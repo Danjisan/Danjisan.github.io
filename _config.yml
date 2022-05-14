@@ -3,7 +3,7 @@ title: "Modular Evolution"
 email: "modularevolution@gmail.com"
 description: > # this means to ignore newlines until "baseurl:"
 baseurl: "" # the subpath of your site, e.g. /blog/
-url: "https://modular-evolution.com" 
+url: "https://Danjisan.github.io" 
 
 # Build settings
 markdown: kramdown
