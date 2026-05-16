@@ -170,7 +170,7 @@
     <a-scene
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true; alpha: true;"
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;"
     >
       <a-nft
         id="nft-marker"
@@ -223,10 +223,7 @@
       let modelScale = MODEL_SCALE_INITIAL;
 
       const scene = document.querySelector("a-scene");
-
-      nftMarker.setAttribute("url", nftUrl);
-      arModel.setAttribute("gltf-model", modelUrl);
-      arModel.setAttribute("position", MODEL_POSITION);
+      let arReady = false;
 
       function applyModelScale(scale) {
         modelScale = Math.max(MODEL_SCALE_MIN, scale);
@@ -252,19 +249,6 @@
           w: Math.round(vv ? vv.width : window.innerWidth),
           h: Math.round(vv ? vv.height : window.innerHeight),
         };
-      }
-
-      function configureArjsForAndroid() {
-        const { w, h } = viewportSize();
-        scene.setAttribute("arjs", {
-          trackingMethod: "best",
-          sourceType: "webcam",
-          debugUIEnabled: false,
-          sourceWidth: 1280,
-          sourceHeight: 720,
-          displayWidth: w,
-          displayHeight: h,
-        });
       }
 
       function fitCameraToScreen() {
@@ -295,7 +279,21 @@
         setTimeout(fitCameraToScreen, 800);
       }
 
-      configureArjsForAndroid();
+      function showArUI() {
+        if (arReady) return;
+        arReady = true;
+        scheduleFit();
+        overlay.classList.add("hidden");
+        hint.classList.add("visible");
+        scaleControls.classList.add("visible");
+        hint.textContent = USE_PLACEHOLDER_NFT
+          ? "Demo: scanează imaginea T-Rex (tracking temporar)"
+          : "Îndreaptă camera spre imaginea marker";
+      }
+
+      nftMarker.setAttribute("url", nftUrl);
+      arModel.setAttribute("gltf-model", modelUrl);
+      arModel.setAttribute("position", MODEL_POSITION);
 
       window.addEventListener("resize", scheduleFit);
       window.addEventListener("orientationchange", scheduleFit);
@@ -312,15 +310,12 @@
         }
       });
 
-      window.addEventListener("arjs-nft-loaded", () => {
-        scheduleFit();
-        overlay.classList.add("hidden");
-        hint.classList.add("visible");
-        scaleControls.classList.add("visible");
-        hint.textContent = USE_PLACEHOLDER_NFT
-          ? "Demo: scanează imaginea T-Rex (tracking temporar)"
-          : "Îndreaptă camera spre imaginea marker";
-      });
+      window.addEventListener("arjs-nft-loaded", showArUI);
+
+      // Dacă descriptorii NFT nu raportează loaded (rețea / reset AR.js)
+      setTimeout(() => {
+        if (!arReady) showArUI();
+      }, 20000);
 
       nftMarker.addEventListener("markerFound", () => {
         hint.textContent = "Marker detectat";
