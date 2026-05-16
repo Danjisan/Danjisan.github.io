@@ -161,7 +161,7 @@
           id="ar-model"
           position="0 0 0"
           rotation="0 0 0"
-          scale="0.05 0.05 0.05"
+          scale="1 1 1"
           gltf-model="assets/models/model.glb"
         ></a-entity>
       </a-marker>
@@ -169,17 +169,17 @@
     </a-scene>
 
     <script>
-      // label = buton; url = GLB; scale = manual (ca în basic: 0.05), nu auto
+      // label = buton; url = GLB; scale = mărime din fișier (1 = fără scalare)
       const MODELS = [
         {
           label: "Al meu",
           url: "assets/models/model.glb",
-          scale: 0.05,
+          scale: 1,
         },
         {
           label: "Rață",
           url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
-          scale: 0.05,
+          scale: 1,
         },
       ];
 
