@@ -10,42 +10,14 @@
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      * {
-        box-sizing: border-box;
-      }
-
       html,
       body {
         margin: 0;
-        width: 100%;
-        height: 100%;
-        height: 100dvh;
         overflow: hidden;
-        touch-action: none;
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      }
-
-      a-scene {
-        position: fixed !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      a-scene > video,
-      a-scene > canvas {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100dvh !important;
-        max-width: 100vw !important;
-        max-height: 100dvh !important;
-        object-fit: cover !important;
-        transform: none !important;
       }
 
       #overlay {
@@ -148,10 +120,6 @@
         background: rgba(50, 110, 200, 0.95);
       }
 
-      #model-picker button:active {
-        transform: scale(0.97);
-      }
-
       #hint {
         position: fixed;
         left: 50%;
@@ -186,45 +154,36 @@
 
     <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Hiro</div>
 
-    <a-scene
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; alpha: true;"
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-    >
-      <a-marker
-        id="hiro-marker"
-        preset="hiro"
-        size="0.1"
-        smooth="true"
-        smoothCount="5"
-        emitevents="true"
-      >
+    <!-- La fel ca basic.html AR.js: embedded arjs, marker simplu, fără resize video/canvas -->
+    <a-scene embedded arjs>
+      <a-marker preset="hiro">
         <a-entity
           id="ar-model"
           position="0 0 0"
           rotation="0 0 0"
-          scale="1 1 1"
+          scale="0.05 0.05 0.05"
+          gltf-model="assets/models/model.glb"
         ></a-entity>
       </a-marker>
-
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // Fără auto-scale / auto-centrare — doar URL per buton. Transform din GLB (0,0,0 scale 1).
+      // label = buton; url = GLB; scale = manual (ca în basic: 0.05), nu auto
       const MODELS = [
-        { label: "Al meu", url: "assets/models/model.glb" },
+        {
+          label: "Al meu",
+          url: "assets/models/model.glb",
+          scale: 0.05,
+        },
         {
           label: "Rață",
           url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
-        },
-        {
-          label: "Astronaut",
-          url: "https://cdn.aframe.io/test-models/models/Astronaut.glb",
+          scale: 0.05,
         },
       ];
 
-      const hiroMarker = document.getElementById("hiro-marker");
+      const hiroMarker = document.querySelector("a-marker");
       const arModel = document.getElementById("ar-model");
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
@@ -242,27 +201,19 @@
         modelStatus.className = kind ? `visible ${kind}` : "visible";
       }
 
+      function applyScale(s) {
+        arModel.setAttribute("scale", `${s} ${s} ${s}`);
+      }
+
       function updatePickerActive() {
         pickerButtons.forEach((btn, i) => {
           btn.classList.toggle("active", i === currentModelIndex);
         });
       }
 
-      function countMeshes() {
-        let n = 0;
-        arModel.object3D.traverse((node) => {
-          if (node.isMesh) n += 1;
-        });
-        return n;
-      }
-
       function onModelLoaded() {
         const current = MODELS[currentModelIndex];
         modelReady = true;
-
-        arModel.object3D.traverse((node) => {
-          node.frustumCulled = false;
-        });
 
         arModel.removeAttribute("animation-mixer");
         const gltf = arModel.components["gltf-model"];
@@ -270,13 +221,7 @@
           arModel.setAttribute("animation-mixer", "clip: *; loop: repeat");
         }
 
-        const meshes = countMeshes();
-
-        if (!meshes) {
-          setModelStatus("err", `${current.label}: fără mesh în GLB`);
-        } else {
-          setModelStatus("ok", `${current.label} încărcat`);
-        }
+        setModelStatus("ok", `${current.label} încărcat`);
       }
 
       function onModelError(event) {
@@ -297,15 +242,10 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
-        arModel.removeAttribute("animation-mixer");
-        arModel.removeAttribute("gltf-model");
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
-        arModel.setAttribute("scale", "1 1 1");
-
-        requestAnimationFrame(() => {
-          arModel.setAttribute("gltf-model", current.url);
-        });
+        applyScale(current.scale);
+        arModel.setAttribute("gltf-model", current.url);
       }
 
       function buildModelPicker() {
@@ -329,59 +269,13 @@
         hint.textContent = "Scanează markerul Hiro";
       }
 
-      function viewportSize() {
-        const vv = window.visualViewport;
-        return {
-          w: Math.round(vv ? vv.width : window.innerWidth),
-          h: Math.round(vv ? vv.height : window.innerHeight),
-        };
-      }
-
-      function fitCameraToScreen() {
-        const video = document.querySelector("a-scene > video");
-        const canvas = document.querySelector("a-scene > canvas");
-        const { w, h } = viewportSize();
-
-        [video, canvas].forEach((el) => {
-          if (!el) return;
-          el.removeAttribute("width");
-          el.removeAttribute("height");
-          el.style.position = "fixed";
-          el.style.top = "0";
-          el.style.left = "0";
-          el.style.width = w + "px";
-          el.style.height = h + "px";
-          el.style.maxWidth = "100vw";
-          el.style.maxHeight = "100dvh";
-          el.style.objectFit = "cover";
-          el.style.transform = "none";
-        });
-      }
-
-      function scheduleFit() {
-        fitCameraToScreen();
-        requestAnimationFrame(fitCameraToScreen);
-        setTimeout(fitCameraToScreen, 250);
-      }
-
       buildModelPicker();
       arModel.addEventListener("model-loaded", onModelLoaded);
       arModel.addEventListener("model-error", onModelError);
 
-      window.addEventListener("resize", scheduleFit);
-      window.addEventListener("orientationchange", scheduleFit);
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", scheduleFit);
-      }
-
       scene.addEventListener("loaded", () => {
-        scheduleFit();
         showArUI();
         loadModel(0);
-        const video = document.querySelector("a-scene > video");
-        if (video) {
-          video.addEventListener("loadedmetadata", scheduleFit);
-        }
       });
 
       hiroMarker.addEventListener("markerFound", () => {
