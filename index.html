@@ -95,6 +95,40 @@
       #hint.visible {
         opacity: 1;
       }
+
+      #model-status {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 12;
+        max-width: 90vw;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.4;
+        text-align: center;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      #model-status.visible {
+        opacity: 1;
+      }
+
+      #model-status.ok {
+        background: rgba(20, 120, 60, 0.85);
+      }
+
+      #model-status.warn {
+        background: rgba(180, 120, 0, 0.9);
+      }
+
+      #model-status.err {
+        background: rgba(160, 40, 40, 0.9);
+      }
     </style>
   </head>
 
@@ -104,6 +138,8 @@
       <p>Ține camera spre markerul Hiro (print sau pe ecran).</p>
     </div>
 
+    <div id="model-status" role="status" aria-live="polite"></div>
+
     <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Hiro</div>
 
     <a-scene
@@ -111,14 +147,6 @@
       renderer="logarithmicDepthBuffer: true; alpha: true;"
       arjs="sourceType: webcam; debugUIEnabled: false;"
     >
-      <a-assets timeout="120000">
-        <a-asset-item
-          id="modelAsset"
-          src="assets/models/model.glb"
-          response-type="arraybuffer"
-        ></a-asset-item>
-      </a-assets>
-
       <a-marker
         id="hiro-marker"
         preset="hiro"
@@ -127,26 +155,48 @@
         smoothCount="5"
         emitevents="true"
       >
-        <a-entity id="ar-model" position="0 0 0" scale="0.05 0.05 0.05"></a-entity>
+        <!-- La fel ca demo-ul oficial: URL direct, fără a-assets / fără HEAD check -->
+        <a-entity
+          id="ar-model"
+          gltf-model="assets/models/model.glb"
+          position="0 0 0"
+          rotation="0 0 0"
+          scale="1 1 1"
+        ></a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      const LOCAL_MODEL_URL = "assets/models/model.glb";
+      const MODEL_SCALE = 1;
 
       const hiroMarker = document.getElementById("hiro-marker");
       const arModel = document.getElementById("ar-model");
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
+      const modelStatus = document.getElementById("model-status");
       const scene = document.querySelector("a-scene");
 
       let modelReady = false;
 
+      function setModelStatus(kind, message) {
+        if (!modelStatus) return;
+        modelStatus.textContent = message;
+        modelStatus.className = kind ? `visible ${kind}` : "visible";
+      }
+
+      function countMeshes() {
+        let n = 0;
+        arModel.object3D.traverse((node) => {
+          if (node.isMesh) n += 1;
+        });
+        return n;
+      }
+
       function onModelLoaded() {
         modelReady = true;
-        arModel.setAttribute("visible", true);
+
         arModel.object3D.traverse((node) => {
           node.frustumCulled = false;
         });
@@ -156,18 +206,32 @@
           arModel.setAttribute("animation-mixer", "clip: *; loop: repeat");
         }
 
-        hint.textContent = "Scanează markerul Hiro";
+        arModel.setAttribute(
+          "scale",
+          `${MODEL_SCALE} ${MODEL_SCALE} ${MODEL_SCALE}`
+        );
+
+        const meshes = countMeshes();
+
+        if (!meshes) {
+          setModelStatus("err", "GLB încărcat dar fără mesh — verifică exportul.");
+        } else {
+          setModelStatus("ok", `Model OK (${meshes} mesh, scale ${MODEL_SCALE})`);
+        }
       }
 
       function onModelError(event) {
-        console.error("GLB load error", event.detail);
-        hint.textContent = "Eroare la încărcarea model.glb";
+        console.error("GLB error", event.detail);
+        setModelStatus("err", "Eroare la încărcarea model.glb");
+        hint.textContent = "GLB nu s-a putut încărca";
         hint.classList.add("visible");
       }
 
       function showArUI() {
         overlay.classList.add("hidden");
         hint.classList.add("visible");
+        if (modelStatus) modelStatus.classList.add("visible");
+        setModelStatus("warn", "Se încarcă model.glb…");
         hint.textContent = "Scanează markerul Hiro";
       }
 
@@ -204,16 +268,10 @@
         fitCameraToScreen();
         requestAnimationFrame(fitCameraToScreen);
         setTimeout(fitCameraToScreen, 250);
-        setTimeout(fitCameraToScreen, 800);
       }
-
-      document
-        .getElementById("modelAsset")
-        .setAttribute("src", LOCAL_MODEL_URL);
 
       arModel.addEventListener("model-loaded", onModelLoaded);
       arModel.addEventListener("model-error", onModelError);
-      arModel.setAttribute("gltf-model", "#modelAsset");
 
       window.addEventListener("resize", scheduleFit);
       window.addEventListener("orientationchange", scheduleFit);
@@ -227,14 +285,13 @@
         const video = document.querySelector("a-scene > video");
         if (video) {
           video.addEventListener("loadedmetadata", scheduleFit);
-          video.addEventListener("loadeddata", scheduleFit);
         }
       });
 
       hiroMarker.addEventListener("markerFound", () => {
         hint.textContent = modelReady
           ? "Marker Hiro detectat"
-          : "Marker detectat — modelul se încarcă…";
+          : "Marker OK — așteaptă încărcarea GLB…";
       });
 
       hiroMarker.addEventListener("markerLost", () => {
