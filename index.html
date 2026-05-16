@@ -120,8 +120,25 @@
         right: 16px;
       }
 
-      #position-controls {
+      #depth-controls {
         left: 16px;
+      }
+
+      #height-controls {
+        left: 16px;
+        top: 62%;
+      }
+
+      #marker-size-controls {
+        left: 16px;
+        top: auto;
+        bottom: 72px;
+        transform: none;
+      }
+
+      .ar-panel .panel-label.wide {
+        min-width: 4.5rem;
+        font-size: 11px;
       }
 
       .ar-panel .panel-label {
@@ -168,15 +185,27 @@
 
     <div id="hint" aria-live="polite">Îndreaptă camera spre imaginea marker</div>
 
-    <div id="position-controls" class="ar-panel" aria-label="Reglaj înălțime model">
-      <button type="button" id="pos-y-up" title="Ridică modelul">▲</button>
+    <div id="depth-controls" class="ar-panel" aria-label="Adâncime față-spate">
+      <button type="button" id="pos-z-up" title="Mai spre cameră (departe de marker)">+Z</button>
+      <span class="panel-label" id="pos-z-value">Z:0</span>
+      <button type="button" id="pos-z-down" title="Mai lipit de marker / ecran">−Z</button>
+    </div>
+
+    <div id="height-controls" class="ar-panel" aria-label="Sus-jos pe imagine">
+      <button type="button" id="pos-y-up" title="Sus pe marker">+Y</button>
       <span class="panel-label" id="pos-y-value">Y:0</span>
-      <button type="button" id="pos-y-down" title="Coboară modelul">▼</button>
+      <button type="button" id="pos-y-down" title="Jos pe marker">−Y</button>
+    </div>
+
+    <div id="marker-size-controls" class="ar-panel" aria-label="Lățime marker în metri">
+      <button type="button" id="marker-size-up" title="Mărește lățimea setată (ex. A4)">+</button>
+      <span class="panel-label wide" id="marker-size-value">15cm</span>
+      <button type="button" id="marker-size-down" title="Micșorează lățimea setată">−</button>
     </div>
 
     <div id="scale-controls" class="ar-panel" aria-label="Reglaj scale model">
       <button type="button" id="scale-up" title="Mărește scale">+</button>
-      <span class="panel-label" id="scale-value">10</span>
+      <span class="panel-label" id="scale-value">5</span>
       <button type="button" id="scale-down" title="Micșorează scale">−</button>
     </div>
 
@@ -196,17 +225,14 @@
       <a-nft
         id="nft-marker"
         type="nft"
+        size="0.15"
         smooth="true"
         smoothCount="15"
         smoothTolerance="0.01"
         smoothThreshold="8"
         emitevents="true"
       >
-        <a-entity
-          id="ar-model"
-          position="0 -50 0"
-          scale="10 10 10"
-        ></a-entity>
+        <a-entity id="ar-model" position="0 0 0" scale="5 5 5"></a-entity>
       </a-nft>
 
       <a-entity camera></a-entity>
@@ -223,16 +249,22 @@
       const PLACEHOLDER_NFT_URL =
         "https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/trex-image/trex";
 
-      // NFT folosește valori mari (demo T-Rex: scale 5). Scale 1 e adesea invizibil.
-      const MODEL_SCALE_INITIAL = 10;
+      // Lățimea REALĂ a imaginii marker (metri): măsoară cu ruleta pe ecran/print.
+      // A4 lat ~0.21m; pe telefon pe ecran poate fi ~0.12–0.18m. Greșit = model plutește.
+      const MARKER_SIZE_INITIAL = 0.15;
+      const MARKER_SIZE_STEP = 0.02;
+      const MARKER_SIZE_MIN = 0.05;
+      const MARKER_SIZE_MAX = 0.5;
+
+      const MODEL_SCALE_INITIAL = 5;
       const MODEL_SCALE_STEP = 1;
       const MODEL_SCALE_MIN = 1;
 
-      // Coordonate NFT (nu metri). +Y = mai sus pe marker, -Y = mai jos.
+      // Axele markerului NFT (planul imaginii ≈ X,Y; Z = față/spate, spre cameră).
       const MODEL_POS_X = 0;
-      const MODEL_POS_Y_INITIAL = -50;
-      const MODEL_POS_Z = 0;
-      const MODEL_POS_Y_STEP = 10;
+      const MODEL_POS_Y_INITIAL = 0;
+      const MODEL_POS_Z_INITIAL = 0;
+      const MODEL_POS_STEP = 10;
 
       const nftUrl = USE_PLACEHOLDER_NFT ? PLACEHOLDER_NFT_URL : LOCAL_NFT_URL;
       const modelUrl = LOCAL_MODEL_URL;
@@ -242,27 +274,49 @@
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
       const scaleControls = document.getElementById("scale-controls");
-      const positionControls = document.getElementById("position-controls");
+      const depthControls = document.getElementById("depth-controls");
+      const heightControls = document.getElementById("height-controls");
+      const markerSizeControls = document.getElementById("marker-size-controls");
       const scaleValueEl = document.getElementById("scale-value");
+      const posZValueEl = document.getElementById("pos-z-value");
       const posYValueEl = document.getElementById("pos-y-value");
+      const markerSizeValueEl = document.getElementById("marker-size-value");
       const scaleUpBtn = document.getElementById("scale-up");
       const scaleDownBtn = document.getElementById("scale-down");
+      const posZUpBtn = document.getElementById("pos-z-up");
+      const posZDownBtn = document.getElementById("pos-z-down");
       const posYUpBtn = document.getElementById("pos-y-up");
       const posYDownBtn = document.getElementById("pos-y-down");
+      const markerSizeUpBtn = document.getElementById("marker-size-up");
+      const markerSizeDownBtn = document.getElementById("marker-size-down");
 
       let modelScale = MODEL_SCALE_INITIAL;
       let modelPosY = MODEL_POS_Y_INITIAL;
+      let modelPosZ = MODEL_POS_Z_INITIAL;
+      let markerSizeM = MARKER_SIZE_INITIAL;
       let modelReady = false;
 
       const scene = document.querySelector("a-scene");
       let arReady = false;
 
+      function applyMarkerSize() {
+        markerSizeM = Math.min(
+          MARKER_SIZE_MAX,
+          Math.max(MARKER_SIZE_MIN, markerSizeM)
+        );
+        nftMarker.setAttribute("size", markerSizeM);
+        markerSizeValueEl.textContent = `${Math.round(markerSizeM * 100)}cm`;
+        markerSizeDownBtn.disabled = markerSizeM <= MARKER_SIZE_MIN;
+        markerSizeUpBtn.disabled = markerSizeM >= MARKER_SIZE_MAX;
+      }
+
       function applyModelPosition() {
         arModel.setAttribute(
           "position",
-          `${MODEL_POS_X} ${modelPosY} ${MODEL_POS_Z}`
+          `${MODEL_POS_X} ${modelPosY} ${modelPosZ}`
         );
         posYValueEl.textContent = `Y:${modelPosY}`;
+        posZValueEl.textContent = `Z:${modelPosZ}`;
       }
 
       function applyModelScale(scale) {
@@ -300,17 +354,38 @@
         hint.classList.add("visible");
       }
 
+      applyMarkerSize();
       applyModelScale(MODEL_SCALE_INITIAL);
       applyModelPosition();
 
+      posZUpBtn.addEventListener("click", () => {
+        modelPosZ += MODEL_POS_STEP;
+        applyModelPosition();
+      });
+
+      posZDownBtn.addEventListener("click", () => {
+        modelPosZ -= MODEL_POS_STEP;
+        applyModelPosition();
+      });
+
       posYUpBtn.addEventListener("click", () => {
-        modelPosY += MODEL_POS_Y_STEP;
+        modelPosY += MODEL_POS_STEP;
         applyModelPosition();
       });
 
       posYDownBtn.addEventListener("click", () => {
-        modelPosY -= MODEL_POS_Y_STEP;
+        modelPosY -= MODEL_POS_STEP;
         applyModelPosition();
+      });
+
+      markerSizeUpBtn.addEventListener("click", () => {
+        markerSizeM += MARKER_SIZE_STEP;
+        applyMarkerSize();
+      });
+
+      markerSizeDownBtn.addEventListener("click", () => {
+        markerSizeM -= MARKER_SIZE_STEP;
+        applyMarkerSize();
       });
 
       scaleUpBtn.addEventListener("click", () => {
@@ -364,7 +439,9 @@
         overlay.classList.add("hidden");
         hint.classList.add("visible");
         scaleControls.classList.add("visible");
-        positionControls.classList.add("visible");
+        depthControls.classList.add("visible");
+        heightControls.classList.add("visible");
+        markerSizeControls.classList.add("visible");
         hint.textContent = USE_PLACEHOLDER_NFT
           ? "Demo: scanează imaginea T-Rex (tracking temporar)"
           : "Îndreaptă camera spre imaginea marker";
