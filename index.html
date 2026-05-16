@@ -76,26 +76,6 @@
         opacity: 0.9;
       }
 
-      #hint {
-        position: fixed;
-        left: 50%;
-        bottom: 24px;
-        transform: translateX(-50%);
-        z-index: 10;
-        padding: 10px 16px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.55);
-        color: #fff;
-        font-size: 14px;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      #hint.visible {
-        opacity: 1;
-      }
-
       #model-status {
         position: fixed;
         top: 12px;
@@ -129,6 +109,68 @@
       #model-status.err {
         background: rgba(160, 40, 40, 0.9);
       }
+
+      #model-picker {
+        position: fixed;
+        bottom: 56px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 11;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        max-width: 96vw;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      #model-picker.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #model-picker button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #model-picker button.active {
+        background: rgba(50, 110, 200, 0.95);
+      }
+
+      #model-picker button:active {
+        transform: scale(0.97);
+      }
+
+      #hint {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        z-index: 10;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 13px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      #hint.visible {
+        opacity: 1;
+      }
     </style>
   </head>
 
@@ -139,6 +181,8 @@
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
+
+    <div id="model-picker" aria-label="Alege model 3D"></div>
 
     <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Hiro</div>
 
@@ -155,10 +199,8 @@
         smoothCount="5"
         emitevents="true"
       >
-        <!-- La fel ca demo-ul oficial: URL direct, fără a-assets / fără HEAD check -->
         <a-entity
           id="ar-model"
-          gltf-model="assets/models/model.glb"
           position="0 0 0"
           rotation="0 0 0"
           scale="1 1 1"
@@ -169,21 +211,41 @@
     </a-scene>
 
     <script>
-      const MODEL_SCALE = 1;
+      // Fără auto-scale / auto-centrare — doar URL per buton. Transform din GLB (0,0,0 scale 1).
+      const MODELS = [
+        { label: "Al meu", url: "assets/models/model.glb" },
+        {
+          label: "Rață",
+          url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+        },
+        {
+          label: "Astronaut",
+          url: "https://cdn.aframe.io/test-models/models/Astronaut.glb",
+        },
+      ];
 
       const hiroMarker = document.getElementById("hiro-marker");
       const arModel = document.getElementById("ar-model");
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
       const modelStatus = document.getElementById("model-status");
+      const modelPicker = document.getElementById("model-picker");
       const scene = document.querySelector("a-scene");
 
       let modelReady = false;
+      let currentModelIndex = 0;
+      let pickerButtons = [];
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
         modelStatus.textContent = message;
         modelStatus.className = kind ? `visible ${kind}` : "visible";
+      }
+
+      function updatePickerActive() {
+        pickerButtons.forEach((btn, i) => {
+          btn.classList.toggle("active", i === currentModelIndex);
+        });
       }
 
       function countMeshes() {
@@ -195,43 +257,75 @@
       }
 
       function onModelLoaded() {
+        const current = MODELS[currentModelIndex];
         modelReady = true;
 
         arModel.object3D.traverse((node) => {
           node.frustumCulled = false;
         });
 
+        arModel.removeAttribute("animation-mixer");
         const gltf = arModel.components["gltf-model"];
         if (gltf?.model?.animations?.length) {
           arModel.setAttribute("animation-mixer", "clip: *; loop: repeat");
         }
 
-        arModel.setAttribute(
-          "scale",
-          `${MODEL_SCALE} ${MODEL_SCALE} ${MODEL_SCALE}`
-        );
-
         const meshes = countMeshes();
 
         if (!meshes) {
-          setModelStatus("err", "GLB încărcat dar fără mesh — verifică exportul.");
+          setModelStatus("err", `${current.label}: fără mesh în GLB`);
         } else {
-          setModelStatus("ok", `Model OK (${meshes} mesh, scale ${MODEL_SCALE})`);
+          setModelStatus("ok", `${current.label} încărcat`);
         }
       }
 
       function onModelError(event) {
-        console.error("GLB error", event.detail);
-        setModelStatus("err", "Eroare la încărcarea model.glb");
-        hint.textContent = "GLB nu s-a putut încărca";
+        const current = MODELS[currentModelIndex];
+        console.error("GLB error", current.url, event.detail);
+        setModelStatus("err", `Eroare: ${current.label}`);
+        hint.textContent = "Modelul nu s-a încărcat";
         hint.classList.add("visible");
+      }
+
+      function loadModel(index) {
+        if (index < 0 || index >= MODELS.length) return;
+
+        currentModelIndex = index;
+        modelReady = false;
+        updatePickerActive();
+
+        const current = MODELS[index];
+        setModelStatus("warn", `Se încarcă ${current.label}…`);
+
+        arModel.removeAttribute("animation-mixer");
+        arModel.removeAttribute("gltf-model");
+        arModel.setAttribute("position", "0 0 0");
+        arModel.setAttribute("rotation", "0 0 0");
+        arModel.setAttribute("scale", "1 1 1");
+
+        requestAnimationFrame(() => {
+          arModel.setAttribute("gltf-model", current.url);
+        });
+      }
+
+      function buildModelPicker() {
+        modelPicker.innerHTML = "";
+        pickerButtons = MODELS.map((model, index) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = model.label;
+          btn.addEventListener("click", () => loadModel(index));
+          modelPicker.appendChild(btn);
+          return btn;
+        });
+        updatePickerActive();
       }
 
       function showArUI() {
         overlay.classList.add("hidden");
         hint.classList.add("visible");
+        modelPicker.classList.add("visible");
         if (modelStatus) modelStatus.classList.add("visible");
-        setModelStatus("warn", "Se încarcă model.glb…");
         hint.textContent = "Scanează markerul Hiro";
       }
 
@@ -270,6 +364,7 @@
         setTimeout(fitCameraToScreen, 250);
       }
 
+      buildModelPicker();
       arModel.addEventListener("model-loaded", onModelLoaded);
       arModel.addEventListener("model-error", onModelError);
 
@@ -282,6 +377,7 @@
       scene.addEventListener("loaded", () => {
         scheduleFit();
         showArUI();
+        loadModel(0);
         const video = document.querySelector("a-scene > video");
         if (video) {
           video.addEventListener("loadedmetadata", scheduleFit);
@@ -289,9 +385,10 @@
       });
 
       hiroMarker.addEventListener("markerFound", () => {
+        const name = MODELS[currentModelIndex].label;
         hint.textContent = modelReady
-          ? "Marker Hiro detectat"
-          : "Marker OK — așteaptă încărcarea GLB…";
+          ? `Marker OK — ${name}`
+          : `Marker OK — încarcă ${name}…`;
       });
 
       hiroMarker.addEventListener("markerLost", () => {
