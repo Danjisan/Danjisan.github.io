@@ -97,10 +97,9 @@
         opacity: 1;
       }
 
-      #scale-controls {
+      .ar-panel {
         position: fixed;
         top: 50%;
-        right: 16px;
         transform: translateY(-50%);
         z-index: 11;
         display: flex;
@@ -112,12 +111,20 @@
         transition: opacity 0.3s ease;
       }
 
-      #scale-controls.visible {
+      .ar-panel.visible {
         opacity: 1;
         pointer-events: auto;
       }
 
-      #scale-controls .scale-label {
+      #scale-controls {
+        right: 16px;
+      }
+
+      #position-controls {
+        left: 16px;
+      }
+
+      .ar-panel .panel-label {
         color: #fff;
         font-size: 12px;
         font-weight: 600;
@@ -128,7 +135,7 @@
         text-align: center;
       }
 
-      #scale-controls button {
+      .ar-panel button {
         width: 48px;
         height: 48px;
         border: none;
@@ -142,12 +149,12 @@
         -webkit-tap-highlight-color: transparent;
       }
 
-      #scale-controls button:disabled {
+      .ar-panel button:disabled {
         opacity: 0.35;
         cursor: not-allowed;
       }
 
-      #scale-controls button:not(:disabled):active {
+      .ar-panel button:not(:disabled):active {
         background: rgba(255, 255, 255, 0.25);
       }
     </style>
@@ -161,9 +168,15 @@
 
     <div id="hint" aria-live="polite">Îndreaptă camera spre imaginea marker</div>
 
-    <div id="scale-controls" aria-label="Reglaj scale model">
+    <div id="position-controls" class="ar-panel" aria-label="Reglaj înălțime model">
+      <button type="button" id="pos-y-up" title="Ridică modelul">▲</button>
+      <span class="panel-label" id="pos-y-value">Y:0</span>
+      <button type="button" id="pos-y-down" title="Coboară modelul">▼</button>
+    </div>
+
+    <div id="scale-controls" class="ar-panel" aria-label="Reglaj scale model">
       <button type="button" id="scale-up" title="Mărește scale">+</button>
-      <span class="scale-label" id="scale-value">1.0</span>
+      <span class="panel-label" id="scale-value">10</span>
       <button type="button" id="scale-down" title="Micșorează scale">−</button>
     </div>
 
@@ -172,20 +185,27 @@
       renderer="logarithmicDepthBuffer: true; alpha: true;"
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720;"
     >
+      <a-assets timeout="120000">
+        <a-asset-item
+          id="modelAsset"
+          src="assets/models/model.glb"
+          response-type="arraybuffer"
+        ></a-asset-item>
+      </a-assets>
+
       <a-nft
         id="nft-marker"
         type="nft"
         smooth="true"
-        smoothCount="10"
+        smoothCount="15"
         smoothTolerance="0.01"
-        smoothThreshold="5"
+        smoothThreshold="8"
         emitevents="true"
       >
         <a-entity
           id="ar-model"
-          position="0 0 0"
-          scale="1 1 1"
-          animation-mixer="clip: *; loop: repeat"
+          position="0 -50 0"
+          scale="10 10 10"
         ></a-entity>
       </a-nft>
 
@@ -203,10 +223,16 @@
       const PLACEHOLDER_NFT_URL =
         "https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/trex-image/trex";
 
-      const MODEL_SCALE_INITIAL = 1;
-      const MODEL_SCALE_STEP = 0.1;
+      // NFT folosește valori mari (demo T-Rex: scale 5). Scale 1 e adesea invizibil.
+      const MODEL_SCALE_INITIAL = 10;
+      const MODEL_SCALE_STEP = 1;
       const MODEL_SCALE_MIN = 1;
-      const MODEL_POSITION = "0 0 0";
+
+      // Coordonate NFT (nu metri). +Y = mai sus pe marker, -Y = mai jos.
+      const MODEL_POS_X = 0;
+      const MODEL_POS_Y_INITIAL = -50;
+      const MODEL_POS_Z = 0;
+      const MODEL_POS_Y_STEP = 10;
 
       const nftUrl = USE_PLACEHOLDER_NFT ? PLACEHOLDER_NFT_URL : LOCAL_NFT_URL;
       const modelUrl = LOCAL_MODEL_URL;
@@ -216,24 +242,76 @@
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
       const scaleControls = document.getElementById("scale-controls");
+      const positionControls = document.getElementById("position-controls");
       const scaleValueEl = document.getElementById("scale-value");
+      const posYValueEl = document.getElementById("pos-y-value");
       const scaleUpBtn = document.getElementById("scale-up");
       const scaleDownBtn = document.getElementById("scale-down");
+      const posYUpBtn = document.getElementById("pos-y-up");
+      const posYDownBtn = document.getElementById("pos-y-down");
 
       let modelScale = MODEL_SCALE_INITIAL;
+      let modelPosY = MODEL_POS_Y_INITIAL;
+      let modelReady = false;
 
       const scene = document.querySelector("a-scene");
       let arReady = false;
 
+      function applyModelPosition() {
+        arModel.setAttribute(
+          "position",
+          `${MODEL_POS_X} ${modelPosY} ${MODEL_POS_Z}`
+        );
+        posYValueEl.textContent = `Y:${modelPosY}`;
+      }
+
       function applyModelScale(scale) {
         modelScale = Math.max(MODEL_SCALE_MIN, scale);
-        const s = modelScale.toFixed(1);
-        arModel.setAttribute("scale", `${s} ${s} ${s}`);
-        scaleValueEl.textContent = s;
+        const label =
+          Math.abs(modelScale - Math.round(modelScale)) < 0.001
+            ? String(Math.round(modelScale))
+            : modelScale.toFixed(1);
+        arModel.setAttribute("scale", `${modelScale} ${modelScale} ${modelScale}`);
+        scaleValueEl.textContent = label;
         scaleDownBtn.disabled = modelScale <= MODEL_SCALE_MIN;
       }
 
+      function onModelLoaded() {
+        modelReady = true;
+        arModel.setAttribute("visible", true);
+
+        arModel.object3D.traverse((node) => {
+          node.frustumCulled = false;
+        });
+
+        const gltf = arModel.components["gltf-model"];
+        if (gltf?.model?.animations?.length) {
+          arModel.setAttribute("animation-mixer", "clip: *; loop: repeat");
+        }
+
+        hint.textContent = USE_PLACEHOLDER_NFT
+          ? "Model încărcat — scanează T-Rex"
+          : "Model încărcat — scanează markerul";
+      }
+
+      function onModelError(event) {
+        console.error("GLB load error", event.detail);
+        hint.textContent = "Eroare la încărcarea model.glb";
+        hint.classList.add("visible");
+      }
+
       applyModelScale(MODEL_SCALE_INITIAL);
+      applyModelPosition();
+
+      posYUpBtn.addEventListener("click", () => {
+        modelPosY += MODEL_POS_Y_STEP;
+        applyModelPosition();
+      });
+
+      posYDownBtn.addEventListener("click", () => {
+        modelPosY -= MODEL_POS_Y_STEP;
+        applyModelPosition();
+      });
 
       scaleUpBtn.addEventListener("click", () => {
         applyModelScale(modelScale + MODEL_SCALE_STEP);
@@ -286,14 +364,21 @@
         overlay.classList.add("hidden");
         hint.classList.add("visible");
         scaleControls.classList.add("visible");
+        positionControls.classList.add("visible");
         hint.textContent = USE_PLACEHOLDER_NFT
           ? "Demo: scanează imaginea T-Rex (tracking temporar)"
           : "Îndreaptă camera spre imaginea marker";
       }
 
+      document
+        .getElementById("modelAsset")
+        .setAttribute("src", LOCAL_MODEL_URL);
+
+      arModel.addEventListener("model-loaded", onModelLoaded);
+      arModel.addEventListener("model-error", onModelError);
+
       nftMarker.setAttribute("url", nftUrl);
-      arModel.setAttribute("gltf-model", modelUrl);
-      arModel.setAttribute("position", MODEL_POSITION);
+      arModel.setAttribute("gltf-model", "#modelAsset");
 
       window.addEventListener("resize", scheduleFit);
       window.addEventListener("orientationchange", scheduleFit);
@@ -318,7 +403,9 @@
       }, 20000);
 
       nftMarker.addEventListener("markerFound", () => {
-        hint.textContent = "Marker detectat";
+        hint.textContent = modelReady
+          ? "Marker detectat"
+          : "Marker detectat — modelul se încarcă…";
         hint.classList.add("visible");
       });
 
