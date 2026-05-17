@@ -9,7 +9,6 @@
     <title>AR Demo — Hiro Marker</title>
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
@@ -195,6 +194,8 @@
       let modelReady = false;
       let currentModelIndex = 0;
       let pickerButtons = [];
+      let activeMixer = null;
+      let activeAction = null;
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
@@ -220,29 +221,33 @@
         return clips.filter((c) => c && c.duration > 0);
       }
 
+      function stopAnimations() {
+        if (activeAction) {
+          activeAction.stop();
+          activeAction = null;
+        }
+        activeMixer = null;
+      }
+
       function startAnimations() {
+        stopAnimations();
+
         const clips = getGltfAnimations();
-        arModel.removeAttribute("animation-mixer");
         if (!clips.length) return "";
 
         const names = clips.map((c) => c.name);
         const current = MODELS[currentModelIndex];
+        const clipName =
+          current.clip && names.includes(current.clip) ? current.clip : names[0];
         const clip =
-          current.clip && names.includes(current.clip)
-            ? current.clip
-            : names.length > 1
-              ? "*"
-              : names[0];
+          clips.find((c) => c.name === clipName) || clips[0];
+        const root = arModel.components["gltf-model"]?.model || arModel.object3D;
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            arModel.setAttribute("animation-mixer", {
-              clip,
-              loop: "repeat",
-              timeScale: 1,
-            });
-          });
-        });
+        activeMixer = new THREE.AnimationMixer(root);
+        activeAction = activeMixer.clipAction(clip);
+        activeAction.reset();
+        activeAction.setLoop(THREE.LoopRepeat, Infinity);
+        activeAction.play();
 
         return names.join(", ");
       }
@@ -280,7 +285,7 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
-        arModel.removeAttribute("animation-mixer");
+        stopAnimations();
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
         applyScale(current.scale);
@@ -316,6 +321,12 @@
         if (modelStatus) modelStatus.classList.add("visible");
         hint.textContent = "Scanează markerul Hiro";
       }
+
+      scene.addEventListener("tick", (evt) => {
+        if (activeMixer) {
+          activeMixer.update(evt.detail.delta / 1000);
+        }
+      });
 
       buildModelPicker();
       arModel.addEventListener("model-loaded", onModelLoaded);
