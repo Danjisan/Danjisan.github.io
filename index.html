@@ -175,6 +175,7 @@
           label: "Al meu",
           url: "assets/models/model.glb",
           scale: 1,
+          clip: "Animation",
         },
         {
           label: "Rață",
@@ -213,9 +214,10 @@
 
       function getGltfAnimations() {
         const gltf = arModel.components["gltf-model"];
-        if (!gltf) return [];
-        // Clipurile sunt pe componentă (parser glTF), nu pe object3D.model
-        return gltf.animations || gltf.model?.userData?.animations || [];
+        if (!gltf?.model) return [];
+        // A-Frame 1.6 copiază clipurile pe model.animations după load
+        const clips = gltf.model.animations || gltf.animations || [];
+        return clips.filter((c) => c && c.duration > 0);
       }
 
       function startAnimations() {
@@ -224,13 +226,21 @@
         if (!clips.length) return "";
 
         const names = clips.map((c) => c.name);
-        const clip = names.length > 1 ? "*" : names[0];
+        const current = MODELS[currentModelIndex];
+        const clip =
+          current.clip && names.includes(current.clip)
+            ? current.clip
+            : names.length > 1
+              ? "*"
+              : names[0];
 
         requestAnimationFrame(() => {
-          arModel.setAttribute("animation-mixer", {
-            clip,
-            loop: "repeat",
-            timeScale: 1,
+          requestAnimationFrame(() => {
+            arModel.setAttribute("animation-mixer", {
+              clip,
+              loop: "repeat",
+              timeScale: 1,
+            });
           });
         });
 
@@ -274,7 +284,16 @@
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
         applyScale(current.scale);
+
+        const prevUrl = arModel.getAttribute("gltf-model");
+        const alreadyLoaded =
+          prevUrl === current.url && arModel.components["gltf-model"]?.model;
+
         arModel.setAttribute("gltf-model", current.url);
+
+        if (alreadyLoaded) {
+          requestAnimationFrame(() => onModelLoaded());
+        }
       }
 
       function buildModelPicker() {
@@ -304,6 +323,7 @@
 
       scene.addEventListener("loaded", () => {
         showArUI();
+        updatePickerActive();
         loadModel(0);
       });
 
