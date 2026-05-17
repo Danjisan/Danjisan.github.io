@@ -10,6 +10,94 @@
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+      AFRAME.registerComponent("gltf-animation-player", {
+        schema: {
+          clip: { type: "string", default: "" },
+          active: { type: "boolean", default: true },
+        },
+
+        init() {
+          this.mixer = null;
+          this.action = null;
+          this.clock = new THREE.Clock();
+          this._onModelLoaded = () => this.setup();
+          this._raf = this._loop.bind(this);
+          this.el.addEventListener("model-loaded", this._onModelLoaded);
+          this._rafId = requestAnimationFrame(this._raf);
+        },
+
+        _loop() {
+          if (this.mixer) {
+            this.mixer.update(this.clock.getDelta());
+          }
+          this._rafId = requestAnimationFrame(this._raf);
+        },
+
+        setup() {
+          this.teardownMixer();
+
+          if (!this.data.active) return;
+
+          const model = this.el.getObject3D("mesh");
+          if (!model?.animations?.length) return;
+
+          const clips = model.animations;
+          const wanted = (this.data.clip || "").toLowerCase();
+          const clip =
+            clips.find((c) => c.name.toLowerCase() === wanted) ||
+            clips.find((c) => c.name === this.data.clip) ||
+            clips[0];
+
+          this.mixer = new THREE.AnimationMixer(model);
+          this.action = this.mixer.clipAction(clip);
+          this.action.enabled = true;
+          this.action.setEffectiveWeight(1);
+          this.action.setLoop(THREE.LoopRepeat, Infinity);
+          this.action.clampWhenFinished = false;
+          this.action.reset();
+          this.action.play();
+
+          this.el.emit("anim-started", {
+            clip: clip.name,
+            running: this.action.isRunning(),
+            tracks: clip.tracks.length,
+          });
+        },
+
+        teardownMixer() {
+          if (this.mixer) {
+            this.mixer.stopAllAction();
+          }
+          this.mixer = null;
+          this.action = null;
+          this.clock = new THREE.Clock();
+        },
+
+        tick(_t, dt) {
+          if (this.mixer && dt > 0) {
+            this.mixer.update(dt / 1000);
+          }
+        },
+
+        update(oldData) {
+          if (
+            oldData.clip !== this.data.clip ||
+            oldData.active !== this.data.active
+          ) {
+            this.setup();
+          }
+        },
+
+        remove() {
+          this.el.removeEventListener("model-loaded", this._onModelLoaded);
+          if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+          }
+          this.teardownMixer();
+        },
+      });
+    </script>
 
     <style>
       html,
@@ -161,7 +249,7 @@
           position="0 0 0"
           rotation="0 0 0"
           scale="1 1 1"
-          gltf-model="assets/models/model.glb"
+          gltf-animation-player="clip: Animation"
         ></a-entity>
       </a-marker>
       <a-entity camera></a-entity>
@@ -194,8 +282,6 @@
       let modelReady = false;
       let currentModelIndex = 0;
       let pickerButtons = [];
-      let activeMixer = null;
-      let activeAction = null;
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
@@ -213,59 +299,41 @@
         });
       }
 
-      function getGltfAnimations() {
-        const gltf = arModel.components["gltf-model"];
-        if (!gltf?.model) return [];
-        // A-Frame 1.6 copiază clipurile pe model.animations după load
-        const clips = gltf.model.animations || gltf.animations || [];
-        return clips.filter((c) => c && c.duration > 0);
+      function getClipNames() {
+        const model = arModel.getObject3D("mesh");
+        if (!model?.animations?.length) return [];
+        return model.animations.map((c) => c.name);
       }
 
-      function stopAnimations() {
-        if (activeAction) {
-          activeAction.stop();
-          activeAction = null;
-        }
-        activeMixer = null;
-      }
-
-      function startAnimations() {
-        stopAnimations();
-
-        const clips = getGltfAnimations();
-        if (!clips.length) return "";
-
-        const names = clips.map((c) => c.name);
+      function syncAnimationPlayer() {
         const current = MODELS[currentModelIndex];
-        const clipName =
-          current.clip && names.includes(current.clip) ? current.clip : names[0];
-        const clip =
-          clips.find((c) => c.name === clipName) || clips[0];
-        const root = arModel.components["gltf-model"]?.model || arModel.object3D;
-
-        activeMixer = new THREE.AnimationMixer(root);
-        activeAction = activeMixer.clipAction(clip);
-        activeAction.reset();
-        activeAction.setLoop(THREE.LoopRepeat, Infinity);
-        activeAction.play();
-
-        return names.join(", ");
+        arModel.setAttribute("gltf-animation-player", {
+          clip: current.clip || "",
+          active: Boolean(current.clip),
+        });
       }
 
       function onModelLoaded() {
-        const current = MODELS[currentModelIndex];
         modelReady = true;
+        syncAnimationPlayer();
 
-        const clipNames = startAnimations();
-        if (clipNames) {
-          setModelStatus("ok", `${current.label} — anim: ${clipNames}`);
+        const current = MODELS[currentModelIndex];
+        const names = getClipNames();
+        if (names.length) {
+          setModelStatus("ok", `${current.label} — anim: ${names.join(", ")}`);
         } else {
-          setModelStatus(
-            "ok",
-            `${current.label} încărcat (GLB fără clip animație pentru web)`
-          );
+          setModelStatus("ok", `${current.label} încărcat`);
         }
       }
+
+      arModel.addEventListener("anim-started", (evt) => {
+        const current = MODELS[currentModelIndex];
+        const { clip, running, tracks } = evt.detail;
+        setModelStatus(
+          "ok",
+          `${current.label} — ${clip}${running ? " ▶" : " oprit"} (${tracks} tracks)`
+        );
+      });
 
       function onModelError(event) {
         const current = MODELS[currentModelIndex];
@@ -285,20 +353,18 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
-        stopAnimations();
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
         applyScale(current.scale);
+        syncAnimationPlayer();
 
-        const prevUrl = arModel.getAttribute("gltf-model");
-        const alreadyLoaded =
-          prevUrl === current.url && arModel.components["gltf-model"]?.model;
+        const player = arModel.components["gltf-animation-player"];
+        if (player) player.teardownMixer();
 
-        arModel.setAttribute("gltf-model", current.url);
-
-        if (alreadyLoaded) {
-          requestAnimationFrame(() => onModelLoaded());
-        }
+        arModel.removeAttribute("gltf-model");
+        requestAnimationFrame(() => {
+          arModel.setAttribute("gltf-model", current.url);
+        });
       }
 
       function buildModelPicker() {
@@ -321,12 +387,6 @@
         if (modelStatus) modelStatus.classList.add("visible");
         hint.textContent = "Scanează markerul Hiro";
       }
-
-      scene.addEventListener("tick", (evt) => {
-        if (activeMixer) {
-          activeMixer.update(evt.detail.delta / 1000);
-        }
-      });
 
       buildModelPicker();
       arModel.addEventListener("model-loaded", onModelLoaded);
