@@ -211,17 +211,45 @@
         });
       }
 
+      function getGltfAnimations() {
+        const gltf = arModel.components["gltf-model"];
+        if (!gltf) return [];
+        // Clipurile sunt pe componentă (parser glTF), nu pe object3D.model
+        return gltf.animations || gltf.model?.userData?.animations || [];
+      }
+
+      function startAnimations() {
+        const clips = getGltfAnimations();
+        arModel.removeAttribute("animation-mixer");
+        if (!clips.length) return "";
+
+        const names = clips.map((c) => c.name);
+        const clip = names.length > 1 ? "*" : names[0];
+
+        requestAnimationFrame(() => {
+          arModel.setAttribute("animation-mixer", {
+            clip,
+            loop: "repeat",
+            timeScale: 1,
+          });
+        });
+
+        return names.join(", ");
+      }
+
       function onModelLoaded() {
         const current = MODELS[currentModelIndex];
         modelReady = true;
 
-        arModel.removeAttribute("animation-mixer");
-        const gltf = arModel.components["gltf-model"];
-        if (gltf?.model?.animations?.length) {
-          arModel.setAttribute("animation-mixer", "clip: *; loop: repeat");
+        const clipNames = startAnimations();
+        if (clipNames) {
+          setModelStatus("ok", `${current.label} — anim: ${clipNames}`);
+        } else {
+          setModelStatus(
+            "ok",
+            `${current.label} încărcat (GLB fără clip animație pentru web)`
+          );
         }
-
-        setModelStatus("ok", `${current.label} încărcat`);
       }
 
       function onModelError(event) {
@@ -242,6 +270,7 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
+        arModel.removeAttribute("animation-mixer");
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
         applyScale(current.scale);
