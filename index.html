@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>AR Demo — Hiro Marker</title>
+    <title>AR Demo — Eldrem Marker</title>
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -232,18 +232,24 @@
   <body>
     <div id="overlay">
       <strong>Se încarcă AR…</strong>
-      <p>Ține camera spre markerul Hiro (print sau pe ecran).</p>
+      <p>Ține camera spre markerul Eldrem (print sau pe ecran).</p>
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
 
     <div id="model-picker" aria-label="Alege model 3D"></div>
 
-    <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Hiro</div>
+    <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Eldrem</div>
 
     <!-- La fel ca basic.html AR.js: embedded arjs, marker simplu, fără resize video/canvas -->
     <a-scene embedded arjs>
-      <a-marker preset="hiro">
+      <a-marker
+        id="eldrem-marker"
+        type="pattern"
+        url="assets/markers/pattern-eldrem-logomark.patt"
+        size="0.1"
+        emitevents="true"
+      >
         <a-entity
           id="ar-model"
           position="0 0 0"
@@ -271,7 +277,7 @@
         },
       ];
 
-      const hiroMarker = document.querySelector("a-marker");
+      const eldremMarker = document.getElementById("eldrem-marker");
       const arModel = document.getElementById("ar-model");
       const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
@@ -385,7 +391,7 @@
         hint.classList.add("visible");
         modelPicker.classList.add("visible");
         if (modelStatus) modelStatus.classList.add("visible");
-        hint.textContent = "Scanează markerul Hiro";
+        hint.textContent = "Scanează markerul Eldrem";
       }
 
       buildModelPicker();
@@ -398,15 +404,15 @@
         loadModel(0);
       });
 
-      hiroMarker.addEventListener("markerFound", () => {
+      eldremMarker.addEventListener("markerFound", () => {
         const name = MODELS[currentModelIndex].label;
         hint.textContent = modelReady
           ? `Marker OK — ${name}`
           : `Marker OK — încarcă ${name}…`;
       });
 
-      hiroMarker.addEventListener("markerLost", () => {
-        hint.textContent = "Îndreaptă camera spre markerul Hiro";
+      eldremMarker.addEventListener("markerLost", () => {
+        hint.textContent = "Îndreaptă camera spre markerul Eldrem";
       });
     </script>
   </body>
