@@ -1,0 +1,129 @@
+html,
+body.ar-demo {
+  margin: 0;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+#overlay,
+.arjs-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  text-align: center;
+  padding: 24px;
+  transition: opacity 0.4s ease;
+}
+
+#overlay.hidden,
+.arjs-loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#overlay p,
+.arjs-loader p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+#model-status {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  max-width: 90vw;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#model-status.visible {
+  opacity: 1;
+}
+
+#model-status.ok {
+  background: rgba(20, 120, 60, 0.85);
+}
+
+#model-status.warn {
+  background: rgba(180, 120, 0, 0.9);
+}
+
+#model-status.err {
+  background: rgba(160, 40, 40, 0.9);
+}
+
+#model-picker {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 96vw;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#model-picker.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#model-picker button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#model-picker button.active {
+  background: rgba(50, 110, 200, 0.95);
+}
+
+#hint {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#hint.visible {
+  opacity: 1;
+}

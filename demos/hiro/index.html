@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>AR — Hiro marker</title>
+    <link rel="stylesheet" href="/assets/site.css" />
+    <link rel="stylesheet" href="/assets/ar-demo.css" />
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="/assets/gltf-animation-player.js"></script>
+  </head>
+  <body class="ar-demo">
+    <div id="overlay">
+      <strong>Se încarcă AR…</strong>
+      <p>Ține camera spre markerul Hiro (print sau pe ecran).</p>
+    </div>
+
+    <div id="model-status" role="status" aria-live="polite"></div>
+    <div id="model-picker" aria-label="Alege model 3D"></div>
+    <div id="hint" aria-live="polite">Îndreaptă camera spre markerul Hiro</div>
+
+    <a-scene embedded arjs>
+      <a-marker preset="hiro" emitevents="true">
+        <a-entity
+          id="ar-model"
+          position="0 0 0"
+          rotation="0 0 0"
+          scale="1 1 1"
+          gltf-animation-player="clip: Animation"
+        ></a-entity>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script src="/assets/site-nav.js"></script>
+    <script>
+      const MODELS = [
+        {
+          label: "Al meu",
+          url: "/assets/models/model.glb",
+          scale: 1,
+          clip: "Animation",
+        },
+        {
+          label: "Rață",
+          url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+          scale: 1,
+        },
+      ];
+
+      const trackTarget = document.querySelector("a-marker");
+      const arModel = document.getElementById("ar-model");
+      const overlay = document.getElementById("overlay");
+      const hint = document.getElementById("hint");
+      const modelStatus = document.getElementById("model-status");
+      const modelPicker = document.getElementById("model-picker");
+      const scene = document.querySelector("a-scene");
+
+      let modelReady = false;
+      let currentModelIndex = 0;
+      let pickerButtons = [];
+
+      function setModelStatus(kind, message) {
+        if (!modelStatus) return;
+        modelStatus.textContent = message;
+        modelStatus.className = kind ? `visible ${kind}` : "visible";
+      }
+
+      function applyScale(s) {
+        arModel.setAttribute("scale", `${s} ${s} ${s}`);
+      }
+
+      function updatePickerActive() {
+        pickerButtons.forEach((btn, i) => {
+          btn.classList.toggle("active", i === currentModelIndex);
+        });
+      }
+
+      function getClipNames() {
+        const model = arModel.getObject3D("mesh");
+        if (!model?.animations?.length) return [];
+        return model.animations.map((c) => c.name);
+      }
+
+      function syncAnimationPlayer() {
+        const current = MODELS[currentModelIndex];
+        arModel.setAttribute("gltf-animation-player", {
+          clip: current.clip || "",
+          active: Boolean(current.clip),
+        });
+      }
+
+      function onModelLoaded() {
+        modelReady = true;
+        syncAnimationPlayer();
+        const current = MODELS[currentModelIndex];
+        const names = getClipNames();
+        if (names.length) {
+          setModelStatus("ok", `${current.label} — anim: ${names.join(", ")}`);
+        } else {
+          setModelStatus("ok", `${current.label} încărcat`);
+        }
+      }
+
+      arModel.addEventListener("anim-started", (evt) => {
+        const current = MODELS[currentModelIndex];
+        const { clip, running, tracks } = evt.detail;
+        setModelStatus(
+          "ok",
+          `${current.label} — ${clip}${running ? " ▶" : " oprit"} (${tracks} tracks)`
+        );
+      });
+
+      function onModelError(event) {
+        const current = MODELS[currentModelIndex];
+        console.error("GLB error", current.url, event.detail);
+        setModelStatus("err", `Eroare: ${current.label}`);
+        hint.textContent = "Modelul nu s-a încărcat";
+        hint.classList.add("visible");
+      }
+
+      function loadModel(index) {
+        if (index < 0 || index >= MODELS.length) return;
+        currentModelIndex = index;
+        modelReady = false;
+        updatePickerActive();
+        const current = MODELS[index];
+        setModelStatus("warn", `Se încarcă ${current.label}…`);
+        arModel.setAttribute("position", "0 0 0");
+        arModel.setAttribute("rotation", "0 0 0");
+        applyScale(current.scale);
+        syncAnimationPlayer();
+        const player = arModel.components["gltf-animation-player"];
+        if (player) player.teardownMixer();
+        arModel.removeAttribute("gltf-model");
+        requestAnimationFrame(() => {
+          arModel.setAttribute("gltf-model", current.url);
+        });
+      }
+
+      function buildModelPicker() {
+        modelPicker.innerHTML = "";
+        pickerButtons = MODELS.map((model, index) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = model.label;
+          btn.addEventListener("click", () => loadModel(index));
+          modelPicker.appendChild(btn);
+          return btn;
+        });
+        updatePickerActive();
+      }
+
+      function showArUI() {
+        overlay.classList.add("hidden");
+        hint.classList.add("visible");
+        modelPicker.classList.add("visible");
+        if (modelStatus) modelStatus.classList.add("visible");
+        hint.textContent = "Scanează markerul Hiro";
+      }
+
+      buildModelPicker();
+      arModel.addEventListener("model-loaded", onModelLoaded);
+      arModel.addEventListener("model-error", onModelError);
+      scene.addEventListener("loaded", () => {
+        showArUI();
+        updatePickerActive();
+        loadModel(0);
+      });
+      trackTarget.addEventListener("markerFound", () => {
+        const name = MODELS[currentModelIndex].label;
+        hint.textContent = modelReady
+          ? `Marker OK — ${name}`
+          : `Marker OK — încarcă ${name}…`;
+      });
+      trackTarget.addEventListener("markerLost", () => {
+        hint.textContent = "Îndreaptă camera spre markerul Hiro";
+      });
+    </script>
+  </body>
+</html>
