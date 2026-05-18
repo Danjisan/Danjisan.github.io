@@ -100,6 +100,41 @@
       const _camPos = new THREE.Vector3();
       const _modelWorld = new THREE.Vector3();
       const _corner = new THREE.Vector3();
+      const _axisX = new THREE.Vector3();
+      const _axisY = new THREE.Vector3();
+      const _markerRoot = new THREE.Vector3();
+
+      function getMarkerRoot3D() {
+        const root = nftMarker.object3D;
+        return root.children.length > 0 ? root.children[0] : root;
+      }
+
+      function getMarkerCornersWorld(hw) {
+        const root = getMarkerRoot3D();
+        const m = root.matrixWorld;
+        const center = _markerRoot.setFromMatrixPosition(m);
+        _axisX.setFromMatrixColumn(m, 0);
+        _axisY.setFromMatrixColumn(m, 1);
+        const sx = _axisX.length();
+        const sy = _axisY.length();
+        if (sx < 1e-6 || sy < 1e-6) return null;
+        _axisX.multiplyScalar(1 / sx);
+        _axisY.multiplyScalar(1 / sy);
+        const scaleX = sx * hw;
+        const scaleY = sy * hw;
+        const signs = [
+          [-1, -1],
+          [1, -1],
+          [1, 1],
+          [-1, 1],
+        ];
+        return signs.map(([dx, dy]) =>
+          center
+            .clone()
+            .add(_axisX.clone().multiplyScalar(dx * scaleX))
+            .add(_axisY.clone().multiplyScalar(dy * scaleY))
+        );
+      }
 
       function fmt(n) {
         return Number.isFinite(n) ? n.toFixed(3) : "—";
@@ -140,40 +175,43 @@
         }
         markerCtx.clearRect(0, 0, w, h);
 
-        const hw = 0.5;
-        const localCorners = [
-          [-hw, -hw, 0],
-          [hw, -hw, 0],
-          [hw, hw, 0],
-          [-hw, hw, 0],
-        ];
+        const root = getMarkerRoot3D();
+        root.getWorldPosition(_worldPos);
 
+        const centerScreen = projectToScreen(_worldPos, camera3d, w, h);
+        const worldCorners = getMarkerCornersWorld(0.5);
         const screenPts = [];
-        for (const [x, y, z] of localCorners) {
-          _corner.set(x, y, z).applyMatrix4(nftMarker.object3D.matrixWorld);
-          const p = projectToScreen(_corner, camera3d, w, h);
-          if (p) screenPts.push(p);
-        }
 
-        if (screenPts.length < 4) return;
+        if (worldCorners) {
+          for (const wc of worldCorners) {
+            const p = projectToScreen(wc, camera3d, w, h);
+            if (p) screenPts.push(p);
+          }
+        }
 
         markerCanvas.classList.add("visible");
         markerCtx.strokeStyle = "rgba(0, 255, 140, 0.9)";
         markerCtx.lineWidth = 2;
-        markerCtx.beginPath();
-        markerCtx.moveTo(screenPts[0].x, screenPts[0].y);
-        for (let i = 1; i < screenPts.length; i++) {
-          markerCtx.lineTo(screenPts[i].x, screenPts[i].y);
-        }
-        markerCtx.closePath();
-        markerCtx.stroke();
 
-        const cx = screenPts.reduce((s, p) => s + p.x, 0) / 4;
-        const cy = screenPts.reduce((s, p) => s + p.y, 0) / 4;
-        markerCtx.fillStyle = "rgba(0, 255, 140, 0.95)";
-        markerCtx.beginPath();
-        markerCtx.arc(cx, cy, 5, 0, Math.PI * 2);
-        markerCtx.fill();
+        if (screenPts.length >= 4) {
+          markerCtx.beginPath();
+          markerCtx.moveTo(screenPts[0].x, screenPts[0].y);
+          for (let i = 1; i < screenPts.length; i++) {
+            markerCtx.lineTo(screenPts[i].x, screenPts[i].y);
+          }
+          markerCtx.closePath();
+          markerCtx.stroke();
+        }
+
+        if (centerScreen) {
+          markerCtx.fillStyle = "rgba(0, 255, 140, 0.95)";
+          markerCtx.beginPath();
+          markerCtx.arc(centerScreen.x, centerScreen.y, 6, 0, Math.PI * 2);
+          markerCtx.fill();
+          markerCtx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+          markerCtx.lineWidth = 1.5;
+          markerCtx.stroke();
+        }
       }
 
       function updateDebugPanel() {
@@ -186,7 +224,7 @@
           return;
         }
 
-        nftMarker.object3D.getWorldPosition(_worldPos);
+        getMarkerRoot3D().getWorldPosition(_worldPos);
         arModel.object3D.getWorldPosition(_modelWorld);
 
         const camera3d = getCamera3D();
@@ -196,20 +234,35 @@
           dist = _worldPos.distanceTo(_camPos);
         }
 
+        const root = getMarkerRoot3D();
         const mLocal = arModel.object3D.position;
         const mRot = arModel.object3D.rotation;
-        const nRot = nftMarker.object3D.rotation;
+        const nRot = root.rotation;
         const mScale = arModel.getAttribute("scale");
-
-        const box = new THREE.Box3().setFromObject(nftMarker.object3D);
+        const box = new THREE.Box3().setFromObject(root);
         const size = box.getSize(new THREE.Vector3());
+        const axisXLen = root.matrixWorld.elements
+          ? Math.hypot(
+              root.matrixWorld.elements[0],
+              root.matrixWorld.elements[1],
+              root.matrixWorld.elements[2]
+            )
+          : 0;
+        const axisYLen = root.matrixWorld.elements
+          ? Math.hypot(
+              root.matrixWorld.elements[4],
+              root.matrixWorld.elements[5],
+              root.matrixWorld.elements[6]
+            )
+          : 0;
 
         debugPanel.textContent = [
           "═══ NFT marker (logo) ═══",
           `Detectat: da`,
-          `Centru (world): ${fmt(_worldPos.x)}, ${fmt(_worldPos.y)}, ${fmt(_worldPos.z)}`,
+          `Origine tracking (world): ${fmt(_worldPos.x)}, ${fmt(_worldPos.y)}, ${fmt(_worldPos.z)}`,
           `Rotație (°): ${radToDeg(nRot.x)}, ${radToDeg(nRot.y)}, ${radToDeg(nRot.z)}`,
-          `BBox world (est.): ${fmt(size.x)} × ${fmt(size.y)} × ${fmt(size.z)}`,
+          `Axe marker (lungime): X≈${fmt(axisXLen)} Y≈${fmt(axisYLen)}`,
+          `BBox (est.): ${fmt(size.x)} × ${fmt(size.y)} × ${fmt(size.z)}`,
           `Distanță cameră: ${fmt(dist)}`,
           "",
           "═══ Model 3D ═══",
@@ -218,8 +271,9 @@
           `Scale: ${mScale}`,
           `World pos: ${fmt(_modelWorld.x)}, ${fmt(_modelWorld.y)}, ${fmt(_modelWorld.z)}`,
           "",
-          "Notă: originea NFT ≈ centrul imaginii.",
-          "Contur verde = ~1×1 unit. AR (pătrat training).",
+          "Punct verde = origine tracking AR.",
+          "Dreptunghi = ~1×1 unit. pe axele reale.",
+          "Model decalat? Verifică pivot în Blender (0,0,0).",
         ].join("\n");
 
         drawMarkerOutline();
