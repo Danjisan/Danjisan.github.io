@@ -108,6 +108,58 @@ body.ar-demo {
   background: rgba(50, 110, 200, 0.95);
 }
 
+#scale-controls {
+  position: fixed;
+  bottom: 108px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#scale-controls.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#scale-controls button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#scale-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+#scale-controls #scale-value {
+  min-width: 2.5rem;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 #hint {
   position: fixed;
   left: 50%;
@@ -125,5 +177,72 @@ body.ar-demo {
 }
 
 #hint.visible {
+  opacity: 1;
+}
+
+#debug-toggle {
+  position: fixed;
+  top: 52px;
+  right: 10px;
+  z-index: 13;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#debug-toggle.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#debug-toggle.active {
+  background: rgba(50, 110, 200, 0.95);
+}
+
+#debug-panel {
+  position: fixed;
+  top: 88px;
+  left: 8px;
+  right: 8px;
+  z-index: 13;
+  max-height: 42vh;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #c8e0ff;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#debug-panel.visible {
+  opacity: 1;
+}
+
+#marker-debug-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#marker-debug-canvas.visible {
   opacity: 1;
 }

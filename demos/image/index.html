@@ -20,7 +20,17 @@
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
+    <div id="scale-controls" aria-label="Scale model">
+      <button type="button" id="scale-down" aria-label="Scale minus">−</button>
+      <span id="scale-value">1</span>
+      <button type="button" id="scale-up" aria-label="Scale plus">+</button>
+    </div>
     <div id="model-picker" aria-label="Alege model 3D"></div>
+    <button type="button" id="debug-toggle" aria-pressed="false">
+      Info AR
+    </button>
+    <pre id="debug-panel" aria-live="polite"></pre>
+    <canvas id="marker-debug-canvas"></canvas>
     <div id="hint" aria-live="polite">Îndreaptă camera spre logo-ul Eldrem</div>
 
     <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
@@ -65,11 +75,155 @@
       const hint = document.getElementById("hint");
       const modelStatus = document.getElementById("model-status");
       const modelPicker = document.getElementById("model-picker");
+      const scaleControls = document.getElementById("scale-controls");
+      const scaleDown = document.getElementById("scale-down");
+      const scaleUp = document.getElementById("scale-up");
+      const scaleValue = document.getElementById("scale-value");
       const scene = document.querySelector("a-scene");
+
+      const MIN_SCALE = 1;
+      const SCALE_STEP = 1;
 
       let modelReady = false;
       let currentModelIndex = 0;
       let pickerButtons = [];
+      let manualScale = 1;
+      let markerTracked = false;
+      let debugOpen = false;
+
+      const debugToggle = document.getElementById("debug-toggle");
+      const debugPanel = document.getElementById("debug-panel");
+      const markerCanvas = document.getElementById("marker-debug-canvas");
+      const markerCtx = markerCanvas?.getContext("2d");
+
+      const _worldPos = new THREE.Vector3();
+      const _camPos = new THREE.Vector3();
+      const _modelWorld = new THREE.Vector3();
+      const _corner = new THREE.Vector3();
+
+      function fmt(n) {
+        return Number.isFinite(n) ? n.toFixed(3) : "—";
+      }
+
+      function radToDeg(r) {
+        return ((r * 180) / Math.PI).toFixed(1);
+      }
+
+      function getCamera3D() {
+        const camEl = document.querySelector("[camera]");
+        return camEl?.getObject3D("camera") || scene?.camera;
+      }
+
+      function projectToScreen(worldVec, camera3d, w, h) {
+        _corner.copy(worldVec).project(camera3d);
+        if (_corner.z > 1) return null;
+        return {
+          x: (_corner.x * 0.5 + 0.5) * w,
+          y: (-_corner.y * 0.5 + 0.5) * h,
+        };
+      }
+
+      function drawMarkerOutline() {
+        if (!markerCtx || !markerCanvas || !debugOpen || !markerTracked) {
+          if (markerCanvas) markerCanvas.classList.remove("visible");
+          return;
+        }
+
+        const camera3d = getCamera3D();
+        if (!camera3d) return;
+
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (markerCanvas.width !== w || markerCanvas.height !== h) {
+          markerCanvas.width = w;
+          markerCanvas.height = h;
+        }
+        markerCtx.clearRect(0, 0, w, h);
+
+        const hw = 0.5;
+        const localCorners = [
+          [-hw, -hw, 0],
+          [hw, -hw, 0],
+          [hw, hw, 0],
+          [-hw, hw, 0],
+        ];
+
+        const screenPts = [];
+        for (const [x, y, z] of localCorners) {
+          _corner.set(x, y, z).applyMatrix4(nftMarker.object3D.matrixWorld);
+          const p = projectToScreen(_corner, camera3d, w, h);
+          if (p) screenPts.push(p);
+        }
+
+        if (screenPts.length < 4) return;
+
+        markerCanvas.classList.add("visible");
+        markerCtx.strokeStyle = "rgba(0, 255, 140, 0.9)";
+        markerCtx.lineWidth = 2;
+        markerCtx.beginPath();
+        markerCtx.moveTo(screenPts[0].x, screenPts[0].y);
+        for (let i = 1; i < screenPts.length; i++) {
+          markerCtx.lineTo(screenPts[i].x, screenPts[i].y);
+        }
+        markerCtx.closePath();
+        markerCtx.stroke();
+
+        const cx = screenPts.reduce((s, p) => s + p.x, 0) / 4;
+        const cy = screenPts.reduce((s, p) => s + p.y, 0) / 4;
+        markerCtx.fillStyle = "rgba(0, 255, 140, 0.95)";
+        markerCtx.beginPath();
+        markerCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+        markerCtx.fill();
+      }
+
+      function updateDebugPanel() {
+        if (!debugPanel || !debugOpen) return;
+
+        if (!markerTracked) {
+          debugPanel.textContent =
+            "NFT: nedetectat\n\nȚine camera pe logo Eldrem (JPG).";
+          drawMarkerOutline();
+          return;
+        }
+
+        nftMarker.object3D.getWorldPosition(_worldPos);
+        arModel.object3D.getWorldPosition(_modelWorld);
+
+        const camera3d = getCamera3D();
+        let dist = 0;
+        if (camera3d) {
+          camera3d.getWorldPosition(_camPos);
+          dist = _worldPos.distanceTo(_camPos);
+        }
+
+        const mLocal = arModel.object3D.position;
+        const mRot = arModel.object3D.rotation;
+        const nRot = nftMarker.object3D.rotation;
+        const mScale = arModel.getAttribute("scale");
+
+        const box = new THREE.Box3().setFromObject(nftMarker.object3D);
+        const size = box.getSize(new THREE.Vector3());
+
+        debugPanel.textContent = [
+          "═══ NFT marker (logo) ═══",
+          `Detectat: da`,
+          `Centru (world): ${fmt(_worldPos.x)}, ${fmt(_worldPos.y)}, ${fmt(_worldPos.z)}`,
+          `Rotație (°): ${radToDeg(nRot.x)}, ${radToDeg(nRot.y)}, ${radToDeg(nRot.z)}`,
+          `BBox world (est.): ${fmt(size.x)} × ${fmt(size.y)} × ${fmt(size.z)}`,
+          `Distanță cameră: ${fmt(dist)}`,
+          "",
+          "═══ Model 3D ═══",
+          `Local pos: ${fmt(mLocal.x)}, ${fmt(mLocal.y)}, ${fmt(mLocal.z)}`,
+          `Local rot (°): ${radToDeg(mRot.x)}, ${radToDeg(mRot.y)}, ${radToDeg(mRot.z)}`,
+          `Scale: ${mScale}`,
+          `World pos: ${fmt(_modelWorld.x)}, ${fmt(_modelWorld.y)}, ${fmt(_modelWorld.z)}`,
+          "",
+          "Notă: originea NFT ≈ centrul imaginii.",
+          "Contur verde = ~1×1 unit. AR (pătrat training).",
+        ].join("\n");
+
+        drawMarkerOutline();
+      }
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
@@ -77,8 +231,22 @@
         modelStatus.className = kind ? `visible ${kind}` : "visible";
       }
 
+      function updateScaleButtons() {
+        if (scaleDown) scaleDown.disabled = manualScale <= MIN_SCALE;
+      }
+
       function applyScale(s) {
-        arModel.setAttribute("scale", `${s} ${s} ${s}`);
+        manualScale = Math.max(MIN_SCALE, Math.round(s));
+        arModel.setAttribute(
+          "scale",
+          `${manualScale} ${manualScale} ${manualScale}`
+        );
+        if (scaleValue) scaleValue.textContent = String(manualScale);
+        updateScaleButtons();
+      }
+
+      function changeScale(delta) {
+        applyScale(manualScale + delta * SCALE_STEP);
       }
 
       function countMeshes() {
@@ -163,7 +331,7 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
-        applyScale(current.scale);
+        applyScale(manualScale);
         syncAnimationPlayer();
 
         const player = arModel.components["gltf-animation-player"];
@@ -192,11 +360,28 @@
         overlay.classList.add("hidden");
         hint.classList.add("visible");
         modelPicker.classList.add("visible");
+        if (scaleControls) scaleControls.classList.add("visible");
         if (modelStatus) modelStatus.classList.add("visible");
+        if (debugToggle) debugToggle.classList.add("visible");
         hint.textContent = "Ține camera spre logo-ul Eldrem";
       }
 
       buildModelPicker();
+      if (scaleDown) scaleDown.addEventListener("click", () => changeScale(-1));
+      if (scaleUp) scaleUp.addEventListener("click", () => changeScale(1));
+      applyScale(1);
+
+      if (debugToggle) {
+        debugToggle.addEventListener("click", () => {
+          debugOpen = !debugOpen;
+          debugToggle.classList.toggle("active", debugOpen);
+          debugToggle.setAttribute("aria-pressed", String(debugOpen));
+          debugPanel?.classList.toggle("visible", debugOpen);
+          if (!debugOpen) markerCanvas?.classList.remove("visible");
+          updateDebugPanel();
+        });
+      }
+
       arModel.addEventListener("model-loaded", onModelLoaded);
       arModel.addEventListener("model-error", onModelError);
 
@@ -206,14 +391,22 @@
       });
 
       nftMarker.addEventListener("markerFound", () => {
+        markerTracked = true;
         const name = MODELS[currentModelIndex].label;
         hint.textContent = modelReady
           ? `Logo OK — ${name}`
           : `Logo OK — încarcă ${name}…`;
+        updateDebugPanel();
       });
 
       nftMarker.addEventListener("markerLost", () => {
+        markerTracked = false;
         hint.textContent = "Caut logo-ul Eldrem…";
+        updateDebugPanel();
+      });
+
+      scene.addEventListener("tick", () => {
+        if (debugOpen && markerTracked) updateDebugPanel();
       });
     </script>
   </body>
