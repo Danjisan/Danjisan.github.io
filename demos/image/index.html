@@ -14,22 +14,16 @@
     <script src="/assets/gltf-animation-player.js"></script>
   </head>
   <body class="ar-demo">
-    <div class="arjs-loader" id="loader">
-      <div>
-        <strong>Se încarcă tracking-ul…</strong>
-        <p>Descriptorii NFT pentru logo Eldrem.</p>
-      </div>
+    <div id="overlay">
+      <strong>Se încarcă AR…</strong>
+      <p>Ține camera spre logo-ul Eldrem (JPG pe ecran sau print).</p>
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
+    <div id="model-picker" aria-label="Alege model 3D"></div>
     <div id="hint" aria-live="polite">Îndreaptă camera spre logo-ul Eldrem</div>
 
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; precision: medium;"
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-    >
+    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
       <a-nft
         id="eldrem-nft"
         type="nft"
@@ -43,7 +37,6 @@
           position="0 0 0"
           rotation="0 0 0"
           scale="1 1 1"
-          gltf-model="/assets/models/model.glb"
           gltf-animation-player="clip: Animation"
         ></a-entity>
       </a-nft>
@@ -52,12 +45,31 @@
 
     <script src="/assets/site-nav.js"></script>
     <script>
-      const loader = document.getElementById("loader");
+      const MODELS = [
+        {
+          label: "Al meu",
+          url: "/assets/models/model.glb",
+          scale: 1,
+          clip: "Animation",
+        },
+        {
+          label: "Rață",
+          url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+          scale: 1,
+        },
+      ];
+
+      const nftMarker = document.getElementById("eldrem-nft");
+      const arModel = document.getElementById("ar-model");
+      const overlay = document.getElementById("overlay");
       const hint = document.getElementById("hint");
       const modelStatus = document.getElementById("model-status");
-      const arModel = document.getElementById("ar-model");
-      const nftMarker = document.getElementById("eldrem-nft");
+      const modelPicker = document.getElementById("model-picker");
       const scene = document.querySelector("a-scene");
+
+      let modelReady = false;
+      let currentModelIndex = 0;
+      let pickerButtons = [];
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
@@ -65,33 +77,139 @@
         modelStatus.className = kind ? `visible ${kind}` : "visible";
       }
 
-      function hideLoader() {
-        loader.classList.add("hidden");
-        hint.classList.add("visible");
-        modelStatus.classList.add("visible");
-        hint.textContent = "Ține camera spre logo-ul Eldrem (JPG pe ecran sau print)";
+      function applyScale(s) {
+        arModel.setAttribute("scale", `${s} ${s} ${s}`);
       }
 
-      arModel.addEventListener("model-loaded", () => {
-        setModelStatus("ok", "Model încărcat");
-      });
+      function countMeshes() {
+        let n = 0;
+        arModel.object3D.traverse((node) => {
+          if (node.isMesh) n += 1;
+        });
+        return n;
+      }
 
-      arModel.addEventListener("model-error", (e) => {
-        console.error(e.detail);
-        setModelStatus("err", "Eroare la model GLB");
-      });
+      function updatePickerActive() {
+        pickerButtons.forEach((btn, i) => {
+          btn.classList.toggle("active", i === currentModelIndex);
+        });
+      }
+
+      function syncAnimationPlayer() {
+        const current = MODELS[currentModelIndex];
+        arModel.setAttribute("gltf-animation-player", {
+          clip: current.clip || "",
+          active: Boolean(current.clip),
+        });
+      }
+
+      function getClipNames() {
+        const model = arModel.getObject3D("mesh");
+        if (!model?.animations?.length) return [];
+        return model.animations.map((c) => c.name);
+      }
+
+      function onModelLoaded() {
+        modelReady = true;
+        syncAnimationPlayer();
+
+        arModel.object3D.traverse((node) => {
+          node.frustumCulled = false;
+        });
+
+        const current = MODELS[currentModelIndex];
+        const meshes = countMeshes();
+        const names = getClipNames();
+
+        if (!meshes) {
+          setModelStatus("err", `${current.label}: fără mesh în GLB`);
+          return;
+        }
+
+        if (names.length) {
+          setModelStatus(
+            "ok",
+            `${current.label} — ${meshes} mesh, anim: ${names.join(", ")}`
+          );
+        } else {
+          setModelStatus("ok", `${current.label} — ${meshes} mesh`);
+        }
+      }
 
       arModel.addEventListener("anim-started", (evt) => {
-        const { clip, running } = evt.detail;
-        setModelStatus("ok", `${clip}${running ? " ▶" : ""}`);
+        const current = MODELS[currentModelIndex];
+        const { clip, running, tracks } = evt.detail;
+        setModelStatus(
+          "ok",
+          `${current.label} — ${clip}${running ? " ▶" : ""} (${tracks} tracks)`
+        );
       });
 
+      function onModelError(event) {
+        const current = MODELS[currentModelIndex];
+        console.error("GLB error", current.url, event.detail);
+        setModelStatus("err", `Eroare GLB: ${current.label}`);
+        hint.textContent = "Modelul nu s-a încărcat";
+        hint.classList.add("visible");
+      }
+
+      function loadModel(index) {
+        if (index < 0 || index >= MODELS.length) return;
+
+        currentModelIndex = index;
+        modelReady = false;
+        updatePickerActive();
+
+        const current = MODELS[index];
+        setModelStatus("warn", `Se încarcă ${current.label}…`);
+
+        applyScale(current.scale);
+        syncAnimationPlayer();
+
+        const player = arModel.components["gltf-animation-player"];
+        if (player) player.teardownMixer();
+
+        arModel.removeAttribute("gltf-model");
+        requestAnimationFrame(() => {
+          arModel.setAttribute("gltf-model", current.url);
+        });
+      }
+
+      function buildModelPicker() {
+        modelPicker.innerHTML = "";
+        pickerButtons = MODELS.map((model, index) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = model.label;
+          btn.addEventListener("click", () => loadModel(index));
+          modelPicker.appendChild(btn);
+          return btn;
+        });
+        updatePickerActive();
+      }
+
+      function showArUI() {
+        overlay.classList.add("hidden");
+        hint.classList.add("visible");
+        modelPicker.classList.add("visible");
+        if (modelStatus) modelStatus.classList.add("visible");
+        hint.textContent = "Ține camera spre logo-ul Eldrem";
+      }
+
+      buildModelPicker();
+      arModel.addEventListener("model-loaded", onModelLoaded);
+      arModel.addEventListener("model-error", onModelError);
+
       scene.addEventListener("loaded", () => {
-        setTimeout(hideLoader, 800);
+        showArUI();
+        loadModel(0);
       });
 
       nftMarker.addEventListener("markerFound", () => {
-        hint.textContent = "Logo detectat";
+        const name = MODELS[currentModelIndex].label;
+        hint.textContent = modelReady
+          ? `Logo OK — ${name}`
+          : `Logo OK — încarcă ${name}…`;
       });
 
       nftMarker.addEventListener("markerLost", () => {
