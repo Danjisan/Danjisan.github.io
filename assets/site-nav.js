@@ -2,7 +2,8 @@
   const DEMOS = [
     { id: "home", href: "/", label: "Acasă" },
     { id: "hiro", href: "/demos/hiro/", label: "Hiro" },
-    { id: "image", href: "/demos/image/", label: "Eldrem" },
+    { id: "image", href: "/demos/image/", label: "AR.js" },
+    { id: "mind", href: "/demos/mind/", label: "MindAR" },
     { id: "location", href: "/demos/location/", label: "Locație" },
   ];
 
@@ -10,6 +11,7 @@
     const path = window.location.pathname;
     if (path.includes("/demos/hiro")) return "hiro";
     if (path.includes("/demos/image")) return "image";
+    if (path.includes("/demos/mind")) return "mind";
     if (path.includes("/demos/location")) return "location";
     return "home";
   }
