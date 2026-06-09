@@ -1,0 +1,15 @@
+---
+description: Convenții React/TypeScript pentru acest proiect
+globs: **/*.tsx,**/*.ts
+alwaysApply: false
+---
+
+# Convenții React + TypeScript
+
+- Doar componente funcționale cu hooks; fără componente clasă.
+- Un `export default` per fișier de componentă; numele fișierului = numele componentei (PascalCase).
+- Tipuri explicite pentru props (interfață sau tip inline); evită `any`.
+- Logica reutilizabilă se extrage în hooks custom (`src/hooks/useXyz.ts`).
+- Navigația intra-site se face cu `<Link>`/`<NavLink>` din react-router-dom, niciodată `<a href>` (cu excepția linkurilor externe).
+- Stilurile noi se adaugă în `src/styles/global.css` folosind variabilele CSS existente (`--bg`, `--text`, `--accent` etc.); nu hardcoda culori noi fără motiv.
+- Componentele rămân mici și focusate; dacă o pagină crește mult, extrage secțiuni în `src/components/`.

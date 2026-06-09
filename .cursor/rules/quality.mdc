@@ -1,0 +1,22 @@
+---
+description: Standarde de calitate web (accesibilitate, performanță)
+alwaysApply: true
+---
+
+# Calitate web
+
+## Mobile-first (prioritate maximă)
+
+- Site-ul trebuie să funcționeze și să arate impecabil **întâi pe mobil**, apoi pe desktop.
+- CSS-ul se scrie mobile-first: stilurile de bază pentru ecrane mici, `@media (min-width: ...)` pentru ecrane mari.
+- Zonele tactile (butoane, linkuri de meniu) au minim ~44px înălțime pe mobil.
+- Orice componentă nouă se verifică la lățimi mici (360–420px) înainte de a fi considerată gata.
+- Fără overflow orizontal; folosește unități fluide (`clamp()`, `%`, `rem`) în loc de lățimi fixe.
+
+## Generale
+
+- HTML semantic: `<header>`, `<main>`, `<nav>`, `<footer>`, heading-uri în ordine (`h1` unic per pagină).
+- Accesibilitate de bază: `aria-label` pe navigații, `alt` pe imagini, contrast suficient, focus vizibil.
+- Imaginile și asset-urile mari se optimizează înainte de a fi adăugate în repo (web-friendly: WebP/AVIF, GLB comprimat).
+- Înainte de push, build-ul local trebuie să treacă: `npm run build` (include verificarea de tipuri TypeScript).
+- Fără dependențe noi adăugate „din reflex" — fiecare pachet nou se justifică.

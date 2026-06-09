@@ -1,5 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
 .DS_Store
 Thumbs.db
-_site/
-.sass-cache/
-*.log
+
+# Env files — niciodată secrete în repo
+.env
+.env.local
+.env.*.local

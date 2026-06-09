@@ -1,53 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ro">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>WebAR — danjisan.github.io</title>
-    <link rel="stylesheet" href="/assets/site.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ColabMe — în construcție" />
+    <title>ColabMe</title>
   </head>
-  <body class="hub">
-    <nav class="site-nav" aria-label="Demo-uri WebAR">
-      <a href="/" class="active" aria-current="page">Acasă</a>
-      <a href="/demos/hiro/">Hiro</a>
-      <a href="/demos/image/">AR.js</a>
-      <a href="/demos/mind/">MindAR</a>
-      <a href="/demos/location/">Locație</a>
-    </nav>
-
-    <main class="hub-wrap">
-      <h1>WebAR demos</h1>
-      <p>Alege un tip de experiență AR. Fiecare demo e o pagină separată.</p>
-
-      <ul class="demo-list">
-        <li>
-          <a href="/demos/hiro/">
-            <strong>Hiro marker</strong>
-            <span>Pattern clasic, stabil — demo principal</span>
-          </a>
-        </li>
-        <li>
-          <a href="/demos/image/">
-            <strong>Eldrem — AR.js NFT</strong>
-            <span>Image tracking clasic AR.js</span>
-          </a>
-        </li>
-        <li>
-          <a href="/demos/mind/">
-            <strong>Eldrem — MindAR</strong>
-            <span>Image tracking MindAR (de testat)</span>
-          </a>
-        </li>
-        <li>
-          <a href="/demos/location/">
-            <strong>Locație GPS</strong>
-            <span>În curând — pagină placeholder</span>
-          </a>
-        </li>
-      </ul>
-    </main>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

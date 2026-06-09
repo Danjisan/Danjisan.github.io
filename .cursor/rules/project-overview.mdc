@@ -1,0 +1,32 @@
+---
+description: Arhitectura și constrângerile proiectului danjisan.github.io
+alwaysApply: true
+---
+
+# Proiect: danjisan.github.io
+
+Site personal, work in progress. Va primi treptat login și funcții avansate.
+
+## Stack
+
+- **Vite + React 19 + TypeScript** (strict mode)
+- **react-router-dom v7** pentru rutare client-side
+- CSS simplu în `src/styles/global.css` (fără framework CSS deocamdată)
+
+## Structură
+
+- `src/pages/` — câte o componentă per pagină/rută
+- `src/components/` — componente reutilizabile (Header etc.)
+- Rutele se definesc în `src/App.tsx`; linkurile de meniu în `src/components/Header.tsx`
+
+## Constrângeri de hosting
+
+- GitHub Pages = **hosting static**. Niciun cod server-side în acest repo.
+- Funcțiile de login/backend se vor face printr-un BaaS extern (ex. Supabase/Firebase).
+- **Niciodată secrete (API keys private, parole) în repo** — totul din repo e public.
+- Deploy automat la push pe `master` prin `.github/workflows/deploy.yml`; nu se comite folderul `dist/`.
+
+## Limbă
+
+- UI-ul site-ului este în **română**.
+- Codul (nume de variabile, funcții, componente) în **engleză**.
