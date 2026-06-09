@@ -108,58 +108,6 @@ body.ar-demo {
   background: rgba(50, 110, 200, 0.95);
 }
 
-#scale-controls {
-  position: fixed;
-  bottom: 108px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 11;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.65);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-#scale-controls.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-#scale-controls button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-#scale-controls button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-#scale-controls #scale-value {
-  min-width: 2.5rem;
-  text-align: center;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
 #hint {
   position: fixed;
   left: 50%;

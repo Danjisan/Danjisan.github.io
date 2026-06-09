@@ -20,11 +20,6 @@
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
-    <div id="scale-controls" aria-label="Scale model">
-      <button type="button" id="scale-down" aria-label="Scale minus">−</button>
-      <span id="scale-value">1</span>
-      <button type="button" id="scale-up" aria-label="Scale plus">+</button>
-    </div>
     <div id="model-picker" aria-label="Alege model 3D"></div>
     <button type="button" id="debug-toggle" aria-pressed="false">
       Info AR
@@ -59,13 +54,11 @@
         {
           label: "Al meu",
           url: "/assets/models/model-nft.glb",
-          scale: 1,
           clip: "Animation",
         },
         {
           label: "Rață",
           url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
-          scale: 1,
         },
       ];
 
@@ -75,19 +68,11 @@
       const hint = document.getElementById("hint");
       const modelStatus = document.getElementById("model-status");
       const modelPicker = document.getElementById("model-picker");
-      const scaleControls = document.getElementById("scale-controls");
-      const scaleDown = document.getElementById("scale-down");
-      const scaleUp = document.getElementById("scale-up");
-      const scaleValue = document.getElementById("scale-value");
       const scene = document.querySelector("a-scene");
-
-      const MIN_SCALE = 1;
-      const SCALE_STEP = 1;
 
       let modelReady = false;
       let currentModelIndex = 0;
       let pickerButtons = [];
-      let manualScale = 1;
       let markerTracked = false;
       let debugOpen = false;
 
@@ -238,7 +223,6 @@
         const mLocal = arModel.object3D.position;
         const mRot = arModel.object3D.rotation;
         const nRot = root.rotation;
-        const mScale = arModel.getAttribute("scale");
         const box = new THREE.Box3().setFromObject(root);
         const size = box.getSize(new THREE.Vector3());
         const axisXLen = root.matrixWorld.elements
@@ -268,7 +252,6 @@
           "═══ Model 3D ═══",
           `Local pos: ${fmt(mLocal.x)}, ${fmt(mLocal.y)}, ${fmt(mLocal.z)}`,
           `Local rot (°): ${radToDeg(mRot.x)}, ${radToDeg(mRot.y)}, ${radToDeg(mRot.z)}`,
-          `Scale: ${mScale}`,
           `World pos: ${fmt(_modelWorld.x)}, ${fmt(_modelWorld.y)}, ${fmt(_modelWorld.z)}`,
           "",
           "Punct verde = origine tracking AR.",
@@ -283,24 +266,6 @@
         if (!modelStatus) return;
         modelStatus.textContent = message;
         modelStatus.className = kind ? `visible ${kind}` : "visible";
-      }
-
-      function updateScaleButtons() {
-        if (scaleDown) scaleDown.disabled = manualScale <= MIN_SCALE;
-      }
-
-      function applyScale(s) {
-        manualScale = Math.max(MIN_SCALE, Math.round(s));
-        arModel.setAttribute(
-          "scale",
-          `${manualScale} ${manualScale} ${manualScale}`
-        );
-        if (scaleValue) scaleValue.textContent = String(manualScale);
-        updateScaleButtons();
-      }
-
-      function changeScale(delta) {
-        applyScale(manualScale + delta * SCALE_STEP);
       }
 
       function countMeshes() {
@@ -385,7 +350,7 @@
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
 
-        applyScale(manualScale);
+        arModel.setAttribute("scale", "1 1 1");
         syncAnimationPlayer();
 
         const player = arModel.components["gltf-animation-player"];
@@ -414,16 +379,12 @@
         overlay.classList.add("hidden");
         hint.classList.add("visible");
         modelPicker.classList.add("visible");
-        if (scaleControls) scaleControls.classList.add("visible");
         if (modelStatus) modelStatus.classList.add("visible");
         if (debugToggle) debugToggle.classList.add("visible");
         hint.textContent = "Ține camera spre logo-ul Eldrem";
       }
 
       buildModelPicker();
-      if (scaleDown) scaleDown.addEventListener("click", () => changeScale(-1));
-      if (scaleUp) scaleUp.addEventListener("click", () => changeScale(1));
-      applyScale(1);
 
       if (debugToggle) {
         debugToggle.addEventListener("click", () => {

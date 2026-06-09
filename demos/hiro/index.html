@@ -42,13 +42,11 @@
         {
           label: "Al meu",
           url: "/assets/models/model.glb",
-          scale: 1,
           clip: "Animation",
         },
         {
           label: "Rață",
           url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
-          scale: 1,
         },
       ];
 
@@ -68,10 +66,6 @@
         if (!modelStatus) return;
         modelStatus.textContent = message;
         modelStatus.className = kind ? `visible ${kind}` : "visible";
-      }
-
-      function applyScale(s) {
-        arModel.setAttribute("scale", `${s} ${s} ${s}`);
       }
 
       function updatePickerActive() {
@@ -132,7 +126,7 @@
         setModelStatus("warn", `Se încarcă ${current.label}…`);
         arModel.setAttribute("position", "0 0 0");
         arModel.setAttribute("rotation", "0 0 0");
-        applyScale(current.scale);
+        arModel.setAttribute("scale", "1 1 1");
         syncAnimationPlayer();
         const player = arModel.components["gltf-animation-player"];
         if (player) player.teardownMixer();

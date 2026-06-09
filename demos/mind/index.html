@@ -20,11 +20,6 @@
     </div>
 
     <div id="model-status" role="status" aria-live="polite"></div>
-    <div id="scale-controls" aria-label="Scale model">
-      <button type="button" id="scale-down" aria-label="Scale minus">−</button>
-      <span id="scale-value">1</span>
-      <button type="button" id="scale-up" aria-label="Scale plus">+</button>
-    </div>
     <div id="model-picker" aria-label="Alege model 3D"></div>
     <div id="hint" aria-live="polite">Îndreaptă camera spre logo-ul Eldrem</div>
 
@@ -60,14 +55,12 @@
       const MODELS = [
         {
           label: "Al meu",
-          url: "/assets/models/model-nft.glb",
-          scale: 1,
+          url: "/assets/models/model.glb",
           clip: "Animation",
         },
         {
           label: "Rață",
           url: "#duck",
-          scale: 1,
         },
       ];
 
@@ -78,43 +71,17 @@
       const hint = document.getElementById("hint");
       const modelStatus = document.getElementById("model-status");
       const modelPicker = document.getElementById("model-picker");
-      const scaleControls = document.getElementById("scale-controls");
-      const scaleDown = document.getElementById("scale-down");
-      const scaleUp = document.getElementById("scale-up");
-      const scaleValue = document.getElementById("scale-value");
       const scene = document.querySelector("a-scene");
-
-      const MIN_SCALE = 1;
-      const SCALE_STEP = 1;
 
       let modelReady = false;
       let targetVisible = false;
       let currentModelIndex = 0;
       let pickerButtons = [];
-      let manualScale = 1;
 
       function setModelStatus(kind, message) {
         if (!modelStatus) return;
         modelStatus.textContent = message;
         modelStatus.className = kind ? `visible ${kind}` : "visible";
-      }
-
-      function updateScaleButtons() {
-        if (scaleDown) scaleDown.disabled = manualScale <= MIN_SCALE;
-      }
-
-      function applyScale(s) {
-        manualScale = Math.max(MIN_SCALE, Math.round(s));
-        arModel.setAttribute(
-          "scale",
-          `${manualScale} ${manualScale} ${manualScale}`
-        );
-        if (scaleValue) scaleValue.textContent = String(manualScale);
-        updateScaleButtons();
-      }
-
-      function changeScale(delta) {
-        applyScale(manualScale + delta * SCALE_STEP);
       }
 
       function countMeshes() {
@@ -183,7 +150,6 @@
 
         const current = MODELS[index];
         setModelStatus("warn", `Se încarcă ${current.label}…`);
-        applyScale(manualScale);
         syncAnimationPlayer();
 
         const player = arModel.components["gltf-animation-player"];
@@ -216,15 +182,11 @@
         overlay.classList.add("hidden");
         hint.classList.add("visible");
         modelPicker.classList.add("visible");
-        if (scaleControls) scaleControls.classList.add("visible");
         if (modelStatus) modelStatus.classList.add("visible");
         updateHint();
       }
 
       buildModelPicker();
-      if (scaleDown) scaleDown.addEventListener("click", () => changeScale(-1));
-      if (scaleUp) scaleUp.addEventListener("click", () => changeScale(1));
-      applyScale(1);
 
       arModel.addEventListener("model-loaded", onModelLoaded);
       arModel.addEventListener("model-error", onModelError);
