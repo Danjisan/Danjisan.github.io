@@ -442,6 +442,194 @@ body {
   }
 }
 
+/* ── MediaBox (imagine / YouTube / 3D) ────────────── */
+
+.media-box {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+
+.media-box img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-box-3d canvas {
+  /* Canvas-ul R3F umple caseta; touch-action e setat de OrbitControls */
+  display: block;
+}
+
+.model-box {
+  position: absolute;
+  inset: 0;
+}
+
+.model-box.active {
+  box-shadow: inset 0 0 0 2px rgba(167, 139, 250, 0.45);
+  border-radius: var(--radius);
+}
+
+/* Scutul: cât e prezent, scroll-ul și drag-ul trec normal prin pagină */
+.model-box-shield {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.model-box-hint {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(14, 10, 24, 0.75);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.model-box-shield:hover .model-box-hint {
+  opacity: 1;
+  color: var(--text);
+}
+
+/* Butoanele din colțul casetei 3D (⛶ / ✕) */
+.model-box-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(14, 10, 24, 0.75);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.model-box-corner:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* Viewer pe tot ecranul (overlay CSS, nu Fullscreen API) */
+.model-box.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.model-box.fullscreen .model-box-corner {
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+}
+
+.media-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* Fațada YouTube */
+.yt-facade {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.yt-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(14, 10, 24, 0.75);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 1.4rem;
+  padding-left: 5px;
+  transition: transform 0.15s ease;
+}
+
+.yt-facade:hover .yt-play {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.yt-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ── Proiecte ─────────────────────────────────────── */
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 8px;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.project-card h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.project-tagline {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
 /* ── Pagini generice ──────────────────────────────── */
 
 .page {
