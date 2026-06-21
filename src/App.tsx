@@ -7,6 +7,10 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
+import QuestionsPage from "./pages/admin/QuestionsPage";
+import LobbyPage from "./pages/LobbyPage";
+import GamePage from "./pages/GamePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
@@ -22,6 +26,10 @@ export default function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profil" element={<ProfilePage />} />
+          <Route path="/admin/intrebari" element={<QuestionsPage />} />
+          <Route path="/lobby" element={<LobbyPage />} />
+          <Route path="/joc/:sessionId" element={<GamePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

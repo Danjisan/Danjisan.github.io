@@ -1,32 +1,34 @@
 import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { UserProfile } from "../lib/types";
 
 export interface AuthState {
   user: User | null;
   profile: UserProfile | null;
+  session: Session | null;
   loading: boolean;
 }
 
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Sesiunea curentă la mount
     supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session ?? null);
       setUser(data.session?.user ?? null);
       if (data.session?.user) fetchProfile(data.session.user.id);
       else setLoading(false);
     });
 
-    // Ascultă schimbările de sesiune (login, logout, token refresh)
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) fetchProfile(session.user.id);
+      (_event, s) => {
+        setSession(s ?? null);
+        setUser(s?.user ?? null);
+        if (s?.user) fetchProfile(s.user.id);
         else {
           setProfile(null);
           setLoading(false);
@@ -47,5 +49,5 @@ export function useAuth(): AuthState {
     setLoading(false);
   }
 
-  return { user, profile, loading };
+  return { user, profile, session, loading };
 }

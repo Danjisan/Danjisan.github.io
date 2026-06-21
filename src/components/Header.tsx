@@ -9,6 +9,11 @@ const NAV_ITEMS = [
   { to: "/roadmap", label: "Roadmap" },
   { to: "/proiecte", label: "Proiecte" },
   { to: "/contact", label: "Contact" },
+  { to: "/lobby", label: "Joacă" },
+];
+
+const ADMIN_NAV = [
+  { to: "/admin/intrebari", label: "Întrebări" },
 ];
 
 export default function Header() {
@@ -58,12 +63,26 @@ export default function Header() {
           </NavLink>
         ))}
 
+        {/* Link-uri admin/profesor — vizibile doar pentru rolurile permise */}
+        {!loading && profile && ["admin", "profesor"].includes(profile.role) &&
+          ADMIN_NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+              onClick={() => setMenuOpen(false)}
+            >
+              {item.label}
+            </NavLink>
+          ))
+        }
+
         {!loading && (
           user ? (
             <div className="nav-user">
-              <span className="nav-user-name">
+              <NavLink to="/profil" className="nav-user-name" onClick={() => setMenuOpen(false)}>
                 {profile?.display_name ?? user.email}
-              </span>
+              </NavLink>
               {profile?.role && profile.role !== "anonim" && (
                 <span className={`nav-role-badge role-${profile.role}`}>
                   {profile.role}

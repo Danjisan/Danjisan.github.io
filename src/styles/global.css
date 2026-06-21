@@ -297,6 +297,238 @@ body {
   line-height: 1.6;
 }
 
+/* ── Admin pages ──────────────────────────────────── */
+
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+@media (min-width: 860px) {
+  .admin-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .admin-layout > .admin-panel {
+    flex: 1;
+  }
+}
+
+.admin-panel {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.admin-panel h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.admin-options-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-option-radio {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.admin-option-input {
+  flex: 1;
+}
+
+.admin-hint {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-empty {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.auth-textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.5;
+}
+
+/* Lista de întrebări */
+.questions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.question-item {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.question-text {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.q-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.q-correct {
+  font-size: 0.78rem;
+  color: #3ecf8e;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-panel-header h2 {
+  margin: 0;
+}
+
+.admin-cancel-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-cancel-btn:hover {
+  color: var(--text);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.question-item.editing {
+  border-color: var(--accent);
+}
+
+.question-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.question-item-header .question-text {
+  flex: 1;
+  margin: 0 0 8px;
+}
+
+.q-expand-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+}
+
+.question-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.q-options-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.q-option {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.q-option-correct {
+  color: #3ecf8e;
+  background: rgba(62, 207, 142, 0.08);
+  font-weight: 600;
+}
+
+.q-explanation {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.q-edit-btn {
+  align-self: flex-start;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(167,139,250,0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.q-edit-btn:hover {
+  background: rgba(139, 92, 246, 0.28);
+}
+
 /* ── Roadmap (drum șerpuit) ───────────────────────── */
 
 .roadmap-track {
@@ -550,6 +782,17 @@ body {
   font-size: 0.88rem;
 }
 
+.auth-info {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(62, 207, 142, 0.35);
+  background: rgba(62, 207, 142, 0.08);
+  color: #3ecf8e;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
 .auth-submit {
   margin-top: 4px;
   min-height: 44px;
@@ -588,6 +831,139 @@ body {
 
 .auth-link:hover {
   text-decoration: underline;
+}
+
+/* Selector rol la register */
+.auth-role-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.auth-role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.auth-role-card input[type="radio"] {
+  display: none;
+}
+
+.auth-role-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.auth-role-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.auth-role-desc {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Select dropdown */
+.auth-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23a89fc4' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* Profil */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 480px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 1.4rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  margin: 0 0 2px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.profile-email {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.profile-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.profile-stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.profile-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
 }
 
 /* Desktop: nav-user și login-btn pe orizontală */
@@ -837,4 +1213,488 @@ body {
 
 .button-link:hover {
   filter: brightness(1.1);
+}
+
+/* ── Lobby ────────────────────────────────────────────────── */
+
+.lobby-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (min-width: 700px) {
+  .lobby-layout {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.lobby-header h1 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.lobby-status {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.lobby-status.online {
+  background: #1a4a1a;
+  color: #4cff4c;
+}
+
+.lobby-status.offline {
+  background: #3a1a1a;
+  color: #ff6b6b;
+}
+
+.lobby-create-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lobby-create-form h3 {
+  margin: 0 0 0.25rem;
+  color: var(--accent);
+}
+
+.lobby-create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.lobby-create-form input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.lobby-create-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.lobby-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lobby-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.lobby-session-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lobby-session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lobby-host {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lobby-config {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Role badges */
+.role-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.role-admin    { background: #4a1010; color: #ff8a8a; }
+.role-profesor { background: #1a2e4a; color: #8ac4ff; }
+.role-parinte  { background: #1a3a2e; color: #8affca; }
+.role-elev     { background: #2e1a4a; color: #c4a8ff; }
+.role-anonim   { background: #2a2a2a; color: #aaa; }
+
+/* Lobby chat */
+.lobby-chat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: min(450px, 60vh);
+}
+
+.lobby-chat-title {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.lobby-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-right: 4px;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-author {
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+}
+
+.chat-text {
+  font-size: 0.9rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.lobby-chat-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.lobby-chat-form input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+/* ── Game ─────────────────────────────────────────────────── */
+
+.game-layout {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.game-scoreboard {
+  display: flex;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+}
+
+.scoreboard-player {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scoreboard-player.me .sb-name {
+  color: var(--accent);
+}
+
+.sb-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.sb-score {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.game-error,
+.game-disconnect {
+  background: #3a1a1a;
+  color: #ff8a8a;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.game-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.game-waiting-msg {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.game-countdown-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.game-countdown-number {
+  font-size: 5rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.game-players-list {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.game-player-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 0.9rem;
+}
+
+.game-question-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.game-progress {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.game-timer {
+  position: relative;
+  height: 8px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.game-timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  border-radius: 999px;
+  transition: width 0.2s linear;
+}
+
+.game-timer-label {
+  position: absolute;
+  right: 0;
+  top: 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.game-question-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.game-grace-notice {
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: #1a0e2e;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.game-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .game-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game-option {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 56px;
+}
+
+.game-option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #1a0e2e;
+}
+
+.game-option.selected {
+  border-color: var(--accent);
+  background: #2a1550;
+}
+
+.game-option:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* Round result */
+.game-round-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.round-correct-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.round-correct-answer {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4cff8a;
+  margin: 0;
+}
+
+.round-explanation {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.round-points {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.round-scores {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.round-next-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Game over */
+.game-over {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}
+
+.game-over-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.game-over-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.game-over-player {
+  display: flex;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+}
+
+.game-over-player.winner {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.game-over-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }

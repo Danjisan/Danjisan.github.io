@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const justRegistered = searchParams.get("registered") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,11 @@ export default function LoginPage() {
     <section className="page page-center">
       <div className="auth-card">
         <h1>Intră în cont</h1>
+        {justRegistered && (
+          <p className="auth-info">
+            Cont creat! Verifică emailul și confirmă adresa, apoi loghează-te.
+          </p>
+        )}
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
             Email
