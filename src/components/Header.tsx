@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabase";
 
 const NAV_ITEMS = [
   { to: "/", label: "Acasă" },
@@ -11,6 +13,14 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    navigate("/");
+    setMenuOpen(false);
+  }
 
   return (
     <header className="site-header">
@@ -47,9 +57,36 @@ export default function Header() {
             {item.label}
           </NavLink>
         ))}
-        <button type="button" className="nav-login" disabled title="În curând">
-          Login
-        </button>
+
+        {!loading && (
+          user ? (
+            <div className="nav-user">
+              <span className="nav-user-name">
+                {profile?.display_name ?? user.email}
+              </span>
+              {profile?.role && profile.role !== "anonim" && (
+                <span className={`nav-role-badge role-${profile.role}`}>
+                  {profile.role}
+                </span>
+              )}
+              <button
+                type="button"
+                className="nav-logout"
+                onClick={handleLogout}
+              >
+                Ieși
+              </button>
+            </div>
+          ) : (
+            <NavLink
+              to="/login"
+              className="nav-login-btn"
+              onClick={() => setMenuOpen(false)}
+            >
+              Login
+            </NavLink>
+          )
+        )}
       </nav>
     </header>
   );
