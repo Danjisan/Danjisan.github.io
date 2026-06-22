@@ -24,7 +24,7 @@ interface TimerState {
 
 export default function GamePage() {
   useParams<{ sessionId: string }>();
-  const { user, session: authSession, refreshProfile } = useAuth();
+  const { session: authSession, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<GamePhase>("waiting");
@@ -60,8 +60,7 @@ export default function GamePage() {
   }
 
   useEffect(() => {
-    if (!user || !authSession?.access_token) return;
-    const sock = getSocket(authSession.access_token);
+    const sock = getSocket(authSession?.access_token ?? null);
 
     sock.on("session:joined", (data) => {
       setPlayers(data.players);
@@ -126,37 +125,25 @@ export default function GamePage() {
       sock.off("session:player_disconnected");
       sock.off("error");
     };
-  }, [user, authSession]);
+  }, [authSession]);
 
   // Cleanup timer la unmount
   useEffect(() => () => clearTimer(), []);
 
   function sendAnswer(answer: string) {
-    if (!question || selectedAnswer || !authSession?.access_token) return;
+    if (!question || selectedAnswer) return;
     setSelectedAnswer(answer);
-    const sock = getSocket(authSession.access_token);
+    const sock = getSocket(authSession?.access_token ?? null);
     sock.emit("session:answer", { questionId: question.questionId, answer });
   }
 
   function leaveGame() {
-    if (authSession?.access_token) {
-      const sock = getSocket(authSession.access_token);
-      sock.emit("session:leave");
-    }
+    const sock = getSocket(authSession?.access_token ?? null);
+    sock.emit("session:leave");
     navigate("/lobby");
   }
 
-  if (!user) {
-    return (
-      <div className="page-container">
-        <p>
-          Trebuie să fii <a href="/login">autentificat</a>.
-        </p>
-      </div>
-    );
-  }
-
-  const myId = user.id;
+  const myId = authSession?.user?.id ?? null;
 
   return (
     <div className="game-layout">
