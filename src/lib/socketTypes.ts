@@ -58,8 +58,19 @@ export interface ClientToServerEvents {
   "session:leave": () => void;
 }
 
+export interface OnlineUser {
+  userId: string;
+  displayName: string;
+  role: UserRole;
+  schoolName: string | null;
+  xp: number;
+  status: "lobby" | "in_quiz";
+}
+
 export interface ServerToClientEvents {
   "lobby:state": (sessions: LobbySession[]) => void;
+  "lobby:users": (users: OnlineUser[]) => void;
+  "lobby:alone": () => void;
   "lobby:chat_message": (msg: ChatMessage) => void;
   "session:joined": (data: { sessionId: string; players: PlayerInfo[] }) => void;
   "session:starting": (data: { countdown: number; players: PlayerInfo[] }) => void;

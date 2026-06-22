@@ -6,12 +6,12 @@ const SERVER_URL = import.meta.env.VITE_SOCKET_URL ?? "http://localhost:3001";
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
 export function getSocket(
-  token: string,
+  token?: string | null,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
   if (socket && socket.connected) return socket;
 
   socket = io(SERVER_URL, {
-    auth: { token },
+    auth: token ? { token } : {},
     transports: ["websocket"],
     autoConnect: true,
   });
