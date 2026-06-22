@@ -19,7 +19,6 @@ export default function LobbyPage() {
   const [chatInput, setChatInput] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [config, setConfig] = useState({
-    timerSec: 30,
     questionCount: 10,
     category: "",
   });
@@ -67,7 +66,7 @@ export default function LobbyPage() {
     if (!authSession?.access_token) return;
     const sock = getSocket(authSession.access_token);
     sock.emit("session:create", {
-      timerSec: config.timerSec,
+      timerSec: 0,
       questionCount: config.questionCount,
       category: config.category || null,
     });
@@ -120,18 +119,6 @@ export default function LobbyPage() {
         {createOpen && (
           <div className="lobby-create-form">
             <h3>Sesiune nouă</h3>
-            <label>
-              Timer (secunde)
-              <input
-                type="number"
-                min={5}
-                max={120}
-                value={config.timerSec}
-                onChange={(e) =>
-                  setConfig((c) => ({ ...c, timerSec: Number(e.target.value) }))
-                }
-              />
-            </label>
             <label>
               Număr întrebări
               <input
@@ -186,7 +173,7 @@ export default function LobbyPage() {
                     </span>
                   </span>
                   <span className="lobby-config">
-                    {s.config.questionCount} întrebări · {s.config.timerSec}s
+                    {s.config.questionCount} întrebări
                     {s.config.category ? ` · ${s.config.category}` : ""}
                   </span>
                 </div>
