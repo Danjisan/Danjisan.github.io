@@ -8,7 +8,7 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 export function getSocket(
   token?: string | null,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
-  if (socket && socket.connected) return socket;
+  if (socket) return socket;
 
   socket = io(SERVER_URL, {
     auth: token ? { token } : {},
