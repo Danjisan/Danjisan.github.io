@@ -41,6 +41,9 @@ export default function LobbyPage() {
     const token = authSession?.access_token ?? null;
     const sock = getSocket(token);
 
+    // Dacă socket-ul e deja conectat (ex: revenire din joc), setăm imediat
+    if (sock.connected) setConnected(true);
+
     sock.on("connect", () => setConnected(true));
     sock.on("disconnect", () => setConnected(false));
     sock.on("lobby:state", setSessions);
