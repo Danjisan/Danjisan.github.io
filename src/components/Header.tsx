@@ -9,7 +9,8 @@ const NAV_ITEMS = [
   { to: "/roadmap", label: "Roadmap" },
   { to: "/proiecte", label: "Proiecte" },
   { to: "/contact", label: "Contact" },
-  { to: "/lobby", label: "Joacă" },
+  { to: "/lectii", label: "Lumea Lectiilor" },
+  { to: "/lobby", label: "Lumea Online" },
 ];
 
 const ADMIN_NAV = [

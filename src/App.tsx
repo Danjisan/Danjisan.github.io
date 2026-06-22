@@ -11,6 +11,8 @@ import ProfilePage from "./pages/ProfilePage";
 import QuestionsPage from "./pages/admin/QuestionsPage";
 import LobbyPage from "./pages/LobbyPage";
 import GamePage from "./pages/GamePage";
+import LessonsWorldPage from "./pages/LessonsWorldPage";
+import LessonPage from "./pages/lessons/LessonPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/admin/intrebari" element={<QuestionsPage />} />
           <Route path="/lobby" element={<LobbyPage />} />
           <Route path="/joc/:sessionId" element={<GamePage />} />
+          <Route path="/lectii" element={<LessonsWorldPage />} />
+          <Route path="/lectii/:slug" element={<LessonPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
