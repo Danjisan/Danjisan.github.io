@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getSocket } from "../lib/socket";
 import type {
@@ -26,9 +26,12 @@ export default function GamePage() {
   useParams<{ sessionId: string }>();
   const { session: authSession, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const initialPlayers: PlayerInfo[] = (location.state as { players?: PlayerInfo[] })?.players ?? [];
 
   const [phase, setPhase] = useState<GamePhase>("waiting");
-  const [players, setPlayers] = useState<PlayerInfo[]>([]);
+  const [players, setPlayers] = useState<PlayerInfo[]>(initialPlayers);
   const [countdown, setCountdown] = useState(3);
   const [question, setQuestion] = useState<SessionQuestion | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);

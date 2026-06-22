@@ -51,7 +51,7 @@ export default function LobbyPage() {
     );
     sock.on("error", setError);
     sock.on("session:joined", (data: { sessionId: string; players: PlayerInfo[] }) => {
-      navigate(`/joc/${data.sessionId}`);
+      navigate(`/joc/${data.sessionId}`, { state: { players: data.players } });
     });
 
     sock.emit("lobby:join");
