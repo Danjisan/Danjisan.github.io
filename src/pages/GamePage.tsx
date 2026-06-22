@@ -24,7 +24,7 @@ interface TimerState {
 
 export default function GamePage() {
   useParams<{ sessionId: string }>();
-  const { user, session: authSession } = useAuth();
+  const { user, session: authSession, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<GamePhase>("waiting");
@@ -105,6 +105,8 @@ export default function GamePage() {
       clearTimer();
       setGameOver(data);
       setPhase("game_over");
+      // Refresh profil ca să apară XP-ul actualizat
+      refreshProfile();
     });
 
     sock.on("session:player_disconnected", (data) => {
@@ -295,6 +297,11 @@ export default function GamePage() {
               </div>
             ))}
           </div>
+          {myId && (gameOver.scores[myId] ?? 0) > 0 && (
+            <p className="game-over-xp">
+              +{gameOver.scores[myId]} XP adăugat la profilul tău
+            </p>
+          )}
           <div className="game-over-actions">
             <button className="btn-primary" onClick={() => navigate("/lobby")}>
               Înapoi la lobby

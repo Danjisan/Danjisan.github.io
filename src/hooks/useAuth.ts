@@ -8,6 +8,7 @@ export interface AuthState {
   profile: UserProfile | null;
   session: Session | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
@@ -49,5 +50,10 @@ export function useAuth(): AuthState {
     setLoading(false);
   }
 
-  return { user, profile, session, loading };
+  async function refreshProfile() {
+    const currentUser = (await supabase.auth.getUser()).data.user;
+    if (currentUser) await fetchProfile(currentUser.id);
+  }
+
+  return { user, profile, session, loading, refreshProfile };
 }

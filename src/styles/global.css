@@ -1698,6 +1698,16 @@ body {
   font-weight: 700;
 }
 
+.game-over-xp {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: #1a0e2e;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 6px 20px;
+}
+
 .game-over-actions {
   display: flex;
   gap: 1rem;
