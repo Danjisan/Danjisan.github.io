@@ -24,7 +24,7 @@ interface TimerState {
 
 export default function GamePage() {
   useParams<{ sessionId: string }>();
-  const { session: authSession, refreshProfile } = useAuth();
+  const { session: authSession, loading: authLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,6 +63,8 @@ export default function GamePage() {
   }
 
   useEffect(() => {
+    if (authLoading) return;
+
     const sock = getSocket(authSession?.access_token ?? null);
 
     sock.on("session:joined", (data) => {
@@ -128,7 +130,7 @@ export default function GamePage() {
       sock.off("session:player_disconnected");
       sock.off("error");
     };
-  }, [authSession]);
+  }, [authLoading, authSession?.access_token]);
 
   // Cleanup timer la unmount
   useEffect(() => () => clearTimer(), []);

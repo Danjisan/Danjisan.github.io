@@ -20,7 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function LobbyPage() {
-  const { profile, session: authSession } = useAuth();
+  const { profile, session: authSession, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [sessions, setSessions] = useState<LobbySession[]>([]);
@@ -37,6 +37,8 @@ export default function LobbyPage() {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
     // Conectare — cu token dacă e logat, fără dacă e anonim
     const token = authSession?.access_token ?? null;
     const sock = getSocket(token);
@@ -69,7 +71,7 @@ export default function LobbyPage() {
       sock.off("error");
       sock.off("session:joined");
     };
-  }, [authSession]);
+  }, [authLoading, authSession?.access_token]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
