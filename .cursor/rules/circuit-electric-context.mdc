@@ -1,0 +1,85 @@
+---
+description: Context complet pentru dezvoltarea templateului de circuit electric din Lumea Lectiilor ColabMe. Se activează automat când lucrezi pe CircuitElectricTemplate.tsx sau fișiere din lessons/templates/circuit*.
+globs:
+  - src/pages/lessons/templates/Circuit*
+  - src/pages/lessons/templates/circuit*
+alwaysApply: false
+---
+
+# Context: Circuit Electric — ColabMe Lumea Lectiilor
+
+## Rolul tău în acest chat
+
+Ești arhitect web + programator. Înainte de orice cod, propui arhitectura, schema de date și structura de fișiere. Pui întrebări dacă ceva e ambiguu. Nu implementezi un strat până cel precedent e convenit și testat.
+
+---
+
+## ColabMe — context macro
+
+Platformă EdTech React + Vite + TypeScript + R3F.
+- Frontend: `danjisan.github.io` (GitHub Pages, static)
+- Backend: Supabase (PostgreSQL, Auth, Storage, RLS) + Railway (WebSocket/Node.js)
+- UI mobil-first, română, CSS variabile (temă mov/galben)
+
+**Lumea Lectiilor** = pagina `/lectii` cu grid de carduri. Fiecare lecție are `template_type` în DB și un fișier React corespunzător în `src/pages/lessons/templates/`.
+
+Tabelul `lessons` în Supabase are coloana `metadata JSONB` — configurația specifică fiecărui template.
+
+---
+
+## Fișiere relevante (citește înainte să propui cod)
+
+| Fișier | Rol |
+|---|---|
+| `src/pages/lessons/templates/CircuitElectricTemplate.tsx` | Template actual — placeholder gol |
+| `src/pages/lessons/templates/types.ts` | Interfața `TemplateProps` |
+| `src/components/media/ModelViewer3D.tsx` | Viewer R3F existent (reutilizabil) |
+| `src/components/media/ModelBox.tsx` | Shell cu activare tap + fullscreen |
+| `colabme-server/supabase/migrations/20260622_lessons_schema.sql` | Schema tabelului `lessons` |
+| `colabme-server/supabase/migrations/20260622_lessons_seed.sql` | Seed cu lecția `circuit-electric-de-baza` |
+
+---
+
+## Componente electrice permise în M1
+
+`battery` · `led` · `resistor` · `potentiometer` · `switch` · `dc_motor` · `wire`
+
+GLB-urile sunt furnizate de Dan (artist tehnic). Câmpul `glb` din metadata e `null` până la livrare — folosești placeholder-e vizuale, nu mesh-uri generate.
+
+---
+
+## Straturi de implementare (respectă ordinea)
+
+| Strat | Ce face | Milestone |
+|---|---|---|
+| **0** | Viewer static + inventar componente + panou info per componentă | M1 — primul sprint |
+| **1** | Plasare pe masă + conectare (snap la terminale) + potențiometru slider | M1 stretch |
+| **2** | Graf circuit + simulare didactică: LED aprins, motor animat | M2 |
+| **3** | Editor profesor UI + provocări random după reguli | M2+ |
+
+---
+
+## Ce NU faci în M1
+
+- Simulare electrică realistă (Ohm, Kirchhoff, curent continuu)
+- Editor web pentru profesori (configurează direct în Supabase JSONB)
+- Generator random de provocări
+- Fire 3D cu fizică — dacă faci fire, sunt linii SVG 2D sau `<Line>` drei
+- Mai mult de 1–2 provocări fixe hardcodate
+
+---
+
+## Skill-uri de consultat
+
+- `/web3d-r3f` — înainte de orice Canvas R3F sau interacțiune 3D
+- `/circuit-electric` — schema metadata și structura de date internă
+
+---
+
+## Flux de lucru agreat
+
+1. **Arhitectură first**: propune schema `metadata` JSONB, structura de date internă React, structura fișiere
+2. **Dan confirmă** înainte de implementare
+3. **Implementare în pași mici**: Strat 0 complet și testabil → Strat 1 etc.
+4. **Build local** (`npm run build`) înainte de orice push
+5. **Push** doar după confirmare Dan
