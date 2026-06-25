@@ -56,3 +56,11 @@ export interface ParsedCircuitLesson {
   /** true dacă metadata vine din schema v1 completă din DB */
   schemaComplete: boolean;
 }
+
+/** Componentă plasată pe masa de lucru (coordonate normalizate 0–1) */
+export interface CircuitNode {
+  id: string;
+  type: ComponentType;
+  position: { x: number; y: number };
+  state: Record<string, unknown>;
+}
