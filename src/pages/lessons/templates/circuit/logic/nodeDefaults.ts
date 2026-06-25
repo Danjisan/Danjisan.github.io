@@ -1,6 +1,5 @@
 import type { ComponentType } from "../types";
-import type { WorkbenchViewport } from "./viewportCoords";
-import { clientToWorkbenchPosition as clientToWorkbenchPositionWithViewport } from "./viewportCoords";
+import { clientToWorkbenchPosition as clientToWorkbenchPositionFromViewport } from "./viewportCoords";
 
 export function defaultNodeState(type: ComponentType): Record<string, unknown> {
   const base = { flipped: false };
@@ -26,10 +25,9 @@ export function clampWorkbenchPosition(x: number, y: number): { x: number; y: nu
 export function clientToWorkbenchPosition(
   clientX: number,
   clientY: number,
-  rect: DOMRect,
-  viewport: WorkbenchViewport = { zoom: 1, panX: 0, panY: 0 },
+  viewportEl: HTMLElement,
 ): { x: number; y: number } {
-  return clientToWorkbenchPositionWithViewport(clientX, clientY, rect, viewport);
+  return clientToWorkbenchPositionFromViewport(clientX, clientY, viewportEl);
 }
 
 export function isInsideRect(clientX: number, clientY: number, rect: DOMRect): boolean {

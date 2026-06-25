@@ -32,6 +32,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const [inventoryCollapsed, setInventoryCollapsed] = useState(false);
   const [infoBubbleNodeId, setInfoBubbleNodeId] = useState<string | null>(null);
   const workbenchRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   const {
     nodes,
@@ -173,7 +174,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     startNodePointer,
   } = useWorkbenchDrag({
     workbenchRef,
-    viewport,
+    viewportRef,
     canPlaceType,
     onPlaceNode: handlePlaceNode,
     onMoveNode: moveNode,
@@ -271,6 +272,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const workbench = (
     <CircuitWorkbench
       surfaceRef={workbenchRef}
+      viewportRef={viewportRef}
       viewport={viewport}
       onWheel={handleWheel}
       hints={editorFullscreen ? editorHints : []}

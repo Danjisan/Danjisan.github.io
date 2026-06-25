@@ -3205,6 +3205,7 @@ body.circuit-is-dragging * {
   text-align: center;
   max-width: 90%;
   z-index: 0;
+  pointer-events: none;
 }
 
 .circuit-terminal {
@@ -3429,6 +3430,7 @@ body.circuit-is-dragging * {
   opacity: 0.5;
   text-align: center;
   max-width: 70%;
+  pointer-events: none;
 }
 
 .circuit-info-panel {
@@ -3535,6 +3537,10 @@ body.circuit-is-dragging * {
   -webkit-user-select: none;
   padding: 0.75rem;
   margin: -0.75rem;
+}
+
+.circuit-node-2d-anchor {
+  position: relative;
 }
 
 .circuit-node-2d-body {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { clientToWorkbenchPosition, isInsideRect } from "../logic/nodeDefaults";
-import type { WorkbenchViewport } from "../logic/viewportCoords";
+import { clampWorkbenchPosition, isInsideRect } from "../logic/nodeDefaults";
+import { clientToWorkbenchNormalized } from "../logic/viewportCoords";
 import type { ComponentType } from "../types";
 
 const DRAG_THRESHOLD_PX = 10;
@@ -26,6 +26,12 @@ type PendingNode = {
   position: { x: number; y: number };
 };
 
+type NodeDragSession = {
+  nodeId: string;
+  pageStart: { x: number; y: number };
+  nodeStart: { x: number; y: number };
+};
+
 interface PointerPoint {
   x: number;
   y: number;
@@ -33,7 +39,7 @@ interface PointerPoint {
 
 interface UseWorkbenchDragOptions {
   workbenchRef: React.RefObject<HTMLDivElement | null>;
-  viewport: WorkbenchViewport;
+  viewportRef: React.RefObject<HTMLDivElement | null>;
   canPlaceType: (type: ComponentType) => boolean;
   onPlaceNode: (type: ComponentType, position: { x: number; y: number }) => void;
   onMoveNode: (nodeId: string, position: { x: number; y: number }) => void;
@@ -44,7 +50,7 @@ interface UseWorkbenchDragOptions {
 
 export function useWorkbenchDrag({
   workbenchRef,
-  viewport,
+  viewportRef,
   canPlaceType,
   onPlaceNode,
   onMoveNode,
@@ -60,6 +66,7 @@ export function useWorkbenchDrag({
   const nodeDragOriginRef = useRef<{ nodeId: string; position: { x: number; y: number } } | null>(
     null,
   );
+  const nodeDragSessionRef = useRef<NodeDragSession | null>(null);
   const activeDragRef = useRef<ActiveDrag | null>(null);
   const pendingPaletteRef = useRef<PendingPalette | null>(null);
   const pendingNodeRef = useRef<PendingNode | null>(null);
@@ -135,6 +142,7 @@ export function useWorkbenchDrag({
   const finishDrag = useCallback(() => {
     clearLongPressTimer();
     nodeDragOriginRef.current = null;
+    nodeDragSessionRef.current = null;
     setActiveDrag(null);
     setPendingPalette(null);
     setPendingNode(null);
@@ -152,17 +160,28 @@ export function useWorkbenchDrag({
       setGhostPosition({ x: clientX, y: clientY });
 
       const surface = workbenchRef.current;
-      if (!surface) return;
+      const viewportEl = viewportRef.current;
+      if (!surface || !viewportEl) return;
 
       const rect = surface.getBoundingClientRect();
-      const position = clientToWorkbenchPosition(clientX, clientY, rect, viewport);
+      const ptr = clientToWorkbenchNormalized(clientX, clientY, viewportEl);
       const inside = isInsideRect(clientX, clientY, rect);
       const drag = activeDragRef.current;
 
       if (drag?.kind === "node") {
-        onMoveNode(drag.nodeId, position);
+        const session = nodeDragSessionRef.current;
+        if (session && session.nodeId === drag.nodeId) {
+          const pageNow = clientToWorkbenchNormalized(clientX, clientY, viewportEl);
+          onMoveNode(
+            drag.nodeId,
+            clampWorkbenchPosition(
+              session.nodeStart.x + (pageNow.x - session.pageStart.x),
+              session.nodeStart.y + (pageNow.y - session.pageStart.y),
+            ),
+          );
+        }
       } else if (drag?.kind === "palette") {
-        setPalettePreview(inside ? position : null);
+        setPalettePreview(inside ? clampWorkbenchPosition(ptr.x, ptr.y) : null);
       }
     };
 
@@ -183,6 +202,20 @@ export function useWorkbenchDrag({
           clearLongPressTimer();
           onNodeTap(pendingN.nodeId, pendingN.type);
           nodeDragOriginRef.current = { nodeId: pendingN.nodeId, position: pendingN.position };
+          const viewportEl = viewportRef.current;
+          if (viewportEl) {
+            nodeDragSessionRef.current = {
+              nodeId: pendingN.nodeId,
+              pageStart: clientToWorkbenchNormalized(
+                pendingN.startX,
+                pendingN.startY,
+                viewportEl,
+              ),
+              nodeStart: { ...pendingN.position },
+            };
+          } else {
+            nodeDragSessionRef.current = null;
+          }
           const next: ActiveDrag = { kind: "node", nodeId: pendingN.nodeId, pointerId: e.pointerId };
           activeDragRef.current = next;
           pendingNodeRef.current = null;
@@ -237,14 +270,15 @@ export function useWorkbenchDrag({
       if (!drag || e.pointerId !== drag.pointerId) return;
 
       const surface = workbenchRef.current;
-      if (surface) {
+      const viewportEl = viewportRef.current;
+      if (surface && viewportEl) {
         const rect = surface.getBoundingClientRect();
         const inside = isInsideRect(e.clientX, e.clientY, rect);
 
         if (inside) {
-          const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect, viewport);
+          const ptr = clientToWorkbenchNormalized(e.clientX, e.clientY, viewportEl);
           if (drag.kind === "palette" && canPlaceType(drag.type)) {
-            onPlaceNode(drag.type, position);
+            onPlaceNode(drag.type, clampWorkbenchPosition(ptr.x, ptr.y));
           }
         } else if (drag.kind === "node") {
           const origin = nodeDragOriginRef.current;
@@ -277,7 +311,7 @@ export function useWorkbenchDrag({
     onNodeTap,
     onPlaceNode,
     onSelectType,
-    viewport,
+    viewportRef,
     workbenchRef,
   ]);
 

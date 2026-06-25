@@ -6,41 +6,64 @@ export interface WorkbenchViewport {
   panY: number;
 }
 
-export const VIEWPORT_ZOOM_MIN = 0.45;
-export const VIEWPORT_ZOOM_MAX = 2.5;
-export const VIEWPORT_ZOOM_STEP = 0.2;
+export const VIEWPORT_ZOOM_MIN = 0.6;
+export const VIEWPORT_ZOOM_MAX = 1.4;
+export const VIEWPORT_ZOOM_STEP = 0.1;
 
 export function clampZoom(zoom: number): number {
   return Math.min(VIEWPORT_ZOOM_MAX, Math.max(VIEWPORT_ZOOM_MIN, zoom));
 }
 
-/** Coordonate normalizate 0–1 pe masa de lucru, cu pan/zoom */
+/**
+ * Ecran → coordonate normalizate 0–1 pe masă.
+ * Folosește getBoundingClientRect pe viewport — include pan + zoom (CSS zoom sau scale).
+ */
+export function clientPointToWorkbenchNorm(
+  clientX: number,
+  clientY: number,
+  viewportEl: HTMLElement,
+): { x: number; y: number } {
+  const r = viewportEl.getBoundingClientRect();
+  return {
+    x: (clientX - r.left) / r.width,
+    y: (clientY - r.top) / r.height,
+  };
+}
+
+/** Ecran → px layout în viewport (spațiul SVG / noduri) */
+export function clientPointToViewportLayout(
+  clientX: number,
+  clientY: number,
+  viewportEl: HTMLElement,
+): { x: number; y: number } {
+  const norm = clientPointToWorkbenchNorm(clientX, clientY, viewportEl);
+  return {
+    x: norm.x * viewportEl.clientWidth,
+    y: norm.y * viewportEl.clientHeight,
+  };
+}
+
+/** Coordonate normalizate 0–1 pe masa de lucru, cu margine */
 export function clientToWorkbenchPosition(
   clientX: number,
   clientY: number,
-  rect: DOMRect,
-  viewport: WorkbenchViewport,
+  viewportEl: HTMLElement,
 ): { x: number; y: number } {
   const margin = 0.07;
-  const x = (clientX - rect.left - viewport.panX) / viewport.zoom / rect.width;
-  const y = (clientY - rect.top - viewport.panY) / viewport.zoom / rect.height;
+  const { x, y } = clientPointToWorkbenchNorm(clientX, clientY, viewportEl);
   return {
     x: Math.min(1 - margin, Math.max(margin, x)),
     y: Math.min(1 - margin, Math.max(margin, y)),
   };
 }
 
-/** Poziție normalizată 0–1 pentru fir pending (fără clamp) */
+/** Poziție normalizată 0–1 (fără clamp) */
 export function clientToWorkbenchNormalized(
   clientX: number,
   clientY: number,
-  rect: DOMRect,
-  viewport: WorkbenchViewport,
+  viewportEl: HTMLElement,
 ): { x: number; y: number } {
-  return {
-    x: (clientX - rect.left - viewport.panX) / viewport.zoom / rect.width,
-    y: (clientY - rect.top - viewport.panY) / viewport.zoom / rect.height,
-  };
+  return clientPointToWorkbenchNorm(clientX, clientY, viewportEl);
 }
 
 const supportsCssZoom =

@@ -1,5 +1,8 @@
-import { COMPONENT_TERMINALS, TERMINAL_OFFSET_REM } from "../constants";
+import type { CSSProperties } from "react";
+import { COMPONENT_TERMINALS, TERMINAL_BODY_OVERLAP_REM, TERMINAL_SIZE_REM } from "../constants";
 import type { CircuitNode, TerminalDef, TerminalId } from "../types";
+
+const terminalOutsetRem = TERMINAL_SIZE_REM / 2 - TERMINAL_BODY_OVERLAP_REM;
 
 export function isNodeFlipped(node: CircuitNode): boolean {
   return node.state.flipped === true;
@@ -12,20 +15,40 @@ export function getTerminalDefs(node: CircuitNode): TerminalDef[] {
   return base.map((t) => ({ ...t, dx: t.dx === 0 ? 0 : -t.dx }));
 }
 
-/** Centru terminal în px pe masa de lucru — aliniat cu CSS-ul nodului */
+/** Centru terminal lângă marginea corpului — suprapunere ușoară peste chenar */
+export function terminalEdgeStyle(term: TerminalDef): CSSProperties {
+  const o = `${terminalOutsetRem}rem`;
+  if (term.dy < 0) {
+    return { left: "50%", top: 0, transform: `translate(-50%, calc(-50% - ${o}))` };
+  }
+  if (term.dx < 0) {
+    return { left: 0, top: "50%", transform: `translate(calc(-50% - ${o}), -50%)` };
+  }
+  if (term.dx > 0) {
+    return { right: 0, top: "50%", transform: `translate(calc(50% + ${o}), -50%)` };
+  }
+  return { left: "50%", top: "50%", transform: "translate(-50%, -50%)" };
+}
+
+/** Fallback px — doar până la prima măsurare DOM în WireLayer */
 export function getTerminalPixelPosition(
   node: CircuitNode,
   terminal: TerminalDef,
   workbenchWidth: number,
   workbenchHeight: number,
-  remPx: number,
+  _remPx: number,
 ): { x: number; y: number } {
   const cx = node.position.x * workbenchWidth;
   const cy = node.position.y * workbenchHeight;
-  return {
-    x: cx + terminal.dx * TERMINAL_OFFSET_REM.x * remPx,
-    y: cy + terminal.dy * TERMINAL_OFFSET_REM.y * remPx,
-  };
+  const bodyHalfW = 36;
+  const bodyHalfH = 28;
+  const termR = 13;
+  let x = cx;
+  let y = cy;
+  if (terminal.dy < 0) y -= bodyHalfH + termR;
+  else if (terminal.dx < 0) x -= bodyHalfW + termR;
+  else if (terminal.dx > 0) x += bodyHalfW + termR;
+  return { x, y };
 }
 
 export function getTerminalPixelPositionById(

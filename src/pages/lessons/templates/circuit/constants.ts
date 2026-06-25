@@ -55,5 +55,10 @@ export const COMPONENT_TERMINALS: Record<ComponentType, TerminalDef[]> = {
   ],
 };
 
-/** Offset terminal față de centrul nodului — aceeași unitate ca în CSS (rem) */
+/** Diametru bulină terminal — aceeași valoare ca în CSS `.circuit-terminal` */
+export const TERMINAL_SIZE_REM = 1.65;
+/** Cât din bulină se suprapune peste chenarul componentei */
+export const TERMINAL_BODY_OVERLAP_REM = 0.28;
+
+/** @deprecated Terminalele sunt poziționate pe marginea corpului (CSS), nu prin offset rem */
 export const TERMINAL_OFFSET_REM = { x: 3.6, y: 2.55 };

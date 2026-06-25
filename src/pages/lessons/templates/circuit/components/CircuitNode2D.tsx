@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import ComponentInfoBubble from "./ComponentInfoBubble";
-import { COMPONENT_COLORS, COMPONENT_ICONS, TERMINAL_OFFSET_REM } from "../constants";
-import { getTerminalDefs, isNodeFlipped } from "../logic/terminalPositions";
+import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
+import { getTerminalDefs, isNodeFlipped, terminalEdgeStyle } from "../logic/terminalPositions";
 import type { CircuitNode, CircuitTerminalRef, ComponentModel, TerminalId } from "../types";
 
 function FlipRotateIcon() {
@@ -86,6 +86,7 @@ export default function CircuitNode2D({
         } as CSSProperties
       }
     >
+      <div className="circuit-node-2d-anchor">
       <div
         className="circuit-node-2d-body"
         onPointerDown={preview || readOnly ? undefined : (e) => onBodyPointerDown?.(e, node.id)}
@@ -124,10 +125,7 @@ export default function CircuitNode2D({
           const isOccupied = occupiedTerminals.has(termKey);
           const stateClass = isPending ? "pending" : isOccupied ? "occupied" : "free";
           const termClass = `circuit-terminal circuit-terminal--${stateClass}${readOnly ? " circuit-terminal--readonly" : ""}`;
-          const style = {
-            left: `calc(50% + ${term.dx * TERMINAL_OFFSET_REM.x}rem)`,
-            top: `calc(50% + ${term.dy * TERMINAL_OFFSET_REM.y}rem)`,
-          };
+          const style = terminalEdgeStyle(term);
           if (readOnly) {
             return (
               <span
@@ -160,6 +158,8 @@ export default function CircuitNode2D({
             </button>
           );
         })}
+
+      </div>
 
       {selected && !preview && !readOnly && onFlip && (
         <button

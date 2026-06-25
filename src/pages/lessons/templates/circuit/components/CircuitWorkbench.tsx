@@ -1,4 +1,4 @@
-import { useRef, type RefObject } from "react";
+import { type RefObject } from "react";
 import CircuitNode2D from "./CircuitNode2D";
 import WireLayer from "./WireLayer";
 import { viewportTransformStyle, type WorkbenchViewport } from "../logic/viewportCoords";
@@ -14,6 +14,7 @@ import type {
 
 interface CircuitWorkbenchProps {
   surfaceRef: RefObject<HTMLDivElement | null>;
+  viewportRef: RefObject<HTMLDivElement | null>;
   viewport: WorkbenchViewport;
   onWheel?: (e: React.WheelEvent) => void;
   hints: WorkbenchHint[];
@@ -45,6 +46,7 @@ interface CircuitWorkbenchProps {
 
 export default function CircuitWorkbench({
   surfaceRef,
+  viewportRef,
   viewport,
   onWheel,
   hints,
@@ -73,11 +75,6 @@ export default function CircuitWorkbench({
   onNodeFlip,
   onPotentiometerChange,
 }: CircuitWorkbenchProps) {
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const wireLayoutKey = nodes
-    .map((n) => `${n.id}@${n.position.x},${n.position.y},${n.state.flipped}`)
-    .join("|");
-
   const isEmpty = nodes.length === 0 && !placementPreview;
   const readOnly = !editable;
   const isPannable = viewport.zoom !== 1 || viewport.panX !== 0 || viewport.panY !== 0;
@@ -101,13 +98,11 @@ export default function CircuitWorkbench({
           onPointerUp={onSurfacePointerUp}
         >
           <WireLayer
+            nodes={nodes}
             edges={edges}
             pendingTerminal={editable ? pendingTerminal : null}
             pointer={editable ? wirePointer : null}
-            surfaceRef={surfaceRef}
             viewportRef={viewportRef}
-            viewport={viewport}
-            layoutKey={wireLayoutKey}
           />
 
           {hints.map((hint) => (
