@@ -1,6 +1,6 @@
-import { COMPONENT_TERMINALS } from "../constants";
 import { wireBezierPath } from "../logic/wireGeometry";
-import { getTerminalWorkbenchPosition } from "../logic/terminalPositions";
+import { getTerminalDefs, getTerminalWorkbenchPosition } from "../logic/terminalPositions";
+import { clientToWorkbenchNormalized, type WorkbenchViewport } from "../logic/viewportCoords";
 import type { CircuitEdge, CircuitNode, CircuitTerminalRef } from "../types";
 
 interface WireLayerProps {
@@ -9,6 +9,7 @@ interface WireLayerProps {
   pendingTerminal: CircuitTerminalRef | null;
   pointer: { x: number; y: number } | null;
   surfaceRef: React.RefObject<HTMLDivElement | null>;
+  viewport: WorkbenchViewport;
 }
 
 export default function WireLayer({
@@ -17,13 +18,14 @@ export default function WireLayer({
   pendingTerminal,
   pointer,
   surfaceRef,
+  viewport,
 }: WireLayerProps) {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
   const resolveTerminal = (ref: CircuitTerminalRef) => {
     const node = nodeMap.get(ref.nodeId);
     if (!node) return null;
-    const def = COMPONENT_TERMINALS[node.type].find((t) => t.id === ref.terminal);
+    const def = getTerminalDefs(node).find((t) => t.id === ref.terminal);
     if (!def) return null;
     return getTerminalWorkbenchPosition(node, def);
   };
@@ -31,10 +33,7 @@ export default function WireLayer({
   let pendingLineEnd: { x: number; y: number } | null = null;
   if (pendingTerminal && pointer && surfaceRef.current) {
     const rect = surfaceRef.current.getBoundingClientRect();
-    pendingLineEnd = {
-      x: (pointer.x - rect.left) / rect.width,
-      y: (pointer.y - rect.top) / rect.height,
-    };
+    pendingLineEnd = clientToWorkbenchNormalized(pointer.x, pointer.y, rect, viewport);
   }
 
   const pendingStart = pendingTerminal ? resolveTerminal(pendingTerminal) : null;

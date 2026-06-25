@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { clientToWorkbenchPosition, isInsideRect } from "../logic/nodeDefaults";
+import type { WorkbenchViewport } from "../logic/viewportCoords";
 import type { ComponentType } from "../types";
 
 const DRAG_THRESHOLD_PX = 10;
@@ -16,6 +17,7 @@ interface PointerPoint {
 
 interface UseWorkbenchDragOptions {
   workbenchRef: React.RefObject<HTMLDivElement | null>;
+  viewport: WorkbenchViewport;
   canPlaceType: (type: ComponentType) => boolean;
   onPlaceNode: (type: ComponentType, position: { x: number; y: number }) => void;
   onMoveNode: (nodeId: string, position: { x: number; y: number }) => void;
@@ -25,6 +27,7 @@ interface UseWorkbenchDragOptions {
 
 export function useWorkbenchDrag({
   workbenchRef,
+  viewport,
   canPlaceType,
   onPlaceNode,
   onMoveNode,
@@ -121,7 +124,7 @@ export function useWorkbenchDrag({
       if (!surface) return;
 
       const rect = surface.getBoundingClientRect();
-      const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect);
+      const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect, viewport);
       const inside = isInsideRect(e.clientX, e.clientY, rect);
 
       if (activeDrag.kind === "node") {
@@ -140,7 +143,7 @@ export function useWorkbenchDrag({
         const inside = isInsideRect(e.clientX, e.clientY, rect);
 
         if (inside) {
-          const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect);
+          const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect, viewport);
           if (activeDrag.kind === "palette" && canPlaceType(activeDrag.type)) {
             onPlaceNode(activeDrag.type, position);
           }
@@ -165,7 +168,7 @@ export function useWorkbenchDrag({
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [activeDrag, canPlaceType, onMoveNode, onPlaceNode, workbenchRef]);
+  }, [activeDrag, canPlaceType, onMoveNode, onPlaceNode, viewport, workbenchRef]);
 
   return {
     activeDrag,

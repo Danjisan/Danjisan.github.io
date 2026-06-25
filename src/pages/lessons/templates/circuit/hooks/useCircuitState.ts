@@ -83,6 +83,14 @@ export function useCircuitState() {
     );
   }, []);
 
+  const toggleNodeFlip = useCallback((nodeId: string) => {
+    setNodes((prev) =>
+      prev.map((n) =>
+        n.id === nodeId ? { ...n, state: { ...n.state, flipped: !n.state.flipped } } : n,
+      ),
+    );
+  }, []);
+
   return {
     nodes,
     edges,
@@ -96,5 +104,6 @@ export function useCircuitState() {
     edgeAtTerminal,
     toggleSwitch,
     setPotentiometerValue,
+    toggleNodeFlip,
   };
 }

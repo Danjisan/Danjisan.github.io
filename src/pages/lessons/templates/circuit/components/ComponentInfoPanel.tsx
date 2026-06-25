@@ -6,6 +6,7 @@ interface ComponentInfoPanelProps {
   model: ComponentModel | null;
   potentiometerValue?: number;
   onPotentiometerChange?: (value: number) => void;
+  compact?: boolean;
 }
 
 export default function ComponentInfoPanel({
@@ -13,8 +14,10 @@ export default function ComponentInfoPanel({
   model,
   potentiometerValue,
   onPotentiometerChange,
+  compact = false,
 }: ComponentInfoPanelProps) {
   if (!type || !model) {
+    if (compact) return null;
     return (
       <aside className="circuit-info-panel circuit-info-panel--empty">
         <p>Selectează o componentă din inventar sau de pe masă pentru detalii.</p>
@@ -24,9 +27,12 @@ export default function ComponentInfoPanel({
 
   const { info } = model;
   const hasGlb = Boolean(model.glb);
+  const panelClass = ["circuit-info-panel", compact ? "circuit-info-panel--compact" : ""]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <aside className="circuit-info-panel">
+    <aside className={panelClass}>
       <div className="circuit-info-header">
         <span
           className="circuit-info-icon"
@@ -39,9 +45,9 @@ export default function ComponentInfoPanel({
       </div>
 
       {info.summary && <p className="circuit-info-summary">{info.summary}</p>}
-      {info.detail && <p className="circuit-info-detail">{info.detail}</p>}
+      {!compact && info.detail && <p className="circuit-info-detail">{info.detail}</p>}
 
-      {info.tips.length > 0 && (
+      {!compact && info.tips.length > 0 && (
         <ul className="circuit-info-tips">
           {info.tips.map((tip) => (
             <li key={tip}>{tip}</li>
@@ -49,7 +55,7 @@ export default function ComponentInfoPanel({
         </ul>
       )}
 
-      {!info.summary && !info.detail && (
+      {!compact && !info.summary && !info.detail && (
         <p className="circuit-info-missing">Informațiile educaționale nu sunt încă în baza de date.</p>
       )}
 
@@ -70,13 +76,15 @@ export default function ComponentInfoPanel({
         </div>
       )}
 
-      <div className="circuit-info-preview-slot">
-        {hasGlb ? (
-          <p className="circuit-info-preview-ready">Preview 3D disponibil când implementăm GLB-urile.</p>
-        ) : (
-          <p className="circuit-info-preview-placeholder">Preview 3D — asset în pregătire</p>
-        )}
-      </div>
+      {!compact && (
+        <div className="circuit-info-preview-slot">
+          {hasGlb ? (
+            <p className="circuit-info-preview-ready">Preview 3D disponibil când implementăm GLB-urile.</p>
+          ) : (
+            <p className="circuit-info-preview-placeholder">Preview 3D — asset în pregătire</p>
+          )}
+        </div>
+      )}
     </aside>
   );
 }

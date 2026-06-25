@@ -1,13 +1,16 @@
 import type { ComponentType } from "../types";
+import type { WorkbenchViewport } from "./viewportCoords";
+import { clientToWorkbenchPosition as clientToWorkbenchPositionWithViewport } from "./viewportCoords";
 
 export function defaultNodeState(type: ComponentType): Record<string, unknown> {
+  const base = { flipped: false };
   switch (type) {
     case "switch":
-      return { on: false };
+      return { ...base, on: false };
     case "potentiometer":
-      return { value: 0.5 };
+      return { ...base, value: 0.5 };
     default:
-      return {};
+      return base;
   }
 }
 
@@ -24,11 +27,9 @@ export function clientToWorkbenchPosition(
   clientX: number,
   clientY: number,
   rect: DOMRect,
+  viewport: WorkbenchViewport = { zoom: 1, panX: 0, panY: 0 },
 ): { x: number; y: number } {
-  return clampWorkbenchPosition(
-    (clientX - rect.left) / rect.width,
-    (clientY - rect.top) / rect.height,
-  );
+  return clientToWorkbenchPositionWithViewport(clientX, clientY, rect, viewport);
 }
 
 export function isInsideRect(clientX: number, clientY: number, rect: DOMRect): boolean {
