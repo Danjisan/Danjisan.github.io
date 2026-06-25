@@ -2466,14 +2466,23 @@ body {
 
 .circuit-fs-header {
   flex-shrink: 0;
-  padding: 0.55rem 3.25rem 0.55rem 0.75rem;
+  padding: 0.45rem 3rem 0.45rem 0.65rem;
   border-bottom: 1px solid var(--border);
   background: #0c0618;
 }
 
+.circuit-fs-header-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+  min-width: 0;
+}
+
 .circuit-fs-header-badge {
+  flex-shrink: 0;
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -2481,25 +2490,41 @@ body {
 }
 
 .circuit-fs-header-title {
-  margin: 0.2rem 0 0;
-  font-size: 0.92rem;
+  margin: 0;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text);
-  line-height: 1.35;
+  line-height: 1.3;
+  min-width: 0;
 }
 
 .circuit-fs-header-hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.75rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .circuit-fs-header-success {
-  margin: 0.3rem 0 0;
-  font-size: 0.78rem;
+  flex-shrink: 0;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #8d8;
+}
+
+@media (max-width: 600px) {
+  .circuit-fs-header {
+    padding: 0.35rem 2.6rem 0.35rem 0.5rem;
+  }
+
+  .circuit-fs-header-title {
+    font-size: 0.82rem;
+  }
+
+  .circuit-fs-header-hint {
+    margin-top: 0.2rem;
+    font-size: 0.68rem;
+  }
 }
 
 .circuit-fs-advance-btn {
@@ -2553,6 +2578,7 @@ body {
   border-radius: 0;
   border-left: none;
   border-right: none;
+  border-bottom: none;
 }
 
 .circuit-editor-frame.fullscreen .circuit-workbench-surface {
@@ -2562,7 +2588,9 @@ body {
 
 .circuit-editor-frame.fullscreen .circuit-inventory {
   order: 2;
-  border-radius: 12px 12px 0 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
   border-bottom: none;
 }
 
@@ -2570,26 +2598,56 @@ body {
   padding: 0;
   gap: 0;
   background: #0c0618;
+  border-top: 1px solid var(--border);
+}
+
+.circuit-inventory-collapsed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.35rem 0.2rem 0.25rem;
+  min-height: 0;
 }
 
 .circuit-inventory-compact-head {
-  padding: 0.35rem 0.5rem 0;
+  padding: 0.2rem 0.35rem 0;
 }
 
 .circuit-inventory-toggle {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   width: 100%;
-  padding: 0.4rem 0.5rem;
+  padding: 0.3rem 0.4rem;
   border: none;
   border-radius: 8px;
   background: transparent;
   color: var(--accent);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   text-align: left;
+}
+
+.circuit-inventory-toggle--inline {
+  flex-shrink: 0;
+  width: auto;
+  padding: 0.25rem 0.35rem;
+  gap: 0.25rem;
+}
+
+.circuit-inventory-toggle--inline .circuit-inventory-count {
+  margin-left: 0;
+}
+
+.circuit-inventory-toggle-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .circuit-inventory-toggle-label {
+    display: none;
+  }
 }
 
 .circuit-inventory-toggle:hover {
@@ -2611,28 +2669,30 @@ body {
 .circuit-inventory-strip {
   list-style: none;
   margin: 0;
-  padding: 0.25rem 0.5rem 0.55rem;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.35rem;
+  gap: 0.3rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .circuit-inventory-list--compact {
-  max-height: 38vh;
+  max-height: 34vh;
   overflow-y: auto;
-  padding: 0 0.5rem 0.55rem;
+  padding: 0 0.35rem 0.35rem;
 }
 
 .circuit-inventory-item.compact {
-  padding: 0.4rem 0.55rem;
+  padding: 0.35rem 0.5rem;
 }
 
 .circuit-inventory-item.icon-only {
   flex-shrink: 0;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.35rem;
+  height: 2.35rem;
   padding: 0;
   justify-content: center;
   gap: 0;
@@ -2861,6 +2921,92 @@ body.circuit-is-dragging * {
   background: #0c0618;
 }
 
+.circuit-editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  flex-shrink: 0;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: #0c0618;
+}
+
+.circuit-editor-frame.fullscreen .circuit-editor-toolbar {
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid var(--border);
+  border-style: solid;
+}
+
+.circuit-node-info-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 0.35rem);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(15rem, 70vw);
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: rgba(12, 6, 24, 0.96);
+  border: 1px solid rgba(180, 120, 255, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.circuit-node-info-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(12, 6, 24, 0.96);
+}
+
+.circuit-node-info-bubble-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.25;
+}
+
+.circuit-node-info-bubble-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.circuit-node-info-bubble-tip {
+  margin: 0.3rem 0 0;
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.circuit-node-info-bubble-pot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+  font-size: 0.64rem;
+  color: var(--text-muted);
+}
+
+.circuit-node-info-bubble-pot input[type="range"] {
+  width: 100%;
+}
+
+.circuit-node-2d:has(.circuit-node-info-bubble) {
+  z-index: 6;
+}
+
 .circuit-workbench-reset-btn {
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
@@ -2974,7 +3120,6 @@ body.circuit-is-dragging * {
   inset: 0;
   width: 100%;
   height: 100%;
-  will-change: transform;
 }
 
 .circuit-workbench-pan-hint {

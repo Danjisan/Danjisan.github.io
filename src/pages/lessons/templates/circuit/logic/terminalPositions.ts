@@ -1,4 +1,4 @@
-import { COMPONENT_TERMINALS, NODE_TERMINAL_SCALE } from "../constants";
+import { COMPONENT_TERMINALS, TERMINAL_OFFSET_REM } from "../constants";
 import type { CircuitNode, TerminalDef, TerminalId } from "../types";
 
 export function isNodeFlipped(node: CircuitNode): boolean {
@@ -12,23 +12,32 @@ export function getTerminalDefs(node: CircuitNode): TerminalDef[] {
   return base.map((t) => ({ ...t, dx: t.dx === 0 ? 0 : -t.dx }));
 }
 
-export function getTerminalWorkbenchPosition(
+/** Centru terminal în px pe masa de lucru — aliniat cu CSS-ul nodului */
+export function getTerminalPixelPosition(
   node: CircuitNode,
   terminal: TerminalDef,
+  workbenchWidth: number,
+  workbenchHeight: number,
+  remPx: number,
 ): { x: number; y: number } {
+  const cx = node.position.x * workbenchWidth;
+  const cy = node.position.y * workbenchHeight;
   return {
-    x: node.position.x + terminal.dx * NODE_TERMINAL_SCALE.x,
-    y: node.position.y + terminal.dy * NODE_TERMINAL_SCALE.y,
+    x: cx + terminal.dx * TERMINAL_OFFSET_REM.x * remPx,
+    y: cy + terminal.dy * TERMINAL_OFFSET_REM.y * remPx,
   };
 }
 
-export function getTerminalWorkbenchPositionById(
+export function getTerminalPixelPositionById(
   node: CircuitNode,
   terminalId: TerminalId,
+  workbenchWidth: number,
+  workbenchHeight: number,
+  remPx: number,
 ): { x: number; y: number } | null {
   const def = getTerminalDefs(node).find((t) => t.id === terminalId);
   if (!def) return null;
-  return getTerminalWorkbenchPosition(node, def);
+  return getTerminalPixelPosition(node, def, workbenchWidth, workbenchHeight, remPx);
 }
 
 export function terminalKey(nodeId: string, terminal: string): string {

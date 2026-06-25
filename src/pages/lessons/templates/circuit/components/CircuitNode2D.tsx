@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
+import ComponentInfoBubble from "./ComponentInfoBubble";
+import { COMPONENT_COLORS, COMPONENT_ICONS, TERMINAL_OFFSET_REM } from "../constants";
 import { getTerminalDefs, isNodeFlipped } from "../logic/terminalPositions";
 import type { CircuitNode, CircuitTerminalRef, ComponentModel, TerminalId } from "../types";
 
@@ -43,6 +44,9 @@ interface CircuitNode2DProps {
   onTerminalPointerUp?: (e: React.PointerEvent, nodeId: string, terminal: TerminalId) => void;
   onSwitchToggle?: (nodeId: string) => void;
   onFlip?: (nodeId: string) => void;
+  showInfoBubble?: boolean;
+  potentiometerValue?: number;
+  onPotentiometerChange?: (value: number) => void;
 }
 
 export default function CircuitNode2D({
@@ -63,6 +67,9 @@ export default function CircuitNode2D({
   onTerminalPointerUp,
   onSwitchToggle,
   onFlip,
+  showInfoBubble = false,
+  potentiometerValue,
+  onPotentiometerChange,
 }: CircuitNode2DProps) {
   const switchOn = node.type === "switch" && node.state.on === true;
   const flipped = isNodeFlipped(node);
@@ -99,6 +106,14 @@ export default function CircuitNode2D({
         )}
       </div>
 
+      {showInfoBubble && !preview && !readOnly && (
+        <ComponentInfoBubble
+          model={model}
+          potentiometerValue={node.type === "potentiometer" ? potentiometerValue : undefined}
+          onPotentiometerChange={node.type === "potentiometer" ? onPotentiometerChange : undefined}
+        />
+      )}
+
       {!preview &&
         terminals.map((term) => {
           const isPending =
@@ -110,8 +125,8 @@ export default function CircuitNode2D({
           const stateClass = isPending ? "pending" : isOccupied ? "occupied" : "free";
           const termClass = `circuit-terminal circuit-terminal--${stateClass}${readOnly ? " circuit-terminal--readonly" : ""}`;
           const style = {
-            left: `calc(50% + ${term.dx * 52}%)`,
-            top: `calc(50% + ${term.dy * 52}%)`,
+            left: `calc(50% + ${term.dx * TERMINAL_OFFSET_REM.x}rem)`,
+            top: `calc(50% + ${term.dy * TERMINAL_OFFSET_REM.y}rem)`,
           };
           if (readOnly) {
             return (
@@ -119,6 +134,8 @@ export default function CircuitNode2D({
                 key={term.id}
                 className={termClass}
                 style={style}
+                data-circuit-terminal=""
+                data-node-id={node.id}
                 data-terminal={term.id}
                 aria-hidden="true"
               >

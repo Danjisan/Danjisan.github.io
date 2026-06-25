@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export interface WorkbenchViewport {
   zoom: number;
   panX: number;
@@ -41,12 +43,22 @@ export function clientToWorkbenchNormalized(
   };
 }
 
-export function viewportTransformStyle(viewport: WorkbenchViewport): {
-  transform: string;
-  transformOrigin: string;
-} {
+const supportsCssZoom =
+  typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("zoom", "1");
+
+export function viewportTransformStyle(viewport: WorkbenchViewport): CSSProperties {
+  const pan = `translate(${viewport.panX}px, ${viewport.panY}px)`;
+
+  if (supportsCssZoom) {
+    return {
+      transform: pan,
+      transformOrigin: "0 0",
+      zoom: viewport.zoom,
+    };
+  }
+
   return {
-    transform: `translate(${viewport.panX}px, ${viewport.panY}px) scale(${viewport.zoom})`,
+    transform: `${pan} scale(${viewport.zoom})`,
     transformOrigin: "0 0",
   };
 }

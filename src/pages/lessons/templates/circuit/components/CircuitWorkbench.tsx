@@ -1,7 +1,6 @@
-import type { ReactNode, RefObject } from "react";
+import { useRef, type RefObject } from "react";
 import CircuitNode2D from "./CircuitNode2D";
 import WireLayer from "./WireLayer";
-import WorkbenchViewportControls from "./WorkbenchViewportControls";
 import { viewportTransformStyle, type WorkbenchViewport } from "../logic/viewportCoords";
 import type {
   CircuitEdge,
@@ -16,9 +15,6 @@ import type {
 interface CircuitWorkbenchProps {
   surfaceRef: RefObject<HTMLDivElement | null>;
   viewport: WorkbenchViewport;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetView: () => void;
   onWheel?: (e: React.WheelEvent) => void;
   hints: WorkbenchHint[];
   nodes: CircuitNode[];
@@ -26,6 +22,7 @@ interface CircuitWorkbenchProps {
   models: Record<ComponentType, ComponentModel>;
   editable?: boolean;
   selectedNodeId: string | null;
+  infoBubbleNodeId: string | null;
   draggingNodeId: string | null;
   placementPreview: { type: ComponentType; position: { x: number; y: number } } | null;
   pendingTerminal: CircuitTerminalRef | null;
@@ -42,17 +39,13 @@ interface CircuitWorkbenchProps {
   onTerminalPointerDown?: (e: React.PointerEvent, nodeId: string, terminal: TerminalId) => void;
   onTerminalPointerUp?: (e: React.PointerEvent) => void;
   onSwitchToggle: (nodeId: string) => void;
-  onResetBoard?: () => void;
-  toolbarEnd?: ReactNode;
   onNodeFlip?: (nodeId: string) => void;
+  onPotentiometerChange?: (nodeId: string, value: number) => void;
 }
 
 export default function CircuitWorkbench({
   surfaceRef,
   viewport,
-  onZoomIn,
-  onZoomOut,
-  onResetView,
   onWheel,
   hints,
   nodes,
@@ -60,6 +53,7 @@ export default function CircuitWorkbench({
   models,
   editable = true,
   selectedNodeId,
+  infoBubbleNodeId,
   draggingNodeId,
   placementPreview,
   pendingTerminal,
@@ -76,12 +70,15 @@ export default function CircuitWorkbench({
   onTerminalPointerDown,
   onTerminalPointerUp,
   onSwitchToggle,
-  onResetBoard,
-  toolbarEnd,
   onNodeFlip,
+  onPotentiometerChange,
 }: CircuitWorkbenchProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const wireLayoutKey = nodes
+    .map((n) => `${n.id}@${n.position.x},${n.position.y},${n.state.flipped}`)
+    .join("|");
+
   const isEmpty = nodes.length === 0 && !placementPreview;
-  const canReset = nodes.length > 0 || edges.length > 0;
   const readOnly = !editable;
   const isPannable = viewport.zoom !== 1 || viewport.panX !== 0 || viewport.panY !== 0;
 
@@ -90,31 +87,13 @@ export default function CircuitWorkbench({
       className={`circuit-workbench ${readOnly ? "circuit-workbench--preview" : ""}`}
       aria-label="Masa de lucru"
     >
-      <div className="circuit-workbench-toolbar">
-        {onResetBoard && (
-          <button
-            type="button"
-            className="circuit-workbench-reset-btn"
-            disabled={!canReset}
-            onClick={onResetBoard}
-          >
-            Resetează masa
-          </button>
-        )}
-        <WorkbenchViewportControls
-          viewport={viewport}
-          onZoomIn={onZoomIn}
-          onZoomOut={onZoomOut}
-          onResetView={onResetView}
-        />
-        {toolbarEnd}
-      </div>
       <div
         ref={surfaceRef}
         className={`circuit-workbench-surface ${isPannable ? "is-pannable" : ""}`}
         onWheel={onWheel}
       >
         <div
+          ref={viewportRef}
           className="circuit-workbench-viewport"
           style={viewportTransformStyle(viewport)}
           onPointerMove={onSurfacePointerMove}
@@ -122,12 +101,13 @@ export default function CircuitWorkbench({
           onPointerUp={onSurfacePointerUp}
         >
           <WireLayer
-            nodes={nodes}
             edges={edges}
             pendingTerminal={editable ? pendingTerminal : null}
             pointer={editable ? wirePointer : null}
             surfaceRef={surfaceRef}
+            viewportRef={viewportRef}
             viewport={viewport}
+            layoutKey={wireLayoutKey}
           />
 
           {hints.map((hint) => (
@@ -149,6 +129,7 @@ export default function CircuitWorkbench({
               node={node}
               model={models[node.type]}
               selected={editable && selectedNodeId === node.id}
+              showInfoBubble={editable && infoBubbleNodeId === node.id}
               dragging={draggingNodeId === node.id}
               readOnly={readOnly}
               ledOn={ledOnIds.has(node.id)}
@@ -156,6 +137,14 @@ export default function CircuitWorkbench({
               motorRunning={motorRunningIds.has(node.id)}
               pendingTerminal={pendingTerminal}
               occupiedTerminals={occupiedTerminals}
+              potentiometerValue={
+                node.type === "potentiometer" ? (node.state.value as number) : undefined
+              }
+              onPotentiometerChange={
+                onPotentiometerChange
+                  ? (v) => onPotentiometerChange(node.id, v)
+                  : undefined
+              }
               onBodyPointerDown={onBodyPointerDown}
               onRemove={onRemoveNode}
               onTerminalPointerDown={onTerminalPointerDown}
@@ -195,10 +184,6 @@ export default function CircuitWorkbench({
             </p>
           )}
         </div>
-
-        <p className="circuit-workbench-pan-hint" aria-hidden="true">
-          Scroll sau pinch pentru zoom · trage fundalul pentru a muta masa
-        </p>
       </div>
     </div>
   );

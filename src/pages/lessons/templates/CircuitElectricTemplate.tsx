@@ -4,9 +4,9 @@ import DragGhost from "./circuit/components/DragGhost";
 import { parseCircuitMetadata } from "./circuit/parseMetadata";
 import ChallengeBanner from "./circuit/components/ChallengeBanner";
 import CircuitEditorFrame from "./circuit/components/CircuitEditorFrame";
+import CircuitEditorToolbar from "./circuit/components/CircuitEditorToolbar";
 import CircuitFullscreenHeader from "./circuit/components/CircuitFullscreenHeader";
 import CircuitWorkbench from "./circuit/components/CircuitWorkbench";
-import ComponentInfoPanel from "./circuit/components/ComponentInfoPanel";
 import ComponentPalette from "./circuit/components/ComponentPalette";
 import { useCircuitState } from "./circuit/hooks/useCircuitState";
 import { useWireInteraction } from "./circuit/hooks/useWireInteraction";
@@ -30,6 +30,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
   const [editorFullscreen, setEditorFullscreen] = useState(false);
   const [inventoryCollapsed, setInventoryCollapsed] = useState(false);
+  const [infoBubbleNodeId, setInfoBubbleNodeId] = useState<string | null>(null);
   const workbenchRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -69,10 +70,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
 
   const simulation = useMemo(() => simulateCircuit(nodes, edges), [nodes, edges]);
 
-  const selectedModel = selectedType ? metadata.models[selectedType] : null;
-  const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null;
-  const potValue =
-    selectedNode?.type === "potentiometer" ? (selectedNode.state.value as number) ?? 0.5 : undefined;
+  const dismissInfoBubble = useCallback(() => setInfoBubbleNodeId(null), []);
 
   const enterEditorFullscreen = useCallback(() => {
     setEditorFullscreen(true);
@@ -102,8 +100,22 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   }, []);
 
   const handleSelectNode = useCallback((nodeId: string, type: ComponentType) => {
+    setInfoBubbleNodeId(null);
     setSelectedNodeId(nodeId);
     setSelectedType(type);
+  }, []);
+
+  const handleNodeTap = useCallback(
+    (nodeId: string, type: ComponentType) => {
+      handleSelectNode(nodeId, type);
+    },
+    [handleSelectNode],
+  );
+
+  const handleNodeLongPress = useCallback((nodeId: string, type: ComponentType) => {
+    setSelectedNodeId(null);
+    setSelectedType(type);
+    setInfoBubbleNodeId(nodeId);
   }, []);
 
   const handleRemoveNode = useCallback(
@@ -135,6 +147,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     setEditorFullscreen(false);
     setSelectedType(null);
     setSelectedNodeId(null);
+    setInfoBubbleNodeId(null);
   }, [cancelWire]);
 
   const {
@@ -165,7 +178,8 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     onPlaceNode: handlePlaceNode,
     onMoveNode: moveNode,
     onSelectType: handleSelectType,
-    onSelectNode: handleSelectNode,
+    onNodeTap: handleNodeTap,
+    onNodeLongPress: handleNodeLongPress,
   });
 
   const ghostType = paletteDragType;
@@ -188,6 +202,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     resetView();
     setSelectedType(null);
     setSelectedNodeId(null);
+    setInfoBubbleNodeId(null);
   }, [clearBoard, cancelWire, resetView]);
 
   const onSurfacePointerDown = useCallback(
@@ -197,10 +212,14 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
         (e.target instanceof HTMLElement &&
           (e.target.classList.contains("circuit-workbench-empty") ||
             e.target.classList.contains("circuit-workbench-wire-hint")));
-      if (editorFullscreen && isBackdrop) handleSurfacePointerDown(e);
+      if (editorFullscreen && isBackdrop) {
+        handleSurfacePointerDown(e);
+        dismissInfoBubble();
+        setSelectedNodeId(null);
+      }
       if (isBackdrop) handleViewportPointerDown(e);
     },
-    [editorFullscreen, handleSurfacePointerDown, handleViewportPointerDown],
+    [editorFullscreen, handleSurfacePointerDown, handleViewportPointerDown, dismissInfoBubble],
   );
 
   const onSurfacePointerMove = useCallback(
@@ -247,13 +266,12 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     </button>
   );
 
+  const canResetBoard = nodes.length > 0 || edges.length > 0;
+
   const workbench = (
     <CircuitWorkbench
       surfaceRef={workbenchRef}
       viewport={viewport}
-      onZoomIn={zoomIn}
-      onZoomOut={zoomOut}
-      onResetView={resetView}
       onWheel={handleWheel}
       hints={editorFullscreen ? editorHints : []}
       editable={editorFullscreen}
@@ -261,6 +279,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
       edges={edges}
       models={metadata.models}
       selectedNodeId={selectedNodeId}
+      infoBubbleNodeId={infoBubbleNodeId}
       draggingNodeId={editorFullscreen ? draggingNodeId : null}
       placementPreview={editorFullscreen ? placementPreview : null}
       pendingTerminal={editorFullscreen ? pendingTerminal : null}
@@ -284,9 +303,8 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
       onTerminalPointerDown={editorFullscreen ? handleTerminalPointerDown : undefined}
       onTerminalPointerUp={editorFullscreen ? handleTerminalPointerUp : undefined}
       onSwitchToggle={toggleSwitch}
-      onResetBoard={resetBoard}
       onNodeFlip={editorFullscreen ? toggleNodeFlip : undefined}
-      toolbarEnd={editorFullscreen ? undefined : editToolbarButton}
+      onPotentiometerChange={editorFullscreen ? setPotentiometerValue : undefined}
     />
   );
 
@@ -318,17 +336,15 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
           />
         )}
 
-        {editorFullscreen && (
-          <ComponentInfoPanel
-            type={selectedType}
-            model={selectedModel}
-            potentiometerValue={potValue}
-            onPotentiometerChange={
-              selectedNodeId && selectedType === "potentiometer"
-                ? (v) => setPotentiometerValue(selectedNodeId, v)
-                : undefined
-            }
-            compact
+        {!editorFullscreen && (
+          <CircuitEditorToolbar
+            canReset={canResetBoard}
+            onResetBoard={resetBoard}
+            viewport={viewport}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onResetView={resetView}
+            end={editToolbarButton}
           />
         )}
 

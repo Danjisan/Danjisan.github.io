@@ -96,56 +96,73 @@ export default function ComponentPalette({
   if (compact) {
     return (
       <aside className={className} aria-label="Inventar componente">
-        <div className="circuit-inventory-compact-head">
-          <button
-            type="button"
-            className="circuit-inventory-toggle"
-            onClick={onToggleCollapse}
-            aria-expanded={!collapsed}
-          >
-            <span className="circuit-inventory-toggle-icon" aria-hidden="true">
-              {collapsed ? "▲" : "▼"}
-            </span>
-            Inventar
-            <span className="circuit-inventory-count">
-              {placedCount}/{totalCount}
-            </span>
-          </button>
-        </div>
-
         {collapsed ? (
-          <ul className="circuit-inventory-strip" aria-label="Componente disponibile">
-            {components.map((type) => (
-              <li key={type}>
-                <InventoryItem
-                  type={type}
-                  model={models[type]}
-                  selected={selected === type}
-                  isPlaced={placedTypes.has(type)}
-                  compact
-                  iconOnly
-                  onTapSelect={onTapSelect}
-                  onPalettePointerDown={onPalettePointerDown}
-                />
-              </li>
-            ))}
-          </ul>
+          <div className="circuit-inventory-collapsed-row">
+            <button
+              type="button"
+              className="circuit-inventory-toggle circuit-inventory-toggle--inline"
+              onClick={onToggleCollapse}
+              aria-expanded={false}
+            >
+              <span className="circuit-inventory-toggle-icon" aria-hidden="true">
+                ▲
+              </span>
+              <span className="circuit-inventory-toggle-label">Inventar</span>
+              <span className="circuit-inventory-count">
+                {placedCount}/{totalCount}
+              </span>
+            </button>
+            <ul className="circuit-inventory-strip" aria-label="Componente disponibile">
+              {components.map((type) => (
+                <li key={type}>
+                  <InventoryItem
+                    type={type}
+                    model={models[type]}
+                    selected={selected === type}
+                    isPlaced={placedTypes.has(type)}
+                    compact
+                    iconOnly
+                    onTapSelect={onTapSelect}
+                    onPalettePointerDown={onPalettePointerDown}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
-          <ul className="circuit-inventory-list circuit-inventory-list--compact">
-            {components.map((type) => (
-              <li key={type}>
-                <InventoryItem
-                  type={type}
-                  model={models[type]}
-                  selected={selected === type}
-                  isPlaced={placedTypes.has(type)}
-                  compact
-                  onTapSelect={onTapSelect}
-                  onPalettePointerDown={onPalettePointerDown}
-                />
-              </li>
-            ))}
-          </ul>
+          <>
+            <div className="circuit-inventory-compact-head">
+              <button
+                type="button"
+                className="circuit-inventory-toggle"
+                onClick={onToggleCollapse}
+                aria-expanded
+              >
+                <span className="circuit-inventory-toggle-icon" aria-hidden="true">
+                  ▼
+                </span>
+                Inventar
+                <span className="circuit-inventory-count">
+                  {placedCount}/{totalCount}
+                </span>
+              </button>
+            </div>
+            <ul className="circuit-inventory-list circuit-inventory-list--compact">
+              {components.map((type) => (
+                <li key={type}>
+                  <InventoryItem
+                    type={type}
+                    model={models[type]}
+                    selected={selected === type}
+                    isPlaced={placedTypes.has(type)}
+                    compact
+                    onTapSelect={onTapSelect}
+                    onPalettePointerDown={onPalettePointerDown}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </aside>
     );

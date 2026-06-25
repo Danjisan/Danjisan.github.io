@@ -55,5 +55,5 @@ export const COMPONENT_TERMINALS: Record<ComponentType, TerminalDef[]> = {
   ],
 };
 
-/** Offset terminal față de centrul nodului, în coordonate normalizate pe masă */
-export const NODE_TERMINAL_SCALE = { x: 0.105, y: 0.08 };
+/** Offset terminal față de centrul nodului — aceeași unitate ca în CSS (rem) */
+export const TERMINAL_OFFSET_REM = { x: 3.6, y: 2.55 };

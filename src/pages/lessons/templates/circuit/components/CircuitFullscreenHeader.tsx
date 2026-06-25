@@ -15,9 +15,11 @@ export default function CircuitFullscreenHeader({
 
   return (
     <header className="circuit-fs-header">
-      <span className="circuit-fs-header-badge">Provocare {challenge.order}</span>
-      <h3 className="circuit-fs-header-title">{challenge.title}</h3>
-      {solved && <p className="circuit-fs-header-success">✓ Rezolvată</p>}
+      <div className="circuit-fs-header-row">
+        <span className="circuit-fs-header-badge">Provocare {challenge.order}</span>
+        <h3 className="circuit-fs-header-title">{challenge.title}</h3>
+        {solved && <span className="circuit-fs-header-success">✓ Rezolvată</span>}
+      </div>
       {hint && <p className="circuit-fs-header-hint">💡 {hint}</p>}
     </header>
   );
