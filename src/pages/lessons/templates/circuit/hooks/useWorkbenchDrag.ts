@@ -5,10 +5,16 @@ import type { ComponentType } from "../types";
 
 const DRAG_THRESHOLD_PX = 10;
 
-type DragState =
+type ActiveDrag =
   | { kind: "palette"; type: ComponentType; pointerId: number }
-  | { kind: "node"; nodeId: string; pointerId: number }
-  | null;
+  | { kind: "node"; nodeId: string; pointerId: number };
+
+type PendingPalette = {
+  type: ComponentType;
+  pointerId: number;
+  startX: number;
+  startY: number;
+};
 
 interface PointerPoint {
   x: number;
@@ -34,62 +40,37 @@ export function useWorkbenchDrag({
   onSelectType,
   onSelectNode,
 }: UseWorkbenchDragOptions) {
-  const [activeDrag, setActiveDrag] = useState<DragState>(null);
+  const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
+  const [pendingPalette, setPendingPalette] = useState<PendingPalette | null>(null);
   const [ghostPosition, setGhostPosition] = useState<PointerPoint | null>(null);
   const [palettePreview, setPalettePreview] = useState<{ x: number; y: number } | null>(null);
   const nodeDragOriginRef = useRef<{ nodeId: string; position: { x: number; y: number } } | null>(
     null,
   );
-  const pendingPaletteRef = useRef<{
-    type: ComponentType;
-    pointerId: number;
-    startX: number;
-    startY: number;
-  } | null>(null);
+  const activeDragRef = useRef<ActiveDrag | null>(null);
+  const pendingPaletteRef = useRef<PendingPalette | null>(null);
+
+  activeDragRef.current = activeDrag;
+  pendingPaletteRef.current = pendingPalette;
 
   const startPalettePointer = useCallback(
     (type: ComponentType, e: React.PointerEvent) => {
       if (!canPlaceType(type)) return;
       e.preventDefault();
-      pendingPaletteRef.current = {
+      e.stopPropagation();
+      setPendingPalette({
         type,
         pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
-      };
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      });
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
     },
     [canPlaceType],
-  );
-
-  const movePalettePointer = useCallback((e: React.PointerEvent) => {
-    const pending = pendingPaletteRef.current;
-    if (!pending || pending.pointerId !== e.pointerId) return;
-
-    const dx = e.clientX - pending.startX;
-    const dy = e.clientY - pending.startY;
-    if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
-
-    e.preventDefault();
-    setActiveDrag({ kind: "palette", type: pending.type, pointerId: e.pointerId });
-    setGhostPosition({ x: e.clientX, y: e.clientY });
-    pendingPaletteRef.current = null;
-  }, []);
-
-  const endPalettePointer = useCallback(
-    (type: ComponentType, e: React.PointerEvent) => {
-      const pending = pendingPaletteRef.current;
-      if (pending && pending.pointerId === e.pointerId) {
-        onSelectType(type);
-        pendingPaletteRef.current = null;
-      }
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        /* capture deja eliberat */
-      }
-    },
-    [onSelectType],
   );
 
   const startNodePointer = useCallback(
@@ -101,41 +82,88 @@ export function useWorkbenchDrag({
     ) => {
       e.preventDefault();
       e.stopPropagation();
+      setPendingPalette(null);
       onSelectNode(nodeId, type);
       nodeDragOriginRef.current = { nodeId, position: { ...position } };
       setActiveDrag({ kind: "node", nodeId, pointerId: e.pointerId });
       setGhostPosition({ x: e.clientX, y: e.clientY });
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
     },
     [onSelectNode],
   );
 
+  const finishDrag = useCallback(() => {
+    nodeDragOriginRef.current = null;
+    setActiveDrag(null);
+    setPendingPalette(null);
+    setGhostPosition(null);
+    setPalettePreview(null);
+  }, []);
+
   useEffect(() => {
-    if (!activeDrag) return;
+    if (!pendingPalette && !activeDrag) return;
 
     document.body.classList.add("circuit-is-dragging");
 
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerId !== activeDrag.pointerId) return;
-      e.preventDefault();
-      setGhostPosition({ x: e.clientX, y: e.clientY });
+    const updateDragMove = (clientX: number, clientY: number) => {
+      setGhostPosition({ x: clientX, y: clientY });
 
       const surface = workbenchRef.current;
       if (!surface) return;
 
       const rect = surface.getBoundingClientRect();
-      const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect, viewport);
-      const inside = isInsideRect(e.clientX, e.clientY, rect);
+      const position = clientToWorkbenchPosition(clientX, clientY, rect, viewport);
+      const inside = isInsideRect(clientX, clientY, rect);
+      const drag = activeDragRef.current;
 
-      if (activeDrag.kind === "node") {
-        onMoveNode(activeDrag.nodeId, position);
-      } else if (activeDrag.kind === "palette") {
+      if (drag?.kind === "node") {
+        onMoveNode(drag.nodeId, position);
+      } else if (drag?.kind === "palette") {
         setPalettePreview(inside ? position : null);
       }
     };
 
-    const onPointerUp = (e: PointerEvent) => {
-      if (e.pointerId !== activeDrag.pointerId) return;
+    const onPointerMove = (e: PointerEvent) => {
+      const pending = pendingPaletteRef.current;
+      const drag = activeDragRef.current;
+
+      const pointerId = drag?.pointerId ?? pending?.pointerId;
+      if (pointerId === undefined || e.pointerId !== pointerId) return;
+
+      e.preventDefault();
+
+      if (pending && !drag) {
+        const dx = e.clientX - pending.startX;
+        const dy = e.clientY - pending.startY;
+        if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+
+        const next: ActiveDrag = { kind: "palette", type: pending.type, pointerId: e.pointerId };
+        activeDragRef.current = next;
+        pendingPaletteRef.current = null;
+        setPendingPalette(null);
+        setActiveDrag(next);
+        updateDragMove(e.clientX, e.clientY);
+        return;
+      }
+
+      if (drag) updateDragMove(e.clientX, e.clientY);
+    };
+
+    const onPointerEnd = (e: PointerEvent) => {
+      const pending = pendingPaletteRef.current;
+      const drag = activeDragRef.current;
+
+      if (pending && !drag && e.pointerId === pending.pointerId) {
+        onSelectType(pending.type);
+        finishDrag();
+        return;
+      }
+
+      if (!drag || e.pointerId !== drag.pointerId) return;
 
       const surface = workbenchRef.current;
       if (surface) {
@@ -144,31 +172,40 @@ export function useWorkbenchDrag({
 
         if (inside) {
           const position = clientToWorkbenchPosition(e.clientX, e.clientY, rect, viewport);
-          if (activeDrag.kind === "palette" && canPlaceType(activeDrag.type)) {
-            onPlaceNode(activeDrag.type, position);
+          if (drag.kind === "palette" && canPlaceType(drag.type)) {
+            onPlaceNode(drag.type, position);
           }
-        } else if (activeDrag.kind === "node") {
+        } else if (drag.kind === "node") {
           const origin = nodeDragOriginRef.current;
-          if (origin && origin.nodeId === activeDrag.nodeId) {
-            onMoveNode(activeDrag.nodeId, origin.position);
+          if (origin && origin.nodeId === drag.nodeId) {
+            onMoveNode(drag.nodeId, origin.position);
           }
         }
       }
 
-      nodeDragOriginRef.current = null;
-      setActiveDrag(null);
-      setGhostPosition(null);
-      setPalettePreview(null);
+      finishDrag();
     };
 
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerEnd);
+    window.addEventListener("pointercancel", onPointerEnd);
     return () => {
       document.body.classList.remove("circuit-is-dragging");
       window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointerup", onPointerEnd);
+      window.removeEventListener("pointercancel", onPointerEnd);
     };
-  }, [activeDrag, canPlaceType, onMoveNode, onPlaceNode, viewport, workbenchRef]);
+  }, [
+    activeDrag,
+    pendingPalette,
+    canPlaceType,
+    finishDrag,
+    onMoveNode,
+    onPlaceNode,
+    onSelectType,
+    viewport,
+    workbenchRef,
+  ]);
 
   return {
     activeDrag,
@@ -177,8 +214,6 @@ export function useWorkbenchDrag({
     draggingNodeId: activeDrag?.kind === "node" ? activeDrag.nodeId : null,
     paletteDragType: activeDrag?.kind === "palette" ? activeDrag.type : null,
     startPalettePointer,
-    movePalettePointer,
-    endPalettePointer,
     startNodePointer,
   };
 }

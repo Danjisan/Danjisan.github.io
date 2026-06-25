@@ -12,8 +12,6 @@ interface ComponentPaletteProps {
   onToggleCollapse?: () => void;
   onTapSelect: (type: ComponentType) => void;
   onPalettePointerDown: (type: ComponentType, e: React.PointerEvent) => void;
-  onPalettePointerMove: (e: React.PointerEvent) => void;
-  onPalettePointerUp: (type: ComponentType, e: React.PointerEvent) => void;
 }
 
 function InventoryItem({
@@ -25,8 +23,6 @@ function InventoryItem({
   iconOnly,
   onTapSelect,
   onPalettePointerDown,
-  onPalettePointerMove,
-  onPalettePointerUp,
 }: {
   type: ComponentType;
   model: ComponentModel;
@@ -36,8 +32,6 @@ function InventoryItem({
   iconOnly?: boolean;
   onTapSelect: (type: ComponentType) => void;
   onPalettePointerDown: (type: ComponentType, e: React.PointerEvent) => void;
-  onPalettePointerMove: (e: React.PointerEvent) => void;
-  onPalettePointerUp: (type: ComponentType, e: React.PointerEvent) => void;
 }) {
   return (
     <div
@@ -57,8 +51,6 @@ function InventoryItem({
       aria-label={model.label}
       title={model.label}
       onPointerDown={(e) => !isPlaced && onPalettePointerDown(type, e)}
-      onPointerMove={onPalettePointerMove}
-      onPointerUp={(e) => onPalettePointerUp(type, e)}
       onKeyDown={(e) => {
         if (!isPlaced && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
@@ -89,8 +81,6 @@ export default function ComponentPalette({
   onToggleCollapse,
   onTapSelect,
   onPalettePointerDown,
-  onPalettePointerMove,
-  onPalettePointerUp,
 }: ComponentPaletteProps) {
   const placedCount = placedTypes.size;
   const totalCount = components.length;
@@ -136,8 +126,6 @@ export default function ComponentPalette({
                   iconOnly
                   onTapSelect={onTapSelect}
                   onPalettePointerDown={onPalettePointerDown}
-                  onPalettePointerMove={onPalettePointerMove}
-                  onPalettePointerUp={onPalettePointerUp}
                 />
               </li>
             ))}
@@ -154,8 +142,6 @@ export default function ComponentPalette({
                   compact
                   onTapSelect={onTapSelect}
                   onPalettePointerDown={onPalettePointerDown}
-                  onPalettePointerMove={onPalettePointerMove}
-                  onPalettePointerUp={onPalettePointerUp}
                 />
               </li>
             ))}
@@ -181,8 +167,6 @@ export default function ComponentPalette({
               isPlaced={placedTypes.has(type)}
               onTapSelect={onTapSelect}
               onPalettePointerDown={onPalettePointerDown}
-              onPalettePointerMove={onPalettePointerMove}
-              onPalettePointerUp={onPalettePointerUp}
             />
           </li>
         ))}

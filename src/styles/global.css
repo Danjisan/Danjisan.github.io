@@ -2645,7 +2645,15 @@ body {
 body.circuit-is-dragging {
   user-select: none !important;
   -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
   cursor: grabbing;
+  touch-action: none;
+}
+
+body.circuit-is-dragging .circuit-fs-header,
+body.circuit-is-dragging .circuit-info-panel--compact,
+body.circuit-is-dragging .circuit-inventory-toggle {
+  pointer-events: none;
 }
 
 body.circuit-is-dragging * {
@@ -2807,8 +2815,12 @@ body.circuit-is-dragging * {
   border: 1px solid var(--border);
   background: #0a0514;
   color: var(--text);
-  cursor: pointer;
+  cursor: grab;
   text-align: left;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   transition: border-color 0.15s, background 0.15s;
 }
 

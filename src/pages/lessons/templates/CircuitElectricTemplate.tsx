@@ -157,8 +157,6 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     draggingNodeId,
     paletteDragType,
     startPalettePointer,
-    movePalettePointer,
-    endPalettePointer,
     startNodePointer,
   } = useWorkbenchDrag({
     workbenchRef,
@@ -348,8 +346,6 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
               onToggleCollapse={toggleInventoryCollapsed}
               onTapSelect={handleSelectType}
               onPalettePointerDown={startPalettePointer}
-              onPalettePointerMove={movePalettePointer}
-              onPalettePointerUp={endPalettePointer}
             />
           )}
           {workbench}
