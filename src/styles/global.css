@@ -1717,12 +1717,28 @@ body {
   color: var(--text);
 }
 
+.game-grace-slot {
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+
 .game-grace-notice {
   font-size: 0.85rem;
   color: var(--accent);
   background: #1a0e2e;
   border-radius: 8px;
   padding: 6px 12px;
+  margin: 0;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+}
+
+.game-grace-notice.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .game-options {

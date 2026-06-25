@@ -218,9 +218,15 @@ export default function GamePage() {
 
           <p className="game-question-text">{question.text}</p>
 
-          {opponentAnswered && phase === "grace" && (
-            <p className="game-grace-notice">Adversarul a răspuns · 5s rămase</p>
-          )}
+          <div className="game-grace-slot" aria-live="polite">
+            <p
+              className={`game-grace-notice ${
+                opponentAnswered && phase === "grace" ? "is-visible" : ""
+              }`}
+            >
+              Adversarul a răspuns · 5s rămase
+            </p>
+          </div>
 
           <div className="game-options">
             {question.options.map((opt) => {

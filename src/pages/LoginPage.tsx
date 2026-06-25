@@ -33,7 +33,7 @@ export default function LoginPage() {
         <h1>Intră în cont</h1>
         {justRegistered && (
           <p className="auth-info">
-            Cont creat! Verifică emailul și confirmă adresa, apoi loghează-te.
+            Cont creat cu succes! Poți să te loghezi acum.
           </p>
         )}
         <form className="auth-form" onSubmit={handleSubmit}>

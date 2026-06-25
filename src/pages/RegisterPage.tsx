@@ -43,7 +43,12 @@ export default function RegisterPage() {
       .eq("id", data.user.id);
 
     setLoading(false);
-    navigate("/login?registered=1");
+
+    if (data.session) {
+      navigate("/");
+    } else {
+      navigate("/login?registered=1");
+    }
   }
 
   return (
