@@ -1,4 +1,4 @@
-import type { ComponentType } from "./types";
+import type { ComponentType, TerminalDef } from "./types";
 
 export const COMPONENT_ICONS: Record<ComponentType, string> = {
   battery: "🔋",
@@ -26,3 +26,34 @@ export const DEFAULT_LABELS: Record<ComponentType, string> = {
   dc_motor: "Motor DC",
   potentiometer: "Potențiometru",
 };
+
+export const COMPONENT_TERMINALS: Record<ComponentType, TerminalDef[]> = {
+  battery: [
+    { id: "+", dx: 1.05, dy: 0, label: "+" },
+    { id: "-", dx: -1.05, dy: 0, label: "−" },
+  ],
+  led: [
+    { id: "+", dx: 1.05, dy: 0, label: "+" },
+    { id: "-", dx: -1.05, dy: 0, label: "−" },
+  ],
+  resistor: [
+    { id: "a", dx: -1.05, dy: 0, label: "A" },
+    { id: "b", dx: 1.05, dy: 0, label: "B" },
+  ],
+  switch: [
+    { id: "a", dx: -1.05, dy: 0, label: "A" },
+    { id: "b", dx: 1.05, dy: 0, label: "B" },
+  ],
+  dc_motor: [
+    { id: "+", dx: 1.05, dy: 0, label: "+" },
+    { id: "-", dx: -1.05, dy: 0, label: "−" },
+  ],
+  potentiometer: [
+    { id: "a", dx: -1.05, dy: 0, label: "A" },
+    { id: "wiper", dx: 0, dy: -1.1, label: "W" },
+    { id: "b", dx: 1.05, dy: 0, label: "B" },
+  ],
+};
+
+/** Offset terminal față de centrul nodului, în coordonate normalizate pe masă */
+export const NODE_TERMINAL_SCALE = { x: 0.105, y: 0.08 };

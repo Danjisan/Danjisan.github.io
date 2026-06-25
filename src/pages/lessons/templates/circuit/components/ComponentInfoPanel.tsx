@@ -4,13 +4,20 @@ import type { ComponentModel, ComponentType } from "../types";
 interface ComponentInfoPanelProps {
   type: ComponentType | null;
   model: ComponentModel | null;
+  potentiometerValue?: number;
+  onPotentiometerChange?: (value: number) => void;
 }
 
-export default function ComponentInfoPanel({ type, model }: ComponentInfoPanelProps) {
+export default function ComponentInfoPanel({
+  type,
+  model,
+  potentiometerValue,
+  onPotentiometerChange,
+}: ComponentInfoPanelProps) {
   if (!type || !model) {
     return (
       <aside className="circuit-info-panel circuit-info-panel--empty">
-        <p>Selectează o componentă din inventar pentru a vedea informațiile ei.</p>
+        <p>Selectează o componentă din inventar sau de pe masă pentru detalii.</p>
       </aside>
     );
   }
@@ -44,6 +51,23 @@ export default function ComponentInfoPanel({ type, model }: ComponentInfoPanelPr
 
       {!info.summary && !info.detail && (
         <p className="circuit-info-missing">Informațiile educaționale nu sunt încă în baza de date.</p>
+      )}
+
+      {type === "potentiometer" && onPotentiometerChange && potentiometerValue !== undefined && (
+        <div className="circuit-pot-control">
+          <label className="circuit-pot-label" htmlFor="circuit-pot-slider">
+            Rezistență variabilă: {Math.round(potentiometerValue * 100)}%
+          </label>
+          <input
+            id="circuit-pot-slider"
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(potentiometerValue * 100)}
+            onChange={(e) => onPotentiometerChange(Number(e.target.value) / 100)}
+            className="circuit-pot-slider"
+          />
+        </div>
       )}
 
       <div className="circuit-info-preview-slot">

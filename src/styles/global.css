@@ -2599,6 +2599,45 @@ body.circuit-is-dragging * {
   min-height: 280px;
 }
 
+.circuit-challenge-active.solved {
+  border-left-color: #5cb85c;
+}
+
+.circuit-challenge-success {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #8d8;
+}
+
+.circuit-challenge-advance-btn {
+  margin-top: 0.75rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: #1a0e2e;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.circuit-challenge-feedback {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: #e8b86d;
+  line-height: 1.45;
+}
+
+.circuit-node-2d.led-reversed .circuit-node-2d-body {
+  border-color: #aa4444;
+  opacity: 0.65;
+}
+
+.circuit-node-2d.led-reversed .circuit-node-2d-icon {
+  filter: grayscale(0.6);
+}
+
 .circuit-workbench-surface {
   position: relative;
   width: 100%;
@@ -2606,6 +2645,160 @@ body.circuit-is-dragging * {
   min-height: 280px;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.circuit-wire-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.circuit-wire {
+  fill: none;
+  stroke: #e8c547;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.circuit-wire--pending {
+  stroke: #b88cff;
+  stroke-dasharray: 6 4;
+  opacity: 0.9;
+}
+
+.circuit-workbench-wire-hint {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.75;
+  text-align: center;
+  max-width: 90%;
+  z-index: 0;
+}
+
+.circuit-terminal {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 2rem;
+  height: 2rem;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: crosshair;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  transition: box-shadow 0.12s, background 0.12s, border-color 0.12s;
+}
+
+.circuit-terminal-label {
+  font-size: 0.55rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Terminal liber */
+.circuit-terminal--free {
+  border-color: #e8c547;
+  background: #1a1028;
+  color: #e8c547;
+}
+
+.circuit-terminal--free:hover {
+  background: #2a1a3a;
+  box-shadow: 0 0 0 3px rgba(232, 197, 71, 0.25);
+}
+
+/* Terminal ocupat (are fir) */
+.circuit-terminal--occupied {
+  border-color: #5cb85c;
+  background: #0e2a10;
+  color: #8e8;
+}
+
+.circuit-terminal--occupied:hover {
+  background: #1a3a1a;
+  box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.3);
+}
+
+/* Terminal pending (primul tap) */
+.circuit-terminal--pending {
+  border-color: #fff;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(180, 120, 255, 0.45);
+  animation: circuit-terminal-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes circuit-terminal-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(180, 120, 255, 0.45); }
+  50%       { box-shadow: 0 0 0 7px rgba(180, 120, 255, 0.15); }
+}
+
+.circuit-node-2d.led-on .circuit-node-2d-body {
+  box-shadow: 0 0 16px rgba(231, 76, 60, 0.75), 0 0 32px rgba(231, 76, 60, 0.35);
+}
+
+.circuit-node-2d.led-on .circuit-node-2d-icon {
+  filter: drop-shadow(0 0 6px #ff6);
+}
+
+.circuit-node-2d.motor-running .circuit-node-2d-icon {
+  display: inline-block;
+  animation: circuit-motor-spin 1.2s linear infinite;
+}
+
+@keyframes circuit-motor-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.circuit-pot-control {
+  margin: 0.75rem 0;
+}
+
+.circuit-pot-label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.circuit-pot-slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.circuit-node-2d-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.circuit-node-2d-badge.off {
+  background: #3a2020;
+  color: #e88;
+}
+
+.circuit-node-2d-badge.on {
+  background: #1a3a20;
+  color: #8e8;
 }
 
 .circuit-workbench-hint {
@@ -2743,35 +2936,11 @@ body.circuit-is-dragging * {
   position: absolute;
   transform: translate(-50%, -50%);
   touch-action: none;
-  cursor: grab;
   z-index: 2;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.circuit-node-2d.selected {
-  z-index: 3;
-}
-
-.circuit-node-2d.dragging {
-  z-index: 5;
-  cursor: grabbing;
-}
-
-.circuit-node-2d.dragging .circuit-node-2d-body {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-  transform: scale(1.04);
-}
-
-.circuit-node-2d.preview {
-  z-index: 4;
-  pointer-events: none;
-  opacity: 0.72;
-}
-
-.circuit-node-2d.preview .circuit-node-2d-body {
-  border-style: dashed;
-  background: rgba(18, 10, 34, 0.75);
+  padding: 0.75rem;
+  margin: -0.75rem;
 }
 
 .circuit-node-2d-body {
@@ -2786,6 +2955,34 @@ body.circuit-is-dragging * {
   background: #120a22;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   transition: box-shadow 0.15s;
+  cursor: grab;
+  touch-action: none;
+}
+
+.circuit-node-2d.selected {
+  z-index: 3;
+}
+
+.circuit-node-2d.dragging {
+  z-index: 5;
+  cursor: grabbing;
+}
+
+.circuit-node-2d.dragging .circuit-node-2d-body {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  transform: scale(1.04);
+  cursor: grabbing;
+}
+
+.circuit-node-2d.preview {
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+.circuit-node-2d.preview .circuit-node-2d-body {
+  border-style: dashed;
+  background: rgba(18, 10, 34, 0.75);
 }
 
 .circuit-node-2d.selected .circuit-node-2d-body {
@@ -2804,24 +3001,6 @@ body.circuit-is-dragging * {
   text-align: center;
   line-height: 1.2;
   max-width: 5.5rem;
-}
-
-.circuit-node-2d-badge {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-}
-
-.circuit-node-2d-badge.off {
-  background: #3a2020;
-  color: #e88;
-}
-
-.circuit-node-2d-badge.on {
-  background: #1a3a20;
-  color: #8e8;
 }
 
 .circuit-node-2d-remove {

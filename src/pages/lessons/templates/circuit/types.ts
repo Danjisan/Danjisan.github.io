@@ -51,6 +51,27 @@ export interface CircuitElectricMetadata {
   challenges: CircuitChallenge[];
 }
 
+export type TerminalId = "+" | "-" | "a" | "b" | "wiper";
+
+export interface CircuitTerminalRef {
+  nodeId: string;
+  terminal: TerminalId;
+}
+
+export interface CircuitEdge {
+  id: string;
+  from: CircuitTerminalRef;
+  to: CircuitTerminalRef;
+}
+
+export interface TerminalDef {
+  id: TerminalId;
+  /** Offset față de centrul nodului, în fracțiuni din dimensiunea nodului */
+  dx: number;
+  dy: number;
+  label?: string;
+}
+
 export interface ParsedCircuitLesson {
   metadata: CircuitElectricMetadata;
   /** true dacă metadata vine din schema v1 completă din DB */
