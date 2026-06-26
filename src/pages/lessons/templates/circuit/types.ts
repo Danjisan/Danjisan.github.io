@@ -15,10 +15,51 @@ export interface ComponentInfo {
   tips: string[];
 }
 
+/** Parametri electrici per tip — fizică gimnaziu, valori reale (V, Ω, A) */
+export interface BatteryElectrical {
+  voltage_v: number;
+  internal_resistance_ohm: number;
+}
+
+export interface ResistorElectrical {
+  resistance_ohm: number;
+}
+
+export interface LedElectrical {
+  forward_voltage_v: number;
+  on_resistance_ohm: number;
+  max_current_a: number;
+  burn_after_s: number;
+}
+
+export interface SwitchElectrical {
+  contact_resistance_ohm: number;
+}
+
+export interface DcMotorElectrical {
+  winding_resistance_ohm: number;
+  min_run_current_a: number;
+}
+
+export interface PotentiometerElectrical {
+  total_resistance_ohm: number;
+}
+
+export type ComponentElectricalByType = {
+  battery: BatteryElectrical;
+  led: LedElectrical;
+  resistor: ResistorElectrical;
+  switch: SwitchElectrical;
+  dc_motor: DcMotorElectrical;
+  potentiometer: PotentiometerElectrical;
+};
+
 export interface ComponentModel {
   label: string;
   glb: string | null;
   info: ComponentInfo;
+  /** Parametri DC pentru solver MNA — override opțional din metadata */
+  electrical: ComponentElectricalByType[ComponentType];
 }
 
 export interface WorkbenchHint {
@@ -44,11 +85,31 @@ export interface CircuitChallenge {
   required_types: ComponentType[];
 }
 
+export type SimulationFailureKind =
+  | "led_burned"
+  | "short_circuit"
+  | "battery_overloaded"
+  | "led_reverse";
+
+export interface CircuitSimulationConfig {
+  /** Curent total peste prag → eveniment scurtcircuit (A) */
+  short_circuit_current_a: number;
+  failure_messages: Record<SimulationFailureKind, string>;
+}
+
+/** Rezultat per ramură / componentă — overlay la select */
+export interface BranchElectricalReading {
+  voltage_v: number;
+  current_a: number;
+  power_w: number;
+}
+
 export interface CircuitElectricMetadata {
   components: ComponentType[];
   workbench_hints: WorkbenchHint[];
   models: Record<ComponentType, ComponentModel>;
   challenges: CircuitChallenge[];
+  simulation: CircuitSimulationConfig;
 }
 
 export type TerminalId = "+" | "-" | "a" | "b" | "wiper";

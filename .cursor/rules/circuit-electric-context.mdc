@@ -6,80 +6,117 @@ globs:
 alwaysApply: false
 ---
 
-# Context: Circuit Electric — ColabMe Lumea Lectiilor
+# Context: Circuit Electric — ColabMe
 
-## Rolul tău în acest chat
+## Rol
 
-Ești arhitect web + programator. Înainte de orice cod, propui arhitectura, schema de date și structura de fișiere. Pui întrebări dacă ceva e ambiguu. Nu implementezi un strat până cel precedent e convenit și testat.
+Arhitect web + programator. Propui arhitectura înainte de cod. Pași mici, testabili. Push doar după confirmare Dan.
 
----
+## Stack
 
-## ColabMe — context macro
+React + Vite + TS · Frontend GitHub Pages · Config lecții în Supabase `lessons.metadata` JSONB · UI mobil-first, română.
 
-Platformă EdTech React + Vite + TypeScript + R3F.
-- Frontend: `danjisan.github.io` (GitHub Pages, static)
-- Backend: Supabase (PostgreSQL, Auth, Storage, RLS) + Railway (WebSocket/Node.js)
-- UI mobil-first, română, CSS variabile (temă mov/galben)
+## Prioritate curentă (M1): simulare DC
 
-**Lumea Lectiilor** = pagina `/lectii` cu grid de carduri. Fiecare lecție are `template_type` în DB și un fișier React corespunzător în `src/pages/lessons/templates/`.
+**Fizică gimnaziu** — valori reale (V, Ω, A, W), nu SPICE complet.
 
-Tabelul `lessons` în Supabase are coloana `metadata JSONB` — configurația specifică fiecărui template.
+| Da | Nu (încă) |
+|---|---|
+| MNA DC (Kirchhoff + Ohm) | AC, condensatoare, tranzitori |
+| Parametri în `metadata.models.*.electrical` | Reguli hardcodate battery→led |
+| Scurtcircuit + ars componente (evenimente comune) | Multimetru virtual (M2) |
+| Explicații **după** eveniment (toast/bubble) | Newton–Raphson nonlinear |
+| Overlay numeric la **select** componentă | Fire 3D |
 
----
+## Parametri electrici — unde trăiesc
 
-## Fișiere relevante (citește înainte să propui cod)
+```json
+"models": {
+  "battery": {
+    "label": "Baterie 9V",
+    "electrical": { "voltage_v": 9, "internal_resistance_ohm": 2 }
+  },
+  "led": {
+    "electrical": {
+      "forward_voltage_v": 2,
+      "on_resistance_ohm": 50,
+      "max_current_a": 0.02,
+      "burn_after_s": 1
+    }
+  }
+},
+"simulation": {
+  "short_circuit_current_a": 1.5,
+  "failure_messages": { "led_burned": "...", "short_circuit": "..." }
+}
+```
+
+- **Per componentă** → `models[type].electrical` (override opțional)
+- **Implicite** → `circuit/electricalDefaults.ts` (folosite dacă lipsește din DB)
+- **Praguri + mesaje lecție** → `metadata.simulation`
+
+## Arhitectură solver (de implementat)
+
+```
+nodes + edges → buildNetlist() → MNA DC solve → branch V/I/P
+                      ↓
+              device behaviors (burn, short, motor run)
+                      ↓
+              UI: overlay select + animație fire
+```
+
+Fișiere țintă:
+- `circuit/logic/netlist.ts` — union-find terminale → noduri electrice
+- `circuit/logic/mna/` — stamp + solve (matrice mică, fără math.js)
+- `circuit/logic/deviceBehaviors.ts` — timer burn LED, scurtcircuit
+- `circuit/electricalDefaults.ts` — defaulturi + mesaje
+- `directedCircuit.ts` — **legacy**; înlocuit treptat de solver
+
+## Modele componente (gimnaziu)
+
+| Tip | Model simplu |
+|---|---|
+| battery | sursă V + Ri mică |
+| resistor | R |
+| switch | deschis=deconectat; închis=R_contact mică |
+| led | sub Vf≈deschis; peste Vf≈R_on; I>I_max sustinut → burned |
+| dc_motor | R_winding; running dacă I ≥ I_min |
+| potentiometer | R_a-wiper + R_wiper-b din `state.value` |
+
+## UI simulare
+
+- **Select componentă** → overlay: V, I, P (format real: `18.2 mA`, `2.0 V`)
+- **Fire** → direcție + viteză/grosime ∝ \|I\| (după solver)
+- **Eșec** → animație scurtă, apoi mesaj din `failure_messages` cu valorile măsurate
+
+## Componente permise
+
+`battery` · `led` · `resistor` · `potentiometer` · `switch` · `dc_motor` · fire SVG 2D
+
+GLB-uri: `null` până la livrare artist — placeholder 2D.
+
+## Fișiere cheie
 
 | Fișier | Rol |
 |---|---|
-| `src/pages/lessons/templates/CircuitElectricTemplate.tsx` | Template actual — placeholder gol |
-| `src/pages/lessons/templates/types.ts` | Interfața `TemplateProps` |
-| `src/components/media/ModelViewer3D.tsx` | Viewer R3F existent (reutilizabil) |
-| `src/components/media/ModelBox.tsx` | Shell cu activare tap + fullscreen |
-| `colabme-server/supabase/migrations/20260622_lessons_schema.sql` | Schema tabelului `lessons` |
-| `colabme-server/supabase/migrations/20260622_lessons_seed.sql` | Seed cu lecția `circuit-electric-de-baza` |
+| `CircuitElectricTemplate.tsx` | orchestrator |
+| `circuit/types.ts` | tipuri + `ComponentElectrical*` |
+| `circuit/electricalDefaults.ts` | defaulturi DC |
+| `circuit/parseMetadata.ts` | citește metadata |
+| `colabme-server/.../20260625_circuit_electric_metadata.sql` | schema v1 |
+| `colabme-server/.../20260626_circuit_electric_electrical.sql` | electrical + simulation |
 
----
+## Straturi (actualizat)
 
-## Componente electrice permise în M1
+| Strat | Status |
+|---|---|
+| 0–1 | Inventar, plasare, fire, pan/zoom, UX compact |
+| **1b** | **MNA DC + burn/short + overlay** ← ACUM |
+| 2 | GLB 3D, multimetru, provocări noi |
+| 3 | Editor profesor, generator provocări |
 
-`battery` · `led` · `resistor` · `potentiometer` · `switch` · `dc_motor` · `wire`
+## Flux
 
-GLB-urile sunt furnizate de Dan (artist tehnic). Câmpul `glb` din metadata e `null` până la livrare — folosești placeholder-e vizuale, nu mesh-uri generate.
-
----
-
-## Straturi de implementare (respectă ordinea)
-
-| Strat | Ce face | Milestone |
-|---|---|---|
-| **0** | Viewer static + inventar componente + panou info per componentă | M1 — primul sprint |
-| **1** | Plasare pe masă + conectare (snap la terminale) + potențiometru slider | M1 stretch |
-| **2** | Graf circuit + simulare didactică: LED aprins, motor animat | M2 |
-| **3** | Editor profesor UI + provocări random după reguli | M2+ |
-
----
-
-## Ce NU faci în M1
-
-- Simulare electrică realistă (Ohm, Kirchhoff, curent continuu)
-- Editor web pentru profesori (configurează direct în Supabase JSONB)
-- Generator random de provocări
-- Fire 3D cu fizică — dacă faci fire, sunt linii SVG 2D sau `<Line>` drei
-- Mai mult de 1–2 provocări fixe hardcodate
-
----
-
-## Skill-uri de consultat
-
-- `/web3d-r3f` — înainte de orice Canvas R3F sau interacțiune 3D
-- `/circuit-electric` — schema metadata și structura de date internă
-
----
-
-## Flux de lucru agreat
-
-1. **Arhitectură first**: propune schema `metadata` JSONB, structura de date internă React, structura fișiere
-2. **Dan confirmă** înainte de implementare
-3. **Implementare în pași mici**: Strat 0 complet și testabil → Strat 1 etc.
-4. **Build local** (`npm run build`) înainte de orice push
-5. **Push** doar după confirmare Dan
+1. Arhitectură → Dan confirmă
+2. Implementare F1→F5 (netlist → MNA → modele → behaviors → UI fire)
+3. `npm run build` înainte de push

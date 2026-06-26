@@ -1,4 +1,5 @@
 import { DEFAULT_LABELS } from "./constants";
+import { DEFAULT_ELECTRICAL, mergeElectrical, mergeSimulationConfig } from "./electricalDefaults";
 import {
   COMPONENT_TYPES,
   type CircuitChallenge,
@@ -47,12 +48,14 @@ function parseModels(raw: unknown, components: ComponentType[]): Record<Componen
         label: typeof model.label === "string" ? model.label : DEFAULT_LABELS[type],
         glb: typeof model.glb === "string" ? model.glb : null,
         info: parseInfo(model.info),
+        electrical: mergeElectrical(type, model.electrical),
       };
     } else {
       models[type] = {
         label: DEFAULT_LABELS[type],
         glb: null,
         info: EMPTY_INFO,
+        electrical: { ...DEFAULT_ELECTRICAL[type] },
       };
     }
   }
@@ -63,6 +66,7 @@ function parseModels(raw: unknown, components: ComponentType[]): Record<Componen
         label: DEFAULT_LABELS[type],
         glb: null,
         info: EMPTY_INFO,
+        electrical: { ...DEFAULT_ELECTRICAL[type] },
       };
     }
   }
@@ -174,6 +178,7 @@ export function parseCircuitMetadata(raw: Record<string, unknown>): ParsedCircui
     workbench_hints: workbench_hints.length > 0 ? workbench_hints : defaultWorkbenchHints(),
     models,
     challenges,
+    simulation: mergeSimulationConfig(raw.simulation),
   };
 
   return {
