@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TemplateProps } from "./types";
+import CircuitFailureBanner from "./circuit/components/CircuitFailureBanner";
 import DragGhost from "./circuit/components/DragGhost";
 import { parseCircuitMetadata } from "./circuit/parseMetadata";
 import ChallengeBanner from "./circuit/components/ChallengeBanner";
@@ -10,6 +11,7 @@ import CircuitWorkbench from "./circuit/components/CircuitWorkbench";
 import ComponentPalette from "./circuit/components/ComponentPalette";
 import { useCircuitState } from "./circuit/hooks/useCircuitState";
 import { useWireInteraction } from "./circuit/hooks/useWireInteraction";
+import { useSimulationBurn } from "./circuit/hooks/useSimulationBurn";
 import { useWorkbenchDrag } from "./circuit/hooks/useWorkbenchDrag";
 import { useWorkbenchViewport } from "./circuit/hooks/useWorkbenchViewport";
 import { simulateCircuit } from "./circuit/logic/simulateCircuit";
@@ -31,6 +33,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const [editorFullscreen, setEditorFullscreen] = useState(false);
   const [inventoryCollapsed, setInventoryCollapsed] = useState(false);
   const [infoBubbleNodeId, setInfoBubbleNodeId] = useState<string | null>(null);
+  const [failureMessage, setFailureMessage] = useState<string | null>(null);
   const workbenchRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +51,7 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     toggleSwitch,
     setPotentiometerValue,
     toggleNodeFlip,
+    markLedBurned,
   } = useCircuitState();
 
   const occupiedTerminals = useMemo(() => {
@@ -65,11 +69,37 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const lockedChallenges = sortedChallenges.filter((_, i) => i > activeChallengeIndex + 1);
 
   const challengeSolved = useMemo(
-    () => (activeChallenge ? isChallengeSolved(nodes, edges, activeChallenge) : false),
-    [activeChallenge, nodes, edges],
+    () =>
+      activeChallenge
+        ? isChallengeSolved(nodes, edges, activeChallenge, {
+            models: metadata.models,
+            simulation: metadata.simulation,
+          })
+        : false,
+    [activeChallenge, nodes, edges, metadata.models, metadata.simulation],
   );
 
-  const simulation = useMemo(() => simulateCircuit(nodes, edges), [nodes, edges]);
+  const simulation = useMemo(
+    () =>
+      simulateCircuit(nodes, edges, {
+        models: metadata.models,
+        simulation: metadata.simulation,
+      }),
+    [nodes, edges, metadata.models, metadata.simulation],
+  );
+
+  const handleFailureMessage = useCallback((message: string) => {
+    setFailureMessage(message);
+  }, []);
+
+  useSimulationBurn(
+    simulation,
+    nodes,
+    metadata.models,
+    markLedBurned,
+    handleFailureMessage,
+    metadata.simulation,
+  );
 
   const dismissInfoBubble = useCallback(() => setInfoBubbleNodeId(null), []);
 
@@ -289,7 +319,9 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
       wirePointer={editorFullscreen ? wirePointer : null}
       ledOnIds={simulation.ledOn}
       reversedLedIds={simulation.reversedLedIds}
+      burnedLedIds={simulation.burnedLedIds}
       motorRunningIds={simulation.motorRunning}
+      electricalReadings={simulation.readings}
       onSurfacePointerMove={onSurfacePointerMove}
       onSurfacePointerDown={onSurfacePointerDown}
       onSurfacePointerUp={onSurfacePointerUp}
@@ -328,6 +360,8 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
         ) : (
           <p className="circuit-schema-notice">Nicio provocare definită în metadata lecției.</p>
         ))}
+
+      <CircuitFailureBanner message={failureMessage} onDismiss={() => setFailureMessage(null)} />
 
       <CircuitEditorFrame fullscreen={editorFullscreen} onExitFullscreen={exitEditorFullscreen}>
         {editorFullscreen && activeChallenge && (

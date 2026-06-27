@@ -36,38 +36,38 @@ function parseInfo(raw: unknown): ComponentInfo {
   };
 }
 
+function buildModel(type: ComponentType, entry: Record<string, unknown> | undefined): ComponentModel {
+  if (entry) {
+    return {
+      label: typeof entry.label === "string" ? entry.label : DEFAULT_LABELS[type],
+      glb: typeof entry.glb === "string" ? entry.glb : null,
+      info: parseInfo(entry.info),
+      electrical: mergeElectrical(type, entry.electrical),
+    };
+  }
+  return {
+    label: DEFAULT_LABELS[type],
+    glb: null,
+    info: EMPTY_INFO,
+    electrical: { ...DEFAULT_ELECTRICAL[type] },
+  };
+}
+
 function parseModels(raw: unknown, components: ComponentType[]): Record<ComponentType, ComponentModel> {
   const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const models = {} as Record<ComponentType, ComponentModel>;
 
   for (const type of COMPONENT_TYPES) {
     const entry = source[type];
-    if (entry && typeof entry === "object") {
-      const model = entry as Record<string, unknown>;
-      models[type] = {
-        label: typeof model.label === "string" ? model.label : DEFAULT_LABELS[type],
-        glb: typeof model.glb === "string" ? model.glb : null,
-        info: parseInfo(model.info),
-        electrical: mergeElectrical(type, model.electrical),
-      };
-    } else {
-      models[type] = {
-        label: DEFAULT_LABELS[type],
-        glb: null,
-        info: EMPTY_INFO,
-        electrical: { ...DEFAULT_ELECTRICAL[type] },
-      };
-    }
+    models[type] = buildModel(
+      type,
+      entry && typeof entry === "object" ? (entry as Record<string, unknown>) : undefined,
+    );
   }
 
   for (const type of components) {
     if (!models[type]) {
-      models[type] = {
-        label: DEFAULT_LABELS[type],
-        glb: null,
-        info: EMPTY_INFO,
-        electrical: { ...DEFAULT_ELECTRICAL[type] },
-      };
+      models[type] = buildModel(type, undefined);
     }
   }
 

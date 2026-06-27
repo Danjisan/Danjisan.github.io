@@ -91,6 +91,14 @@ export function useCircuitState() {
     );
   }, []);
 
+  const markLedBurned = useCallback((nodeId: string) => {
+    setNodes((prev) =>
+      prev.map((n) =>
+        n.id === nodeId && n.type === "led" ? { ...n, state: { ...n.state, burned: true } } : n,
+      ),
+    );
+  }, []);
+
   return {
     nodes,
     edges,
@@ -105,5 +113,6 @@ export function useCircuitState() {
     toggleSwitch,
     setPotentiometerValue,
     toggleNodeFlip,
+    markLedBurned,
   };
 }

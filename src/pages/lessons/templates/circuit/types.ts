@@ -58,7 +58,6 @@ export interface ComponentModel {
   label: string;
   glb: string | null;
   info: ComponentInfo;
-  /** Parametri DC pentru solver MNA — override opțional din metadata */
   electrical: ComponentElectricalByType[ComponentType];
 }
 

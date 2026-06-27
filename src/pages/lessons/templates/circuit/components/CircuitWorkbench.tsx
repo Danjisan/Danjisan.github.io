@@ -3,6 +3,7 @@ import CircuitNode2D from "./CircuitNode2D";
 import WireLayer from "./WireLayer";
 import { viewportTransformStyle, type WorkbenchViewport } from "../logic/viewportCoords";
 import type {
+  BranchElectricalReading,
   CircuitEdge,
   CircuitNode,
   CircuitTerminalRef,
@@ -31,7 +32,9 @@ interface CircuitWorkbenchProps {
   wirePointer: { x: number; y: number } | null;
   ledOnIds: Set<string>;
   reversedLedIds: Set<string>;
+  burnedLedIds: Set<string>;
   motorRunningIds: Set<string>;
+  electricalReadings: Map<string, BranchElectricalReading>;
   onSurfacePointerMove?: (e: React.PointerEvent) => void;
   onSurfacePointerDown?: (e: React.PointerEvent) => void;
   onSurfacePointerUp?: (e: React.PointerEvent) => void;
@@ -63,7 +66,9 @@ export default function CircuitWorkbench({
   wirePointer,
   ledOnIds,
   reversedLedIds,
+  burnedLedIds,
   motorRunningIds,
+  electricalReadings,
   onSurfacePointerMove,
   onSurfacePointerDown,
   onSurfacePointerUp,
@@ -129,7 +134,11 @@ export default function CircuitWorkbench({
               readOnly={readOnly}
               ledOn={ledOnIds.has(node.id)}
               reversedLed={reversedLedIds.has(node.id)}
+              ledBurned={burnedLedIds.has(node.id)}
               motorRunning={motorRunningIds.has(node.id)}
+              electricalReading={
+                selectedNodeId === node.id ? electricalReadings.get(node.id) : undefined
+              }
               pendingTerminal={pendingTerminal}
               occupiedTerminals={occupiedTerminals}
               potentiometerValue={

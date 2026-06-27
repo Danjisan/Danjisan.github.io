@@ -125,6 +125,45 @@ function findDirectedPath(
   return null;
 }
 
+/** Terminale conectate la rețeaua bateriei (fire + legături interne ale componentelor). */
+export function collectBatteryReachablePins(
+  nodes: CircuitNode[],
+  edges: CircuitEdge[],
+): Set<string> {
+  const battery = nodes.find((n) => n.type === "battery");
+  if (!battery) return new Set();
+
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const seeds = [terminalKey(battery.id, "+"), terminalKey(battery.id, "-")];
+  const visited = new Set<string>(seeds);
+  const queue = [...seeds];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const next of allUndirectedNeighbors(current, nodeMap, edges)) {
+      if (!visited.has(next)) {
+        visited.add(next);
+        queue.push(next);
+      }
+    }
+  }
+
+  return visited;
+}
+
+/** Circuit extern închis: drum de la baterie + la − prin fire și componente (fără „scurt” intern al bateriei). */
+export function isBatteryLoopClosed(nodes: CircuitNode[], edges: CircuitEdge[]): boolean {
+  const battery = nodes.find((n) => n.type === "battery");
+  if (!battery) return false;
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  return isUndirectedClosed(
+    terminalKey(battery.id, "+"),
+    terminalKey(battery.id, "-"),
+    nodeMap,
+    edges,
+  );
+}
+
 function isUndirectedClosed(
   startKey: string,
   goalKey: string,

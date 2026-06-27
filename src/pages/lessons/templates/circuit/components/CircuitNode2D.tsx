@@ -1,8 +1,15 @@
 import type { CSSProperties } from "react";
+import CircuitElectricalOverlay from "./CircuitElectricalOverlay";
 import ComponentInfoBubble from "./ComponentInfoBubble";
 import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
 import { getTerminalDefs, isNodeFlipped, terminalEdgeStyle } from "../logic/terminalPositions";
-import type { CircuitNode, CircuitTerminalRef, ComponentModel, TerminalId } from "../types";
+import type {
+  BranchElectricalReading,
+  CircuitNode,
+  CircuitTerminalRef,
+  ComponentModel,
+  TerminalId,
+} from "../types";
 
 function FlipRotateIcon() {
   return (
@@ -34,8 +41,10 @@ interface CircuitNode2DProps {
   preview?: boolean;
   readOnly?: boolean;
   ledOn?: boolean;
+  ledBurned?: boolean;
   motorRunning?: boolean;
   reversedLed?: boolean;
+  electricalReading?: BranchElectricalReading;
   pendingTerminal: CircuitTerminalRef | null;
   occupiedTerminals: Set<string>;
   onBodyPointerDown?: (e: React.PointerEvent, nodeId: string) => void;
@@ -57,8 +66,10 @@ export default function CircuitNode2D({
   preview = false,
   readOnly = false,
   ledOn = false,
+  ledBurned = false,
   motorRunning = false,
   reversedLed = false,
+  electricalReading,
   pendingTerminal,
   occupiedTerminals,
   onBodyPointerDown,
@@ -77,7 +88,7 @@ export default function CircuitNode2D({
 
   return (
     <div
-      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${flipped ? "flipped" : ""} ${ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
+      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${flipped ? "flipped" : ""} ${ledBurned ? "led-burned" : ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
       style={
         {
           left: `${node.position.x * 100}%`,
@@ -160,6 +171,14 @@ export default function CircuitNode2D({
         })}
 
       </div>
+
+      {selected && electricalReading && !preview && (
+        <CircuitElectricalOverlay
+          label={model.label}
+          reading={electricalReading}
+          burned={ledBurned}
+        />
+      )}
 
       {selected && !preview && !readOnly && onFlip && (
         <button

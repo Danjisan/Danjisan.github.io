@@ -1,8 +1,16 @@
-import type { CircuitEdge, CircuitNode } from "../types";
-import { analyzeDirectedCircuit, type DirectedSimulationResult } from "./directedCircuit";
+import type { CircuitEdge, CircuitElectricMetadata, CircuitNode } from "../types";
+import { runDcSimulation } from "./sim/dcSimulation";
+import type { DcSimulationResult } from "./sim/types";
 
-export type SimulationResult = DirectedSimulationResult;
+export type SimulationResult = DcSimulationResult;
 
-export function simulateCircuit(nodes: CircuitNode[], edges: CircuitEdge[]): SimulationResult {
-  return analyzeDirectedCircuit(nodes, edges);
+export function simulateCircuit(
+  nodes: CircuitNode[],
+  edges: CircuitEdge[],
+  metadata: Pick<CircuitElectricMetadata, "models" | "simulation">,
+): SimulationResult {
+  return runDcSimulation(nodes, edges, metadata);
 }
+
+// Re-export pentru compatibilitate graduală
+export type { DcSimulationResult };

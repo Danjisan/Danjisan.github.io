@@ -1,11 +1,12 @@
 import type {
   CircuitChallenge,
   CircuitEdge,
+  CircuitElectricMetadata,
   CircuitNode,
   CircuitTerminalRef,
   ComponentType,
 } from "../types";
-import { analyzeDirectedCircuit } from "./directedCircuit";
+import { simulateCircuit } from "./simulateCircuit";
 
 export function edgesShareEndpoint(edge: CircuitEdge, ref: CircuitTerminalRef): boolean {
   return (
@@ -30,10 +31,11 @@ export function isChallengeSolved(
   nodes: CircuitNode[],
   edges: CircuitEdge[],
   challenge: CircuitChallenge,
+  metadata: Pick<CircuitElectricMetadata, "models" | "simulation">,
 ): boolean {
   if (!requiredTypesPlaced(nodes, challenge.required_types)) return false;
 
-  const sim = analyzeDirectedCircuit(nodes, edges);
+  const sim = simulateCircuit(nodes, edges, metadata);
   if (!sim.isClosed) return false;
 
   const { target, state } = challenge.win_condition;

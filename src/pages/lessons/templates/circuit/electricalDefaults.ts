@@ -13,8 +13,9 @@ export const DEFAULT_ELECTRICAL: ComponentElectricalByType = {
   },
   led: {
     forward_voltage_v: 2,
-    on_resistance_ohm: 50,
-    max_current_a: 0.02,
+    on_resistance_ohm: 15,
+    /** 9V + 220Ω ≈ 29 mA — sub acest prag; direct pe baterie ≈ 130 mA → arde */
+    max_current_a: 0.04,
     burn_after_s: 1,
   },
   resistor: {
