@@ -110,6 +110,22 @@ function parseChallenge(raw: unknown): CircuitChallenge | null {
     return null;
   }
 
+  const alsoRaw = winCondition.also;
+  const also = Array.isArray(alsoRaw)
+    ? alsoRaw.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const entry = item as Record<string, unknown>;
+        if (
+          typeof entry.target !== "string" ||
+          !isComponentType(entry.target) ||
+          typeof entry.state !== "string"
+        ) {
+          return [];
+        }
+        return [{ target: entry.target, state: entry.state }];
+      })
+    : undefined;
+
   return {
     id: c.id,
     order: typeof c.order === "number" ? c.order : 1,
@@ -120,6 +136,7 @@ function parseChallenge(raw: unknown): CircuitChallenge | null {
       type: "component_state",
       target: winCondition.target,
       state: winCondition.state,
+      ...(also && also.length > 0 ? { also } : {}),
     },
     required_types: required,
   };

@@ -6,6 +6,7 @@ import type {
   CircuitTerminalRef,
   ComponentType,
 } from "../types";
+import { checkAllWinConditions } from "./challengeWin";
 import { simulateCircuit } from "./simulateCircuit";
 
 export function edgesShareEndpoint(edge: CircuitEdge, ref: CircuitTerminalRef): boolean {
@@ -38,16 +39,6 @@ export function isChallengeSolved(
   const sim = simulateCircuit(nodes, edges, metadata);
   if (!sim.isClosed) return false;
 
-  const { target, state } = challenge.win_condition;
-  const targetNode = nodes.find((n) => n.type === target);
-  if (!targetNode) return false;
-
-  if (state === "on" && target === "led") {
-    return sim.ledOn.has(targetNode.id);
-  }
-  if (state === "running" && target === "dc_motor") {
-    return sim.motorRunning.has(targetNode.id);
-  }
-
-  return false;
+  const { target, state, also } = challenge.win_condition;
+  return checkAllWinConditions({ target, state }, also, nodes, sim);
 }

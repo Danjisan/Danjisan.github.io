@@ -68,10 +68,17 @@ export interface WorkbenchHint {
   text: string;
 }
 
+export interface ComponentStateWin {
+  target: ComponentType;
+  state: string;
+}
+
 export interface WinCondition {
   type: "component_state";
   target: ComponentType;
   state: string;
+  /** Condiții suplimentare (ex. LED aprins + motor pornit) */
+  also?: ComponentStateWin[];
 }
 
 export interface CircuitChallenge {

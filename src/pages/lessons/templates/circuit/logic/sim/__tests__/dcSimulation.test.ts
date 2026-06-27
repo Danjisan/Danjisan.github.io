@@ -95,4 +95,22 @@ describe("runDcSimulation", () => {
     expect(sim.isClosed).toBe(true);
     expect(sim.motorRunning.has("motor")).toBe(true);
   });
+
+  it("LED și motor în paralel → ambele active", () => {
+    const swClosed = node("sw", "switch", { flipped: false, on: true });
+    const nodes = [bat, swClosed, res, led, motor];
+    const edges = [
+      edge({ nodeId: "bat", terminal: "+" }, { nodeId: "sw", terminal: "a" }),
+      edge({ nodeId: "sw", terminal: "b" }, { nodeId: "res", terminal: "a" }),
+      edge({ nodeId: "res", terminal: "b" }, { nodeId: "led", terminal: "+" }),
+      edge({ nodeId: "led", terminal: "-" }, { nodeId: "bat", terminal: "-" }),
+      edge({ nodeId: "sw", terminal: "b" }, { nodeId: "motor", terminal: "+" }),
+      edge({ nodeId: "motor", terminal: "-" }, { nodeId: "bat", terminal: "-" }),
+    ];
+    const sim = runDcSimulation(nodes, edges, testMetadata);
+
+    expect(sim.isClosed).toBe(true);
+    expect(sim.ledOn.has("led")).toBe(true);
+    expect(sim.motorRunning.has("motor")).toBe(true);
+  });
 });
