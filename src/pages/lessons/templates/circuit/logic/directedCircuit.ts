@@ -74,6 +74,12 @@ function internalUndirectedNeighbors(key: string, node: CircuitNode): string[] {
     if (terminal === "-") return [terminalKey(node.id, "+")];
   }
 
+  if (type === "wire_junction") {
+    return (["a", "b", "c"] as TerminalId[])
+      .filter((t) => t !== terminal)
+      .map((t) => terminalKey(node.id, t));
+  }
+
   return [];
 }
 

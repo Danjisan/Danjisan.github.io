@@ -96,16 +96,20 @@ describe("runDcSimulation", () => {
     expect(sim.motorRunning.has("motor")).toBe(true);
   });
 
-  it("LED și motor în paralel → ambele active", () => {
+  it("LED și motor în paralel (noduri de legătură) → ambele active", () => {
     const swClosed = node("sw", "switch", { flipped: false, on: true });
-    const nodes = [bat, swClosed, res, led, motor];
+    const j1 = node("j1", "wire_junction");
+    const j2 = node("j2", "wire_junction");
+    const nodes = [bat, swClosed, j1, j2, res, led, motor];
     const edges = [
       edge({ nodeId: "bat", terminal: "+" }, { nodeId: "sw", terminal: "a" }),
-      edge({ nodeId: "sw", terminal: "b" }, { nodeId: "res", terminal: "a" }),
+      edge({ nodeId: "sw", terminal: "b" }, { nodeId: "j1", terminal: "a" }),
+      edge({ nodeId: "j1", terminal: "b" }, { nodeId: "res", terminal: "a" }),
+      edge({ nodeId: "j1", terminal: "c" }, { nodeId: "motor", terminal: "+" }),
       edge({ nodeId: "res", terminal: "b" }, { nodeId: "led", terminal: "+" }),
-      edge({ nodeId: "led", terminal: "-" }, { nodeId: "bat", terminal: "-" }),
-      edge({ nodeId: "sw", terminal: "b" }, { nodeId: "motor", terminal: "+" }),
-      edge({ nodeId: "motor", terminal: "-" }, { nodeId: "bat", terminal: "-" }),
+      edge({ nodeId: "led", terminal: "-" }, { nodeId: "j2", terminal: "a" }),
+      edge({ nodeId: "motor", terminal: "-" }, { nodeId: "j2", terminal: "b" }),
+      edge({ nodeId: "j2", terminal: "c" }, { nodeId: "bat", terminal: "-" }),
     ];
     const sim = runDcSimulation(nodes, edges, testMetadata);
 

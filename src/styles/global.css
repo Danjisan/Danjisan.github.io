@@ -3703,6 +3703,30 @@ body.circuit-is-dragging * {
   max-width: 5.5rem;
 }
 
+.circuit-node-2d--junction {
+  padding: 0.55rem;
+  margin: -0.55rem;
+}
+
+.circuit-node-2d--junction .circuit-node-2d-body {
+  min-width: 2.75rem;
+  padding: 0.35rem;
+  border-radius: 50%;
+  border-width: 2px;
+  border-color: #95a5a6;
+  background: #1a1528;
+}
+
+.circuit-node-2d--junction .circuit-node-2d-icon {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.circuit-inventory-placed-tag--partial {
+  opacity: 0.85;
+  font-weight: 500;
+}
+
 .circuit-node-2d-flip {
   position: absolute;
   left: 50%;

@@ -17,6 +17,7 @@ import { useWorkbenchViewport } from "./circuit/hooks/useWorkbenchViewport";
 import { simulateCircuit } from "./circuit/logic/simulateCircuit";
 import { isChallengeSolved } from "./circuit/logic/validateCircuit";
 import { hintsForEditor } from "./circuit/logic/workbenchHints";
+import { canPlaceMore } from "./circuit/constants";
 import type { ComponentType } from "./circuit/types";
 
 export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
@@ -40,7 +41,6 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const {
     nodes,
     edges,
-    placedTypes,
     placeNode,
     moveNode,
     removeNode,
@@ -113,9 +113,17 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   }, []);
 
   const canPlaceType = useCallback(
-    (type: ComponentType) => !placedTypes.has(type),
-    [placedTypes],
+    (type: ComponentType) => canPlaceMore(nodes, type),
+    [nodes],
   );
+
+  const inventoryComponents = useMemo(() => {
+    if (!activeChallenge) return metadata.components;
+    const allowed = new Set(activeChallenge.required_types);
+    return metadata.components.filter(
+      (type) => allowed.has(type) || nodes.some((n) => n.type === type),
+    );
+  }, [metadata.components, activeChallenge, nodes]);
 
   const handlePlaceNode = useCallback(
     (type: ComponentType, position: { x: number; y: number }) => {
@@ -389,10 +397,11 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
         >
           {editorFullscreen && (
             <ComponentPalette
-              components={metadata.components}
+              components={inventoryComponents}
               models={metadata.models}
               selected={selectedType}
-              placedTypes={placedTypes}
+              nodes={nodes}
+              canPlaceType={canPlaceType}
               compact
               collapsed={inventoryCollapsed}
               onToggleCollapse={toggleInventoryCollapsed}

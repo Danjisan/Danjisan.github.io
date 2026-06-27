@@ -24,8 +24,20 @@ export function requiredTypesPlaced(
   nodes: CircuitNode[],
   required: ComponentType[],
 ): boolean {
-  const placed = new Set(nodes.map((n) => n.type));
-  return required.every((t) => placed.has(t));
+  const placedCounts = new Map<ComponentType, number>();
+  for (const node of nodes) {
+    placedCounts.set(node.type, (placedCounts.get(node.type) ?? 0) + 1);
+  }
+
+  const requiredCounts = new Map<ComponentType, number>();
+  for (const type of required) {
+    requiredCounts.set(type, (requiredCounts.get(type) ?? 0) + 1);
+  }
+
+  for (const [type, count] of requiredCounts) {
+    if ((placedCounts.get(type) ?? 0) < count) return false;
+  }
+  return true;
 }
 
 export function isChallengeSolved(

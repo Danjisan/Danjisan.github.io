@@ -1,12 +1,20 @@
 import type { CSSProperties } from "react";
-import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
-import type { ComponentModel, ComponentType } from "../types";
+import {
+  COMPONENT_COLORS,
+  COMPONENT_ICONS,
+  inventoryLimit,
+  inventoryPlacedCount,
+  inventoryPlacedSlots,
+  inventoryTotalSlots,
+} from "../constants";
+import type { CircuitNode, ComponentModel, ComponentType } from "../types";
 
 interface ComponentPaletteProps {
   components: ComponentType[];
   models: Record<ComponentType, ComponentModel>;
   selected: ComponentType | null;
-  placedTypes: Set<ComponentType>;
+  nodes: CircuitNode[];
+  canPlaceType: (type: ComponentType) => boolean;
   compact?: boolean;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -18,7 +26,9 @@ function InventoryItem({
   type,
   model,
   selected,
-  isPlaced,
+  isFull,
+  placedCount,
+  limit,
   compact,
   iconOnly,
   onTapSelect,
@@ -27,32 +37,37 @@ function InventoryItem({
   type: ComponentType;
   model: ComponentModel;
   selected: boolean;
-  isPlaced: boolean;
+  isFull: boolean;
+  placedCount: number;
+  limit: number;
   compact?: boolean;
   iconOnly?: boolean;
   onTapSelect: (type: ComponentType) => void;
   onPalettePointerDown: (type: ComponentType, e: React.PointerEvent) => void;
 }) {
+  const placedLabel =
+    limit > 1 ? `${placedCount}/${limit} pe masă` : placedCount > 0 ? "pe masă" : null;
+
   return (
     <div
       role="button"
-      tabIndex={isPlaced ? -1 : 0}
+      tabIndex={isFull ? -1 : 0}
       className={[
         "circuit-inventory-item",
         selected ? "active" : "",
-        isPlaced ? "placed" : "",
+        isFull ? "placed" : "",
         compact ? "compact" : "",
         iconOnly ? "icon-only" : "",
       ]
         .filter(Boolean)
         .join(" ")}
       style={{ "--comp-color": COMPONENT_COLORS[type] } as CSSProperties}
-      aria-disabled={isPlaced}
+      aria-disabled={isFull}
       aria-label={model.label}
       title={model.label}
-      onPointerDown={(e) => !isPlaced && onPalettePointerDown(type, e)}
+      onPointerDown={(e) => !isFull && onPalettePointerDown(type, e)}
       onKeyDown={(e) => {
-        if (!isPlaced && (e.key === "Enter" || e.key === " ")) {
+        if (!isFull && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           onTapSelect(type);
         }
@@ -64,10 +79,40 @@ function InventoryItem({
       {!iconOnly && (
         <>
           <span className="circuit-inventory-label">{model.label}</span>
-          {isPlaced && <span className="circuit-inventory-placed-tag">pe masă</span>}
+          {placedLabel && isFull && (
+            <span className="circuit-inventory-placed-tag">{placedLabel}</span>
+          )}
+          {placedLabel && !isFull && placedCount > 0 && (
+            <span className="circuit-inventory-placed-tag circuit-inventory-placed-tag--partial">
+              {placedLabel}
+            </span>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+function renderInventoryItem(
+  type: ComponentType,
+  props: Omit<ComponentPaletteProps, "components" | "compact" | "collapsed" | "onToggleCollapse">,
+  itemProps: { compact?: boolean; iconOnly?: boolean },
+) {
+  const limit = inventoryLimit(type);
+  const placedCount = inventoryPlacedCount(props.nodes, type);
+  return (
+    <InventoryItem
+      type={type}
+      model={props.models[type]}
+      selected={props.selected === type}
+      isFull={!props.canPlaceType(type)}
+      placedCount={placedCount}
+      limit={limit}
+      compact={itemProps.compact}
+      iconOnly={itemProps.iconOnly}
+      onTapSelect={props.onTapSelect}
+      onPalettePointerDown={props.onPalettePointerDown}
+    />
   );
 }
 
@@ -75,15 +120,16 @@ export default function ComponentPalette({
   components,
   models,
   selected,
-  placedTypes,
+  nodes,
+  canPlaceType,
   compact = false,
   collapsed = false,
   onToggleCollapse,
   onTapSelect,
   onPalettePointerDown,
 }: ComponentPaletteProps) {
-  const placedCount = placedTypes.size;
-  const totalCount = components.length;
+  const placedCount = inventoryPlacedSlots(nodes, components);
+  const totalCount = inventoryTotalSlots(components);
 
   const className = [
     "circuit-inventory",
@@ -92,6 +138,15 @@ export default function ComponentPalette({
   ]
     .filter(Boolean)
     .join(" ");
+
+  const itemProps = {
+    models,
+    selected,
+    nodes,
+    canPlaceType,
+    onTapSelect,
+    onPalettePointerDown,
+  };
 
   if (compact) {
     return (
@@ -114,18 +169,7 @@ export default function ComponentPalette({
             </button>
             <ul className="circuit-inventory-strip" aria-label="Componente disponibile">
               {components.map((type) => (
-                <li key={type}>
-                  <InventoryItem
-                    type={type}
-                    model={models[type]}
-                    selected={selected === type}
-                    isPlaced={placedTypes.has(type)}
-                    compact
-                    iconOnly
-                    onTapSelect={onTapSelect}
-                    onPalettePointerDown={onPalettePointerDown}
-                  />
-                </li>
+                <li key={type}>{renderInventoryItem(type, itemProps, { compact: true, iconOnly: true })}</li>
               ))}
             </ul>
           </div>
@@ -149,17 +193,7 @@ export default function ComponentPalette({
             </div>
             <ul className="circuit-inventory-list circuit-inventory-list--compact">
               {components.map((type) => (
-                <li key={type}>
-                  <InventoryItem
-                    type={type}
-                    model={models[type]}
-                    selected={selected === type}
-                    isPlaced={placedTypes.has(type)}
-                    compact
-                    onTapSelect={onTapSelect}
-                    onPalettePointerDown={onPalettePointerDown}
-                  />
-                </li>
+                <li key={type}>{renderInventoryItem(type, itemProps, { compact: true })}</li>
               ))}
             </ul>
           </>
@@ -176,16 +210,7 @@ export default function ComponentPalette({
       </p>
       <ul className="circuit-inventory-list">
         {components.map((type) => (
-          <li key={type}>
-            <InventoryItem
-              type={type}
-              model={models[type]}
-              selected={selected === type}
-              isPlaced={placedTypes.has(type)}
-              onTapSelect={onTapSelect}
-              onPalettePointerDown={onPalettePointerDown}
-            />
-          </li>
+          <li key={type}>{renderInventoryItem(type, itemProps, {})}</li>
         ))}
       </ul>
     </aside>

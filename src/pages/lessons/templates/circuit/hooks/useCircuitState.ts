@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
+import { canPlaceMore } from "../constants";
 import { defaultNodeState } from "../logic/nodeDefaults";
 import type { CircuitEdge, CircuitNode, CircuitTerminalRef, ComponentType } from "../types";
 
@@ -14,11 +15,9 @@ export function useCircuitState() {
   const [nodes, setNodes] = useState<CircuitNode[]>([]);
   const [edges, setEdges] = useState<CircuitEdge[]>([]);
 
-  const placedTypes = useMemo(() => new Set(nodes.map((n) => n.type)), [nodes]);
-
   const placeNode = useCallback((type: ComponentType, position: { x: number; y: number }) => {
     setNodes((prev) => {
-      if (prev.some((n) => n.type === type)) return prev;
+      if (!canPlaceMore(prev, type)) return prev;
       return [...prev, { id: newId(), type, position, state: defaultNodeState(type) }];
     });
   }, []);
@@ -102,7 +101,6 @@ export function useCircuitState() {
   return {
     nodes,
     edges,
-    placedTypes,
     placeNode,
     moveNode,
     removeNode,

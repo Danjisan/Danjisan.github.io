@@ -39,6 +39,12 @@ export const testMetadata: Pick<CircuitElectricMetadata, "models" | "simulation"
       info: { summary: "", detail: "", tips: [] },
       electrical: DEFAULT_ELECTRICAL.potentiometer,
     },
+    wire_junction: {
+      label: "Nod",
+      glb: null,
+      info: { summary: "", detail: "", tips: [] },
+      electrical: DEFAULT_ELECTRICAL.wire_junction,
+    },
   },
   simulation: mergeSimulationConfig(null),
 };

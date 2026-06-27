@@ -5,6 +5,7 @@ export const COMPONENT_TYPES = [
   "switch",
   "dc_motor",
   "potentiometer",
+  "wire_junction",
 ] as const;
 
 export type ComponentType = (typeof COMPONENT_TYPES)[number];
@@ -45,6 +46,9 @@ export interface PotentiometerElectrical {
   total_resistance_ohm: number;
 }
 
+/** Nod pasiv — terminalele sunt legate electric între ele */
+export type WireJunctionElectrical = Record<string, never>;
+
 export type ComponentElectricalByType = {
   battery: BatteryElectrical;
   led: LedElectrical;
@@ -52,6 +56,7 @@ export type ComponentElectricalByType = {
   switch: SwitchElectrical;
   dc_motor: DcMotorElectrical;
   potentiometer: PotentiometerElectrical;
+  wire_junction: WireJunctionElectrical;
 };
 
 export interface ComponentModel {
@@ -118,7 +123,7 @@ export interface CircuitElectricMetadata {
   simulation: CircuitSimulationConfig;
 }
 
-export type TerminalId = "+" | "-" | "a" | "b" | "wiper";
+export type TerminalId = "+" | "-" | "a" | "b" | "c" | "wiper";
 
 export interface CircuitTerminalRef {
   nodeId: string;

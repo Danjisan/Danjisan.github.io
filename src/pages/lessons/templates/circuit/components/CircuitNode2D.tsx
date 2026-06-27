@@ -84,11 +84,12 @@ export default function CircuitNode2D({
 }: CircuitNode2DProps) {
   const switchOn = node.type === "switch" && node.state.on === true;
   const flipped = isNodeFlipped(node);
+  const isJunction = node.type === "wire_junction";
   const terminals = getTerminalDefs(node);
 
   return (
     <div
-      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${flipped ? "flipped" : ""} ${ledBurned ? "led-burned" : ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
+      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${flipped ? "flipped" : ""} ${isJunction ? "circuit-node-2d--junction" : ""} ${ledBurned ? "led-burned" : ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
       style={
         {
           left: `${node.position.x * 100}%`,
@@ -105,7 +106,7 @@ export default function CircuitNode2D({
         <span className="circuit-node-2d-icon" aria-hidden="true">
           {COMPONENT_ICONS[node.type]}
         </span>
-        <span className="circuit-node-2d-label">{model.label}</span>
+        {!isJunction && <span className="circuit-node-2d-label">{model.label}</span>}
         {node.type === "switch" && !preview && (
           <button
             type="button"
@@ -180,7 +181,7 @@ export default function CircuitNode2D({
         />
       )}
 
-      {selected && !preview && !readOnly && onFlip && (
+      {selected && !preview && !readOnly && onFlip && !isJunction && (
         <button
           type="button"
           className="circuit-node-2d-flip"

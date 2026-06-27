@@ -31,6 +31,7 @@ export const DEFAULT_ELECTRICAL: ComponentElectricalByType = {
   potentiometer: {
     total_resistance_ohm: 10_000,
   },
+  wire_junction: {},
 };
 
 export const DEFAULT_FAILURE_MESSAGES: Record<SimulationFailureKind, string> = {

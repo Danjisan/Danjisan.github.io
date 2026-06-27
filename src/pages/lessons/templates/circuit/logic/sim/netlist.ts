@@ -43,6 +43,14 @@ export function buildNetlist(
     );
   }
 
+  for (const node of nodes) {
+    if (node.type === "wire_junction") {
+      const id = node.id;
+      uf.union(terminalKey(id, "a"), terminalKey(id, "b"));
+      uf.union(terminalKey(id, "b"), terminalKey(id, "c"));
+    }
+  }
+
   const groundPin = terminalKey(battery.id, "-");
   const groundRoot = uf.find(groundPin);
 
