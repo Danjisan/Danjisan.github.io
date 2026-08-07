@@ -250,6 +250,260 @@ body {
   color: var(--text-dim);
   font-size: 0.85rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+}
+
+.footer-legal a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ── Legal / GDPR docs ────────────────────────────── */
+
+.legal-page {
+  max-width: 720px;
+}
+
+.legal-banner-todo {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.legal-banner-todo code {
+  font-size: 0.85em;
+}
+
+.legal-doc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.legal-doc h2 {
+  margin: 20px 0 4px;
+  font-size: 1.15rem;
+}
+
+.legal-doc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.legal-doc li {
+  margin-bottom: 6px;
+}
+
+.legal-meta {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.legal-note {
+  margin: 0;
+}
+
+.legal-todo {
+  display: inline;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(251, 191, 36, 0.28);
+  color: inherit;
+}
+
+.legal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.legal-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.legal-nav a:hover {
+  text-decoration: underline;
+}
+
+.legal-table-wrap {
+  overflow-x: auto;
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.legal-table th,
+.legal-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-table th {
+  background: var(--bg-soft);
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.auth-card-wide {
+  max-width: 460px;
+}
+
+.auth-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.auth-check input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.profile-privacy {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.profile-privacy h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.profile-privacy-sub {
+  margin: 18px 0 8px;
+  font-size: 0.95rem;
+}
+
+.profile-privacy p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.profile-privacy a {
+  color: var(--accent);
+}
+
+.profile-rights-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.profile-rights-list li {
+  margin-bottom: 6px;
+}
+
+.profile-privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.profile-btn-secondary {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  filter: none !important;
+}
+
+.profile-btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+.profile-btn-danger {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.55);
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.profile-btn-danger:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.2);
+}
+
+.profile-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-data-panel,
+.profile-delete-panel {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.profile-data-summary {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.profile-data-hint {
+  margin: 12px 0 0 !important;
+  font-size: 0.82rem !important;
+}
+
+.profile-delete-panel p {
+  margin-bottom: 12px;
+}
+
+.profile-delete-panel code {
+  font-size: 0.9em;
 }
 
 /* ── Hero (Acasă) ─────────────────────────────────── */
@@ -1154,6 +1408,18 @@ body {
 
 .yt-facade:hover .yt-play {
   transform: translate(-50%, -50%) scale(1.1);
+}
+
+.yt-privacy-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 
 .yt-iframe {

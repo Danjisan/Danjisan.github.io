@@ -20,12 +20,25 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("elev");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [ageOk, setAgeOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (!acceptTerms) {
+      setError("Trebuie să accepți Termenii și Politica de confidențialitate.");
+      return;
+    }
+    if (!ageOk) {
+      setError(
+        "Confirmă că ai cel puțin 16 ani sau că un părinte/tutore este de acord.",
+      );
+      return;
+    }
 
     const passwordError = validateNewPassword(password, password);
     if (passwordError) {
@@ -38,7 +51,13 @@ export default function RegisterPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: {
+          display_name: displayName,
+          accepted_terms_at: new Date().toISOString(),
+          age_or_guardian_confirmed: true,
+        },
+      },
     });
 
     if (signUpError || !data.user) {
@@ -64,7 +83,7 @@ export default function RegisterPage() {
 
   return (
     <section className="page page-center">
-      <div className="auth-card">
+      <div className="auth-card auth-card-wide">
         <h1>Cont nou</h1>
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
@@ -122,6 +141,40 @@ export default function RegisterPage() {
               ))}
             </div>
           </fieldset>
+
+          <label className="auth-check">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              required
+            />
+            <span>
+              Am citit și accept{" "}
+              <Link to="/termeni" className="auth-link" target="_blank" rel="noreferrer">
+                Termenii
+              </Link>{" "}
+              și{" "}
+              <Link to="/privacy" className="auth-link" target="_blank" rel="noreferrer">
+                Politica de confidențialitate
+              </Link>
+              .
+            </span>
+          </label>
+
+          <label className="auth-check">
+            <input
+              type="checkbox"
+              checked={ageOk}
+              onChange={(e) => setAgeOk(e.target.checked)}
+              required
+            />
+            <span>
+              Confirm că am cel puțin 16 ani sau că un părinte / tutore este de
+              acord cu crearea acestui cont.
+            </span>
+          </label>
+
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit" disabled={loading}>
             {loading ? "Se creează contul…" : "Creează cont"}

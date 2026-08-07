@@ -6,8 +6,8 @@ interface YouTubeEmbedProps {
 }
 
 /**
- * Fațadă ușoară: afișează doar thumbnail-ul; iframe-ul YouTube real
- * (care e greu, ~1MB) se încarcă abia la click pe play.
+ * Fațadă: thumbnail + play. Iframe YouTube (youtube-nocookie) doar după click —
+ * reduce cookies third-party până la interacțiune explicită.
  */
 export default function YouTubeEmbed({ videoId, title }: YouTubeEmbedProps) {
   const [playing, setPlaying] = useState(false);
@@ -38,6 +38,9 @@ export default function YouTubeEmbed({ videoId, title }: YouTubeEmbedProps) {
       />
       <span className="yt-play" aria-hidden="true">
         ▶
+      </span>
+      <span className="yt-privacy-hint">
+        Play încarcă YouTube (privacy-enhanced)
       </span>
     </button>
   );

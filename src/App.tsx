@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -10,6 +10,9 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
+import PrivacyPage from "./pages/legal/PrivacyPage";
+import CookiesPage from "./pages/legal/CookiesPage";
+import TermsPage from "./pages/legal/TermsPage";
 import QuestionsPage from "./pages/admin/QuestionsPage";
 import LobbyPage from "./pages/LobbyPage";
 import GamePage from "./pages/GamePage";
@@ -28,6 +31,9 @@ export default function App() {
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/proiecte" element={<ProjectsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/termeni" element={<TermsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -43,6 +49,12 @@ export default function App() {
       </main>
       <footer className="app-footer">
         <p>© {new Date().getFullYear()} ColabMe · site în construcție</p>
+        <nav className="footer-legal" aria-label="Legal">
+          <Link to="/privacy">Confidențialitate</Link>
+          <Link to="/cookies">Cookies</Link>
+          <Link to="/termeni">Termeni</Link>
+          <Link to="/contact">Contact</Link>
+        </nav>
       </footer>
     </div>
   );

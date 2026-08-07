@@ -338,8 +338,21 @@ Ordinea de implementare (fiecare pas are propriile task-uri, detaliate când aju
 
 ## Note tehnice
 
-- **GDPR**: Platformă cu minori (elevi) → date în EU (Supabase Frankfurt), consimțământ parental TBD
-- **Securitate**: Row Level Security în Supabase pe toate tabelele sensibile
+- **GDPR**: Platformă cu minori (elevi) → date în EU (Supabase Frankfurt); pagini /privacy, /cookies, /termeni; self-service pe Profil (export + ștergere)
+- **Securitate**: Row Level Security în Supabase pe tabelele sensibile
 - **Assets 3D web**: GLB optimizat pentru web (Draco compression recomandat pentru modele mari)
 - **Repo curent**: `danjisan.github.io` = web client sandbox. La M1 final → deploy pe `colabme.eu`.
 - **Branding**: Logo SVG + PNG în `public/branding/`. SVG preferabil peste tot.
+
+---
+
+## PIN — Legal review (nu uitați)
+
+> Reveniți după publicarea inițială (Aug 2026). Bifați când e făcut.
+
+- [ ] Recitire `/privacy`, `/cookies`, `/termeni` pe colabme.eu
+- [ ] Verificare date în `src/content/legalOrg.ts` (denumire, CUI, adresă, emailuri)
+- [ ] Confirmare termene retenție (24 luni inactiv, chat ~90 zile) — ajustați dacă e nevoie
+- [ ] Confirmare text minori (16 ani / tutore) cu realitatea operațională
+- [ ] DPA Supabase acceptat în dashboard (dacă e cazul)
+- [ ] Test: Vezi datele mele / Descarcă JSON / Șterge contul (pe un cont de test)
