@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import ColabMeLogo from "../components/ColabMeLogo";
 
 export default function HomePage() {
   const [params] = useSearchParams();
@@ -14,7 +15,9 @@ export default function HomePage() {
       )}
       <p className="hero-badge">Work in progress</p>
       <h1 className="hero-title">
-        Salut, aici e <span className="accent">ColabMe</span>.
+        Salut, aici e{" "}
+        <ColabMeLogo className="colabme-logo--hero" />
+        .
       </h1>
       <p className="hero-subtitle">
         Site-ul e în construcție. În curând: proiecte, experimente și mai

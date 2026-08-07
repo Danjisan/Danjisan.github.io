@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import ColabMeLogo from "./ColabMeLogo";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 
@@ -32,7 +33,7 @@ export default function Header() {
     <header className="site-header">
       <div className="header-bar">
         <NavLink to="/" className="brand" onClick={() => setMenuOpen(false)}>
-          ColabMe
+          <ColabMeLogo className="colabme-logo--header" />
         </NavLink>
         <button
           type="button"
