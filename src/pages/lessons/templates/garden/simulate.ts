@@ -231,10 +231,7 @@ export function applyWater(
   };
 }
 
-export function applyWeed(
-  plant: SimPlantState,
-  now: Date = new Date(),
-): SimPlantState {
+export function applyWeed(plant: SimPlantState): SimPlantState {
   if (plant.status === "dead" || plant.status === "harvested") return plant;
   return {
     ...plant,
