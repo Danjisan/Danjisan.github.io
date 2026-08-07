@@ -4127,3 +4127,240 @@ body.circuit-is-dragging * {
   font-size: 0.9rem;
   padding: 2rem 0;
 }
+
+/* ── Grădina Virtuală ───────────────────────────────── */
+
+.garden-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.garden-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.garden-sun-hint,
+.garden-muted {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.garden-warn {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--gold);
+  font-size: 0.88rem;
+}
+
+.garden-gate {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.garden-panel {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.garden-h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.garden-h3 {
+  margin: 16px 0 8px;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.garden-seed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.garden-seed-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.garden-seed-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.garden-seed-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.garden-seed-emoji {
+  font-size: 1.6rem;
+}
+
+.garden-seed-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.garden-lock {
+  font-size: 0.72rem;
+  color: var(--gold);
+}
+
+.garden-layout {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 800px) {
+  .garden-layout {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+.garden-plant-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.garden-plant-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+.garden-plant-row.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.garden-viz {
+  position: relative;
+  min-height: 120px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: rgba(34, 80, 40, 0.15);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.garden-viz-plant {
+  font-size: 2.8rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+.garden-viz-plant.stage-0 { transform: scale(0.55); }
+.garden-viz-plant.stage-1 { transform: scale(0.7); }
+.garden-viz-plant.stage-2 { transform: scale(0.85); }
+.garden-viz-plant.stage-3 { transform: scale(1); }
+.garden-viz-plant.stage-4 { transform: scale(1.1); }
+.garden-viz-plant.stage-5 { transform: scale(1.2); }
+
+.garden-viz-weeds {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.garden-plant-title {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.garden-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.garden-meters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.garden-meters meter {
+  width: 100%;
+  height: 12px;
+}
+
+.garden-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.garden-btn-secondary {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.garden-btn-secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.garden-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.garden-footnote {
+  margin-top: 8px;
+}
