@@ -6,6 +6,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
+  const justReset = searchParams.get("reset") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +37,11 @@ export default function LoginPage() {
             Cont creat cu succes! Poți să te loghezi acum.
           </p>
         )}
+        {justReset && (
+          <p className="auth-info">
+            Parola a fost schimbată. Intră în cont cu parola nouă.
+          </p>
+        )}
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
             Email
@@ -59,6 +65,11 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </label>
+          <p className="auth-inline-link">
+            <Link to="/forgot-password" className="auth-link">
+              Am uitat parola?
+            </Link>
+          </p>
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit" disabled={loading}>
             {loading ? "Se încarcă…" : "Intră în cont"}

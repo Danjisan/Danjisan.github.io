@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import {
+  MIN_PASSWORD_LENGTH,
+  validateNewPassword,
+} from "../lib/authPassword";
 import { supabase } from "../lib/supabase";
 import type { UserRole } from "../lib/types";
 
@@ -22,6 +26,13 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const passwordError = validateNewPassword(password, password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
     setLoading(true);
 
     const { data, error: signUpError } = await supabase.auth.signUp({
@@ -86,7 +97,7 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={8}
+              minLength={MIN_PASSWORD_LENGTH}
               autoComplete="new-password"
             />
           </label>

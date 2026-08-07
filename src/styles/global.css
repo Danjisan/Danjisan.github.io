@@ -839,6 +839,19 @@ body {
   text-decoration: underline;
 }
 
+.auth-hint {
+  margin: -8px 0 20px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.auth-inline-link {
+  margin: -8px 0 0;
+  text-align: right;
+  font-size: 0.88rem;
+}
+
 /* Selector rol la register */
 .auth-role-fieldset {
   border: none;
