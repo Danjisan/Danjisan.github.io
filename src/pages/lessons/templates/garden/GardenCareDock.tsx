@@ -117,17 +117,27 @@ export function GardenCareDock({
   actions: ReactNode;
   warn?: ReactNode;
 }) {
+  const hasDetails = Boolean(blurb) || Boolean(warn);
+
   return (
     <div className="garden-care-dock">
       <div className="garden-care-dock-inner">
-        <p className="garden-care-dock-title">{title}</p>
-        {blurb && <p className="garden-care-dock-blurb">{blurb}</p>}
-        <p className="garden-care-dock-status">
-          Status: <strong>{statusLabel}</strong>
-        </p>
+        <div className="garden-care-dock-header">
+          <p className="garden-care-dock-title">{title}</p>
+          <p className="garden-care-dock-status">
+            <span className="garden-care-dock-status-label">Status</span>{" "}
+            <strong>{statusLabel}</strong>
+          </p>
+        </div>
         <div className="garden-meters garden-care-dock-meters">{meters}</div>
         <div className="garden-actions garden-care-dock-actions">{actions}</div>
-        {warn}
+        {hasDetails && (
+          <details className="garden-care-dock-details">
+            <summary>Detalii</summary>
+            {blurb && <p className="garden-care-dock-blurb">{blurb}</p>}
+            {warn}
+          </details>
+        )}
       </div>
     </div>
   );

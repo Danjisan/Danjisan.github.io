@@ -4345,7 +4345,9 @@ body.circuit-is-dragging * {
   bottom: 0;
   z-index: 2;
   pointer-events: none;
-  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
 }
 
 .garden-emoji-fullscreen .garden-care-dock {
@@ -4355,48 +4357,129 @@ body.circuit-is-dragging * {
 
 .garden-care-dock-inner {
   pointer-events: auto;
-  max-height: min(48vh, 420px);
+  width: 100%;
+  max-width: 420px;
+  max-height: min(32vh, 260px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 14px 16px 16px;
-  border-radius: 16px 16px 12px 12px;
+  padding: 10px 12px 12px;
+  border-radius: 14px 14px 10px 10px;
   border: 1px solid var(--border);
   background: rgba(14, 10, 24, 0.88);
   backdrop-filter: blur(12px);
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
 }
 
+.garden-care-dock-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+
 .garden-care-dock-title {
-  margin: 0 0 4px;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.garden-care-dock-status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.garden-care-dock-status-label {
+  font-weight: 500;
+}
+
+.garden-care-dock-status strong {
+  color: var(--text);
   font-weight: 700;
 }
 
 .garden-care-dock-blurb {
-  margin: 0 0 8px;
-  font-size: 0.85rem;
+  margin: 0;
+  font-size: 0.8rem;
   color: var(--text-dim);
   line-height: 1.35;
 }
 
-.garden-care-dock-status {
-  margin: 0 0 10px;
-  font-size: 0.9rem;
+.garden-care-dock-meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 0 8px;
+  gap: 6px 10px;
 }
 
-.garden-care-dock-meters {
-  margin: 0 0 12px;
-  gap: 8px;
+.garden-care-dock-meters label {
+  gap: 2px;
+  font-size: 0.75rem;
+}
+
+.garden-care-dock-meters meter {
+  height: 8px;
 }
 
 .garden-care-dock-actions {
   margin: 0;
+  gap: 6px;
 }
 
 .garden-care-dock-actions .auth-submit,
 .garden-care-dock-actions .garden-btn-secondary {
-  flex: 1 1 auto;
-  min-width: 7.5rem;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  margin-top: 0;
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+
+.garden-care-dock-details {
+  margin-top: 8px;
+}
+
+.garden-care-dock-details summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  list-style: none;
+}
+
+.garden-care-dock-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.garden-care-dock-details summary::after {
+  content: " ▾";
+  font-size: 0.7em;
+}
+
+.garden-care-dock-details[open] summary::after {
+  content: " ▴";
+}
+
+.garden-care-dock-details[open] summary {
+  margin-bottom: 6px;
+}
+
+.garden-care-dock-details .garden-care-dock-blurb + .garden-warn,
+.garden-care-dock-details .garden-warn {
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 720px) {
+  .garden-care-dock-inner {
+    max-height: min(36vh, 300px);
+  }
 }
 
 .garden-viz-plant {
