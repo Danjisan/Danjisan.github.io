@@ -4312,6 +4312,93 @@ body.circuit-is-dragging * {
   overflow: visible;
 }
 
+.garden-emoji-expand {
+  z-index: 2;
+}
+
+.garden-emoji-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.garden-emoji-fullscreen-viz {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(60, 100, 50, 0.35), transparent 55%),
+    rgba(34, 80, 40, 0.12);
+}
+
+/* Dock îngrijire — peste 3D în expand, thumb-zone pe mobil */
+.garden-care-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.garden-emoji-fullscreen .garden-care-dock {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.garden-care-dock-inner {
+  pointer-events: auto;
+  max-height: min(48vh, 420px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 16px 16px;
+  border-radius: 16px 16px 12px 12px;
+  border: 1px solid var(--border);
+  background: rgba(14, 10, 24, 0.88);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.garden-care-dock-title {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.garden-care-dock-blurb {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+}
+
+.garden-care-dock-status {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+}
+
+.garden-care-dock-meters {
+  margin: 0 0 12px;
+  gap: 8px;
+}
+
+.garden-care-dock-actions {
+  margin: 0;
+}
+
+.garden-care-dock-actions .auth-submit,
+.garden-care-dock-actions .garden-btn-secondary {
+  flex: 1 1 auto;
+  min-width: 7.5rem;
+}
+
 .garden-viz-plant {
   font-size: 2.8rem;
   line-height: 1;

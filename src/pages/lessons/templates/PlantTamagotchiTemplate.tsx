@@ -33,6 +33,7 @@ import {
   type GardenPlotRow,
 } from "./garden/api";
 import { resolvePlantGlb } from "./garden/visualAssets";
+import { GardenCareDock, GardenEmojiStage } from "./garden/GardenCareDock";
 
 const STATUS_LABEL: Record<string, string> = {
   growing: "În creștere",
@@ -458,120 +459,152 @@ export default function PlantTamagotchiTemplate({ lesson }: TemplateProps) {
             <p className="garden-muted">Selectează o plantă.</p>
           ) : (
             <>
-              <div className="garden-viz">
-                  {(() => {
-                  const glb = resolvePlantGlb(
-                    sim.speciesId,
-                    sim.growthProgress,
-                  );
-                  if (glb) {
-                    return (
-                      <div className="garden-viz-model">
-                        <ModelBox
-                          src={glb}
-                          settings={{
-                            autoRotate: true,
-                            autoRotateSpeed: 0.6,
-                            // Fără Bounds: fără intro zoom + snap; mărimea e din scale + cameră
-                            autoFit: false,
-                            modelScale: 3.2,
-                            fov: 32,
-                            cameraPosition: [0.55, 0.35, 0.55],
-                            minDistance: 0.25,
-                            maxDistance: 1.4,
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-                  return (
-                    <div
-                      className={`garden-viz-plant stage-${Math.min(5, Math.floor(sim.growthProgress * 5))}`}
-                      aria-hidden
-                    >
-                      {species.emoji}
-                    </div>
-                  );
-                })()}
-                {sim.weedLevel > 0.15 && (
-                  <div className="garden-viz-weeds" aria-hidden>
-                    {"🌿".repeat(Math.min(5, Math.ceil(sim.weedLevel * 5)))}
+              {(() => {
+                const glb = resolvePlantGlb(
+                  sim.speciesId,
+                  sim.growthProgress,
+                );
+                const careDock = (
+                  <GardenCareDock
+                    title={`${species.emoji} ${species.label} — ${stageLabel(sim.growthProgress)}`}
+                    blurb={species.blurb}
+                    statusLabel={STATUS_LABEL[sim.status]}
+                    meters={
+                      <>
+                        <label>
+                          Creștere {pct(Math.min(1, sim.growthProgress))}
+                          <meter
+                            min={0}
+                            max={1}
+                            value={Math.min(1, sim.growthProgress)}
+                          />
+                        </label>
+                        <label>
+                          Umiditate sol {pct(sim.soilMoisture)}
+                          <meter min={0} max={1} value={sim.soilMoisture} />
+                        </label>
+                        <label>
+                          Sănătate {pct(sim.health)}
+                          <meter min={0} max={1} value={sim.health} />
+                        </label>
+                        <label>
+                          Buruieni {pct(sim.weedLevel)}
+                          <meter min={0} max={1} value={sim.weedLevel} />
+                        </label>
+                      </>
+                    }
+                    actions={
+                      <>
+                        <button
+                          type="button"
+                          className="auth-submit"
+                          disabled={
+                            busy ||
+                            sim.status === "dead" ||
+                            sim.status === "harvested"
+                          }
+                          onClick={handleWater}
+                        >
+                          Udă
+                        </button>
+                        <button
+                          type="button"
+                          className="garden-btn-secondary"
+                          disabled={
+                            busy ||
+                            sim.status === "dead" ||
+                            sim.status === "harvested"
+                          }
+                          onClick={handleWeed}
+                        >
+                          Smulge buruieni
+                        </button>
+                        <button
+                          type="button"
+                          className="garden-btn-secondary"
+                          disabled={
+                            busy ||
+                            (sim.status !== "mature" &&
+                              sim.growthProgress < 0.95)
+                          }
+                          onClick={handleHarvest}
+                        >
+                          Recoltează
+                        </button>
+                      </>
+                    }
+                    warn={
+                      sun.isHarshSun &&
+                      sim.status !== "dead" &&
+                      sim.status !== "harvested" ? (
+                        <p className="garden-warn">
+                          Acum e soare tare afară (simulat pentru Alexandria).
+                          Udatul funcționează, dar e mai puțin eficient.
+                        </p>
+                      ) : null
+                    }
+                  />
+                );
+                const stageClass = `stage-${Math.min(5, Math.floor(sim.growthProgress * 5))}`;
+
+                return (
+                  <div className="garden-viz">
+                    {glb ? (
+                      <>
+                        <div className="garden-viz-model">
+                          <ModelBox
+                            src={glb}
+                            settings={{
+                              autoRotate: true,
+                              autoRotateSpeed: 0.6,
+                              autoFit: false,
+                              modelScale: 3.2,
+                              fov: 32,
+                              cameraPosition: [0.55, 0.35, 0.55],
+                              minDistance: 0.25,
+                              maxDistance: 1.4,
+                            }}
+                            fullscreenChrome={careDock}
+                          />
+                        </div>
+                        {sim.weedLevel > 0.15 && (
+                          <div className="garden-viz-weeds" aria-hidden>
+                            {"🌿".repeat(
+                              Math.min(5, Math.ceil(sim.weedLevel * 5)),
+                            )}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <GardenEmojiStage
+                        emoji={species.emoji}
+                        stageClass={stageClass}
+                        weedLevel={sim.weedLevel}
+                        careDock={careDock}
+                      />
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
               <p className="garden-plant-title">
-                {species.emoji} {species.label} — {stageLabel(sim.growthProgress)}
+                {species.emoji} {species.label} —{" "}
+                {stageLabel(sim.growthProgress)}
               </p>
-              <p className="garden-muted">{species.blurb}</p>
-              <p>
+              <p className="garden-muted">
                 Status: <strong>{STATUS_LABEL[sim.status]}</strong>
+                {" · "}
+                Apasă ⛶ pe preview ca să uzi, vezi meterele și îngrijești
+                planta.
               </p>
-
-              <div className="garden-meters">
-                <label>
-                  Creștere {pct(Math.min(1, sim.growthProgress))}
-                  <meter min={0} max={1} value={Math.min(1, sim.growthProgress)} />
-                </label>
-                <label>
-                  Umiditate sol {pct(sim.soilMoisture)}
-                  <meter min={0} max={1} value={sim.soilMoisture} />
-                </label>
-                <label>
-                  Sănătate {pct(sim.health)}
-                  <meter min={0} max={1} value={sim.health} />
-                </label>
-                <label>
-                  Buruieni {pct(sim.weedLevel)}
-                  <meter min={0} max={1} value={sim.weedLevel} />
-                </label>
-              </div>
-
-              <div className="garden-actions">
-                <button
-                  type="button"
-                  className="auth-submit"
-                  disabled={busy || sim.status === "dead" || sim.status === "harvested"}
-                  onClick={handleWater}
-                >
-                  Udă
-                </button>
-                <button
-                  type="button"
-                  className="garden-btn-secondary"
-                  disabled={busy || sim.status === "dead" || sim.status === "harvested"}
-                  onClick={handleWeed}
-                >
-                  Smulge buruieni
-                </button>
-                <button
-                  type="button"
-                  className="garden-btn-secondary"
-                  disabled={
-                    busy ||
-                    (sim.status !== "mature" && sim.growthProgress < 0.95)
-                  }
-                  onClick={handleHarvest}
-                >
-                  Recoltează
-                </button>
-              </div>
-              {sun.isHarshSun &&
-                sim.status !== "dead" &&
-                sim.status !== "harvested" && (
-                  <p className="garden-warn">
-                    Acum e soare tare afară (simulat pentru Alexandria). Udatul
-                    funcționează, dar e mai puțin eficient.
-                  </p>
-                )}
             </>
           )}
         </section>
       </div>
 
       <p className="garden-muted garden-footnote">
-        Vizualul e placeholder (emoji). Creșterea rulează în timp real pe
-        serverul tău de date — poți închide pagina și te întorci mâine. GLB-uri
-        3D se pot agăța ulterior pe specie.
+        Îngrijirea detaliată e în expand (⛶). Pagina rămâne liberă pentru
+        restul grădinii. Modelele 3D apar pe măsură ce adăugăm GLB-uri pe
+        specii.
       </p>
     </div>
   );

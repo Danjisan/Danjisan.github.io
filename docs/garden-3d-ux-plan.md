@@ -1,84 +1,85 @@
-# Grădină Virtuală — plan UX 3D (fără implementare încă)
+# Grădină Virtuală — plan UX 3D
 
-Status: **documentare / plan**. Nu implementăm slider de zoom sau redesign expand până decidem împreună după push-ul curent.
+Status: **acord pe direcție** — expand = fișă plantă cu HUD peste 3D. Fără slider zoom (pinch/wheel e suficient).
 
-## Ce e „decent” acum (OK de push)
+## Decizii închise
 
-- GLB `fasole_seed.glb` în `public/garden/fasole/`
-- Mapare `visualAssets.ts` (doar sămânța `ready: true`)
-- Viewer în panoul Îngrijire, cu `autoFit: false` (fără Bounds intro/snap)
-- Framing încă **prea mic** pe sămânță — acceptat temporar; nu mai chase-uim `fitMargin` / Bounds în acest pas
+- Zoom: OrbitControls (wheel PC / pinch mobil) — **fără slidere**
+- Expand fullscreen: fix CSS `height: 240px` vs fullscreen — done
+- Detalii îngrijire (status, metere, Udă/Buruieni/…) → **în expand**, peste 3D, optimizat mobil
 
-## Lecții ModelBox (de ce nu „un slider rapid”)
+## Ce e live acum
 
-Am investit deja într-un model de control care protejează scroll-ul pe mobil:
+- GLB `fasole_seed.glb` + `visualAssets.ts` (sămânța `ready`)
+- Viewer inline cu `autoFit: false`
+- Framing sămânță încă mic — tuning ulterior (scale/cameră), nu blocker
+
+## Lecții ModelBox (păstrăm)
 
 | Stare | Comportament |
 | --- | --- |
-| **Adormit** (default) | Shield peste canvas: scroll/drag de pagină trec; auto-rotate vizual |
-| **Activ** (tap/click „Apasă pentru a interacționa”) | OrbitControls: rotație (+ zoom nativ Orbit dacă e permis) |
-| **Dezactivare** | mouse leave (PC) / tap în afară (mobil) |
-| **Expand** | overlay CSS `position: fixed; inset: 0` (nu Fullscreen API); Esc / ✕; `body` overflow hidden |
+| **Adormit** | Shield: scroll pagină liber; auto-rotate |
+| **Activ** | Orbit (rotație + zoom) |
+| **Expand** | `fixed; inset: 0`; Esc / ✕; body overflow hidden |
 
-Reguli de păstrat:
+Reguli:
 
-1. **Niciun control de zoom pe gest vertical în view-ul inline** — pe mobil se confundă cu scroll-ul paginii.
-2. Shield rămâne obligatoriu în caseta din pagină.
-3. Controale „fine” (slider zoom, detalii) → doar în **mod expand / detalii**, unde pagina din spate e blocată.
-4. Nu stricăm ModelBox-ul folosit și de lecțiile 3D; grădina extinde sau wrap-uiește, nu rescrie orbite/shield fără nevoie.
+1. Inline: shield obligatoriu; zoom ok dar gesturile pot lupta cu scroll — de-asta detaliul e în expand.
+2. Expand: pagină blocată → pinch/wheel safe.
+3. Nu stricăm ModelBox-ul lecțiilor; grădina adaugă un **HUD/sheet** în expand (slot / wrapper), nu rescrie orbita.
 
-## Bug cunoscut: expand pe PC „lat, dar scund”
+## Direcție UX aleasă: bottom HUD peste 3D
 
-Simptom: expand apare sus, peste meniu, pe lățime, **nu pe toată înălțimea**.
+### De ce asta (nu altceva)
 
-Cauză: `.garden-viz-model .model-box { height: 240px }` bătea `.model-box.fullscreen`.
+| Pattern | Exemplu tipic | La noi |
+| --- | --- | --- |
+| **Bottom sheet / dock pe media** | Maps (card locație), Spotify Now Playing, multe AR try-on | **Da** — degete jos, 3D liber sus, ✕ rămâne sus-dreapta |
+| HUD colțuri tip joc | Fortnite / AR measure | Posibil pentru chips scurte; acțiunile mari tot jos |
+| Split 50/50 3D \| panel | Desktop dashboards | **Nu pe mobil** — taie planta; pe PC opțional mai târziu |
+| Drawer din lateral | Admin apps | Mai greu pe one-hand mobil |
+| Modal text peste tot | Dialoguri | Ascunde 3D-ul — evitat |
 
-**Fix (aplicat):** `.garden-viz-model .model-box.fullscreen { height: auto; … }` — overlay pe tot viewport-ul.
+**Recomandare ColabMe:** pe expand, canvas full-bleed + **bandă de sticlă jos** (safe-area pe iPhone) cu:
 
-## Direcție UX propusă (de discutat)
+1. Titlu scurt: `Fasole — Sămânță` + status
+2. 4 metere compacte (sau 2 vizibile + „mai mult”)
+3. Rând acțiuni: Udă | Buruieni | Recoltează (thumb zone)
+4. Hint soare pe o linie, discret
 
-### A. Prima pagină grădină (compact)
+Sus: doar ✕ (și eventual un chip „Apasă & trage / pinch” o dată).
 
-- Listă plante + preview 3D mic (sau chiar emoji până e expand)
-- Status scurt + 1–2 acțiuni esențiale (Udă / Buruieni) — sau doar CTA „Deschide planta”
-- **Fără** pereți de text, metere lungi, slider zoom
+3D rămâne zona de gesturi; HUD-ul **nu** capturează drag pe canvas (pointer-events pe panou, nu pe tot ecranul).
 
-### B. Expand = „fișa plantei” (detaliu)
+### Inline (prima pagină) — țintă
 
-Layout tip sheet / overlay full viewport:
+- Listă plante + preview 3D mic
+- Fără metere lungi / fără zid de butoane — CTA implicit = expand (⛶) sau tap pe plantă → expand
+- Opțional: un singur status scurt pe rândul din listă (cum e acum)
 
-- Canvas 3D mare (orbită activă din start în expand)
-- **Zoom doar aici**: slider sau +/− (pointer pe slider, nu pinch obligatoriu pe canvas — pinch pe OrbitControls e ok în expand pentru că scroll-ul paginii e blocat; totuși slider e predictibil pe iOS)
-- Meters: creștere, umiditate, sănătate, buruieni
-- Acțiuni: Udă, Smulge, Recoltează
-- Hint soare / mesaje
-- Închidere clară (✕ / Esc / gest back pe mobil — de decis)
+### Desktop
 
-### C. Inline activ (fără expand)
+- Același HUD jos (consistență) **sau** rail îngust dreapta dacă banda jos acoperă prea mult bobul pe landscape — de decis la implementare după un screenshot
+- Nu e nevoie de layout total diferit în v1
 
-- Doar rotație ușoară (cum e acum)
-- Zoom Orbit **dezactivat sau foarte limitat** în inline, ca să nu lupte cu scroll
-- Zoom „serios” → expand
+## Ce evităm
 
-## Zoom slider — principii (când îl facem)
+- Slider zoom / +/− zoom (redundant)
+- Observe/Bounds care re-fit-uiește la orbită
+- Panou opac full-screen care ascunde planta
+- Acțiuni doar pe prima pagină + duplicate confuze — sursa de adevăr = expand; inline rămâne listă + preview
 
-- Doar în expand (sau panel detalii dedicat)
-- Nu folosi wheel pe canvas în inline
-- Slider = `input type="range"` / butoane +/− care setează `camera.position` distance sau `controls.dolly` — **nu** un al doilea Bounds/observe
-- Păstrăm `minDistance` / `maxDistance` ca limite
-- Test obligatoriu: iOS Safari + Chrome Android + desktop (trackpad + mouse)
+## Implementare
 
-## Pași recomandați
+1. ModelBox `fullscreenChrome` + `GardenCareDock` (HUD jos) — done
+2. Îngrijire mutată în expand; inline = preview + status scurt — done
+3. Fallback emoji cu același expand + dock — done
+4. Tuning scale/cameră sămânță — ulterior
+5. Test mobil: pinch + tap Udă; PC wheel + butoane
 
-1. **Push** cu GLB + viewer stabil — done
-2. Fix CSS fullscreen vs `height: 240px` — done (local; de push)
-3. Design expand „fișă plantă” (wireframe / listă UI) — acord pe ce mutăm din prima pagină
-4. Abia apoi: zoom controls + eventual `GardenPlantSheet` care wrap-uiește ModelBox
-5. Abia la final: tuning default scale/cameră pe sămânță (sau preset per LOD în `visualAssets`)
+## Întrebări rămase (fine)
 
-## Întrebări deschise (înainte de cod mare)
-
-1. Expand = tot ecranul pe mobil **și** desktop, sau pe desktop un panel 70% / drawer?
-2. Acțiunile Udă/Buruieni rămân și pe prima pagină sau doar în expand?
-3. Preview inline: păstrăm 3D mic sau revenim la emoji + expand pentru 3D?
-4. Un singur canvas partajat (inline → expand același WebGL) vs remount — tradeoff memorie vs simplitate?
+1. Pe prima pagină: păstrăm și Udă rapid, sau **doar** în expand?
+   → **Decis: cât mai mult în expand.** Pagina tamagotchi rămâne pentru restul grădinii; îngrijirea detaliată (status, metere, Udă/Buruieni/Recoltează, hint soare) trăiește în expand.
+2. HUD jos: mereu deschis (dock fix) sau „peek” care se trage în sus pentru detalii?
+   → **Propunere default:** dock jos mereu vizibil în expand (acțiuni + status esențial). Dacă devine prea înalt, al doilea pas = secțiune „Detalii” expandabilă în același panou — nu pe pagina principală.

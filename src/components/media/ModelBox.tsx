@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from "react";
 import type { ModelSettings } from "./types";
 
 // Three.js + react-three-fiber se încarcă doar când o pagină chiar
@@ -8,6 +8,8 @@ const ModelViewer3D = lazy(() => import("./ModelViewer3D"));
 interface ModelBoxProps {
   src: string;
   settings?: ModelSettings;
+  /** UI randat doar în expand (ex. HUD îngrijire grădină), peste canvas */
+  fullscreenChrome?: ReactNode;
 }
 
 function ExpandIcon() {
@@ -43,9 +45,13 @@ function CloseIcon() {
  * dar scroll-ul/drag-ul trec prin ea ca prin orice element al paginii.
  * La click/tap se activează controalele (orbită + zoom); se dezactivează
  * când mouse-ul iese din casetă (PC) sau la tap în afara ei (mobil).
- * Butonul ⛶ deschide viewerul peste tot ecranul (ieșire cu ✕ sau Esc).
+ * Butonul ⛶ deschide viewerul pe tot ecranul (ieșire cu ✕ sau Esc).
  */
-export default function ModelBox({ src, settings }: ModelBoxProps) {
+export default function ModelBox({
+  src,
+  settings,
+  fullscreenChrome,
+}: ModelBoxProps) {
   const [active, setActive] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -112,6 +118,8 @@ export default function ModelBox({ src, settings }: ModelBoxProps) {
           <span className="model-box-hint">↻ Apasă pentru a interacționa</span>
         </button>
       )}
+
+      {fullscreen && fullscreenChrome}
 
       {fullscreen ? (
         <button
