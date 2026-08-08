@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
+import ModelBox from "../../../components/media/ModelBox";
 import type { TemplateProps } from "./types";
 import {
   ALEXANDRIA_TELEORMAN,
@@ -31,6 +32,7 @@ import {
   type GardenPlantRow,
   type GardenPlotRow,
 } from "./garden/api";
+import { resolvePlantGlb } from "./garden/visualAssets";
 
 const STATUS_LABEL: Record<string, string> = {
   growing: "În creștere",
@@ -456,14 +458,43 @@ export default function PlantTamagotchiTemplate({ lesson }: TemplateProps) {
             <p className="garden-muted">Selectează o plantă.</p>
           ) : (
             <>
-              <div className="garden-viz" aria-hidden>
-                <div
-                  className={`garden-viz-plant stage-${Math.min(5, Math.floor(sim.growthProgress * 5))}`}
-                >
-                  {species.emoji}
-                </div>
+              <div className="garden-viz">
+                  {(() => {
+                  const glb = resolvePlantGlb(
+                    sim.speciesId,
+                    sim.growthProgress,
+                  );
+                  if (glb) {
+                    return (
+                      <div className="garden-viz-model">
+                        <ModelBox
+                          src={glb}
+                          settings={{
+                            autoRotate: true,
+                            autoRotateSpeed: 0.6,
+                            // Fără Bounds: fără intro zoom + snap; mărimea e din scale + cameră
+                            autoFit: false,
+                            modelScale: 3.2,
+                            fov: 32,
+                            cameraPosition: [0.55, 0.35, 0.55],
+                            minDistance: 0.25,
+                            maxDistance: 1.4,
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      className={`garden-viz-plant stage-${Math.min(5, Math.floor(sim.growthProgress * 5))}`}
+                      aria-hidden
+                    >
+                      {species.emoji}
+                    </div>
+                  );
+                })()}
                 {sim.weedLevel > 0.15 && (
-                  <div className="garden-viz-weeds">
+                  <div className="garden-viz-weeds" aria-hidden>
                     {"🌿".repeat(Math.min(5, Math.ceil(sim.weedLevel * 5)))}
                   </div>
                 )}

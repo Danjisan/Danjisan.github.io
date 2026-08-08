@@ -341,6 +341,8 @@ Ordinea de implementare (fiecare pas are propriile task-uri, detaliate când aju
 - **GDPR**: Platformă cu minori (elevi) → date în EU (Supabase Frankfurt); pagini /privacy, /cookies, /termeni; self-service pe Profil (export + ștergere)
 - **Securitate**: Row Level Security în Supabase pe tabelele sensibile
 - **Assets 3D web**: GLB optimizat pentru web (Draco compression recomandat pentru modele mari)
+- **Grădina / fasole 3D**: [`docs/garden-fasole-assets.md`](./garden-fasole-assets.md) — 6 mesh-uri M1 + intermediare  
+- **Grădina / referințe foto**: [`docs/garden-reference-photos.md`](./garden-reference-photos.md) — UNL PASSEL fasole + alternative pe specii
 - **Repo curent**: `danjisan.github.io` = web client sandbox. La M1 final → deploy pe `colabme.eu`.
 - **Branding**: Logo SVG + PNG în `public/branding/`. SVG preferabil peste tot.
 

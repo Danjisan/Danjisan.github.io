@@ -4285,6 +4285,26 @@ body.circuit-is-dragging * {
   padding: 16px;
 }
 
+.garden-viz:has(.garden-viz-model) {
+  min-height: 260px;
+  align-items: stretch;
+  padding: 8px;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(60, 100, 50, 0.35), transparent 55%),
+    rgba(34, 80, 40, 0.12);
+}
+
+.garden-viz-model {
+  width: 100%;
+  min-height: 240px;
+}
+
+.garden-viz-model .model-box {
+  height: 240px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 .garden-viz-plant {
   font-size: 2.8rem;
   line-height: 1;
