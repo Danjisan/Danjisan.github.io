@@ -129,8 +129,10 @@ export function GardenCareDock({
             <strong>{statusLabel}</strong>
           </p>
         </div>
-        <div className="garden-meters garden-care-dock-meters">{meters}</div>
-        <div className="garden-actions garden-care-dock-actions">{actions}</div>
+        <div className="garden-care-dock-body">
+          <div className="garden-meters garden-care-dock-meters">{meters}</div>
+          <div className="garden-actions garden-care-dock-actions">{actions}</div>
+        </div>
         {hasDetails && (
           <details className="garden-care-dock-details">
             <summary>Detalii</summary>
