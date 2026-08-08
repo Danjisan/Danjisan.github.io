@@ -4305,6 +4305,13 @@ body.circuit-is-dragging * {
   overflow: hidden;
 }
 
+/* Expand: nu lăsa height: 240px să bată overlay-ul fullscreen */
+.garden-viz-model .model-box.fullscreen {
+  height: auto;
+  border-radius: 0;
+  overflow: visible;
+}
+
 .garden-viz-plant {
   font-size: 2.8rem;
   line-height: 1;

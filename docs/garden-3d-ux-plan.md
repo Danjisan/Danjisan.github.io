@@ -31,17 +31,9 @@ Reguli de păstrat:
 
 Simptom: expand apare sus, peste meniu, pe lățime, **nu pe toată înălțimea**.
 
-Cauză probabilă (CSS): în grădină există
+Cauză: `.garden-viz-model .model-box { height: 240px }` bătea `.model-box.fullscreen`.
 
-```css
-.garden-viz-model .model-box {
-  height: 240px;
-}
-```
-
-care vine **după** `.model-box.fullscreen` și forțează 240px chiar în overlay. Deci nu e „feature mobil” — e conflict de specificitate. De reparat când facem UX-ul de expand (ex. `.garden-viz-model .model-box.fullscreen { height: auto; inset: 0; }`).
-
-Pe mobil, expand-ul **ar trebui** să fie viewport real (lat + înalt), altfel e inutil pentru „detaliu plantă”.
+**Fix (aplicat):** `.garden-viz-model .model-box.fullscreen { height: auto; … }` — overlay pe tot viewport-ul.
 
 ## Direcție UX propusă (de discutat)
 
@@ -78,8 +70,8 @@ Layout tip sheet / overlay full viewport:
 
 ## Pași recomandați
 
-1. **Push acum** cu GLB + viewer stabil (framing imperfect OK)
-2. Fix mic separat: CSS fullscreen vs `height: 240px` (poate fi un PR scurt)
+1. **Push** cu GLB + viewer stabil — done
+2. Fix CSS fullscreen vs `height: 240px` — done (local; de push)
 3. Design expand „fișă plantă” (wireframe / listă UI) — acord pe ce mutăm din prima pagină
 4. Abia apoi: zoom controls + eventual `GardenPlantSheet` care wrap-uiește ModelBox
 5. Abia la final: tuning default scale/cameră pe sămânță (sau preset per LOD în `visualAssets`)
