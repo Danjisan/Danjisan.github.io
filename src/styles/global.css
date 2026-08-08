@@ -4413,10 +4413,12 @@ body.circuit-is-dragging * {
   display: flex;
   align-items: stretch;
   gap: 10px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .garden-care-dock-meters {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   min-width: 0;
