@@ -28,56 +28,83 @@ const TEMPLATE_LABELS: Record<string, string> = {
   chemistry_sim: "Laborator virtual",
 };
 
-function LessonThumbIcon({ templateType }: { templateType: string }) {
+/** Prefer suggestive icons over placeholder storage thumbs (e.g. logo SVG). */
+function shouldUseRemoteThumb(url: string | null): boolean {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return !(
+    lower.includes("colabme-logo") ||
+    lower.endsWith(".svg")
+  );
+}
+
+function LessonGlyph({ templateType }: { templateType: string }) {
   const common = {
-    width: 40,
-    height: 40,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.6,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
+    width: 36,
+    height: 36,
+    viewBox: "0 0 40 40",
+    fill: "currentColor",
     "aria-hidden": true,
   };
 
   switch (templateType) {
+    case "bacteria_viewer":
+      // Morphologie: coccus, bacillus, streptococcus, staphylococcus
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="12" r="3.2" opacity="0.95" />
+          <rect x="16.2" y="9.2" width="11.5" height="5.6" rx="2.8" opacity="0.9" />
+          <circle cx="8" cy="27" r="2.4" />
+          <circle cx="13.2" cy="27" r="2.4" />
+          <circle cx="18.4" cy="27" r="2.4" />
+          <circle cx="28" cy="24.5" r="2.35" />
+          <circle cx="32.2" cy="27.8" r="2.35" />
+          <circle cx="27.2" cy="29.8" r="2.35" />
+          <circle cx="31.6" cy="22.2" r="2.1" opacity="0.85" />
+        </svg>
+      );
     case "plant_tamagotchi":
       return (
         <svg {...common}>
-          <path d="M12 22v-7" />
-          <path d="M12 15c-4.5 0-7-3.5-7-7 3.5 0 7 2.5 7 7z" />
-          <path d="M12 15c4.5 0 7-3.5 7-7-3.5 0-7 2.5-7 7z" />
-          <path d="M9 22h6" />
-        </svg>
-      );
-    case "bacteria_viewer":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="5.5" />
-          <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2" />
-          <path d="M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M5.2 18.8l1.4-1.4M17.4 6.6l1.4-1.4" />
+          <path d="M20 34V18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M20 22c-6.5-.2-10.5-4.8-10.2-10.5C15.5 12 19.2 15.8 20 22Z" />
+          <path d="M20 20c6.5-.2 10.5-4.5 10.2-10.2C24.2 10.2 20.8 14.2 20 20Z" />
+          <path d="M15 34h10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
       );
     case "circuit_electric":
       return (
         <svg {...common}>
-          <path d="M13 2 6 13h5l-1 9 7-11h-5l1-9z" />
+          <path
+            d="M18.5 5 11 20h7l-2.5 15L29 17h-7L24 5H18.5Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
         </svg>
       );
     case "chemistry_sim":
       return (
         <svg {...common}>
-          <path d="M9 3h6" />
-          <path d="M10 3v6.2L5.5 18a2.5 2.5 0 0 0 2.2 3.7h8.6a2.5 2.5 0 0 0 2.2-3.7L14 9.2V3" />
-          <path d="M8.5 15h7" />
+          <circle cx="14" cy="14" r="4" />
+          <circle cx="27" cy="12" r="3.2" opacity="0.9" />
+          <circle cx="22" cy="26" r="4.4" opacity="0.95" />
+          <path
+            d="M17.2 16.2 20.2 23.2M25.2 14.5 23.2 22.2M16.8 14.8 24.2 12.4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
         </svg>
       );
     default:
       return (
         <svg {...common}>
-          <rect x="4" y="4" width="16" height="16" rx="3" />
-          <path d="M8 12h8M12 8v8" />
+          <rect x="8" y="8" width="24" height="24" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path d="M14 20h12M20 14v12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
       );
   }
@@ -200,76 +227,46 @@ export default function LessonsWorldPage() {
       {loading ? (
         <p className="lessons-loading">Se încarcă…</p>
       ) : (
-        <div className="lessons-grid">
+        <div className="lessons-list">
           {filtered.length === 0 ? (
             <p className="lessons-empty">Nicio lecție în această categorie.</p>
           ) : (
             filtered.map((lesson) => {
               const state = getLessonState(lesson);
               const expanded = expandedId === lesson.id;
+              const remoteThumb = shouldUseRemoteThumb(lesson.thumbnail_url);
+
               return (
                 <article
                   key={lesson.id}
-                  className={`lesson-card ${state} ${expanded ? "expanded" : ""}`}
+                  className={`lesson-row ${state} ${expanded ? "expanded" : ""}`}
                 >
-                  <div className="lesson-card-thumb">
-                    {lesson.thumbnail_url ? (
-                      <img src={lesson.thumbnail_url} alt="" loading="lazy" />
-                    ) : (
-                      <div className="lesson-card-thumb-placeholder">
-                        <LessonThumbIcon templateType={lesson.template_type} />
-                      </div>
-                    )}
-                    {state === "locked" && (
-                      <div className="lesson-lock-overlay">
-                        <span className="lock-icon">🔒</span>
-                      </div>
-                    )}
-                    {state === "completed" && (
-                      <div className="lesson-complete-badge">✓</div>
-                    )}
-                  </div>
-
-                  <div className="lesson-card-info">
-                    <p className="lesson-card-title">{lesson.title}</p>
-                    <div className="lesson-card-meta">
-                      {lesson.category && (
-                        <span className="lesson-cat-tag">{lesson.category}</span>
+                  <div className="lesson-row-main">
+                    <div className="lesson-row-icon" aria-hidden="true">
+                      {remoteThumb ? (
+                        <img src={lesson.thumbnail_url!} alt="" loading="lazy" />
+                      ) : (
+                        <LessonGlyph templateType={lesson.template_type} />
                       )}
-                      <DifficultyDots level={lesson.difficulty} />
+                      {state === "locked" && (
+                        <span className="lesson-row-lock">🔒</span>
+                      )}
+                      {state === "completed" && (
+                        <span className="lesson-row-done">✓</span>
+                      )}
                     </div>
 
-                    {expanded && (
-                      <div className="lesson-card-details">
-                        <div className="lesson-card-details-meta">
-                          <span className="lesson-template-tag">
-                            {TEMPLATE_LABELS[lesson.template_type] ?? lesson.template_type}
-                          </span>
-                          <span className="lesson-difficulty-label">
-                            {DIFFICULTY_LABELS[lesson.difficulty]}
-                          </span>
-                        </div>
-                        {lesson.description && (
-                          <p className="lesson-card-details-desc">{lesson.description}</p>
+                    <div className="lesson-row-body">
+                      <p className="lesson-row-title">{lesson.title}</p>
+                      <div className="lesson-row-meta">
+                        {lesson.category && (
+                          <span className="lesson-cat-tag">{lesson.category}</span>
                         )}
-                        {state === "locked" && (
-                          <div className="lesson-card-lock-reason">
-                            {lesson.min_xp_required > (profile?.xp ?? 0) && (
-                              <p>
-                                Necesită <strong>{lesson.min_xp_required} XP</strong>
-                                {" "}(ai {profile?.xp ?? 0} XP)
-                              </p>
-                            )}
-                            {lesson.prerequisite_lesson_id &&
-                              !completedIds.has(lesson.prerequisite_lesson_id) && (
-                                <p>Completează mai întâi lecția prerequisită</p>
-                              )}
-                          </div>
-                        )}
+                        <DifficultyDots level={lesson.difficulty} />
                       </div>
-                    )}
+                    </div>
 
-                    <div className="lesson-card-actions">
+                    <div className="lesson-row-actions">
                       <button
                         type="button"
                         className="btn-secondary lesson-card-details-btn"
@@ -307,6 +304,36 @@ export default function LessonsWorldPage() {
                       )}
                     </div>
                   </div>
+
+                  {expanded && (
+                    <div className="lesson-row-details">
+                      <div className="lesson-card-details-meta">
+                        <span className="lesson-template-tag">
+                          {TEMPLATE_LABELS[lesson.template_type] ?? lesson.template_type}
+                        </span>
+                        <span className="lesson-difficulty-label">
+                          {DIFFICULTY_LABELS[lesson.difficulty]}
+                        </span>
+                      </div>
+                      {lesson.description && (
+                        <p className="lesson-card-details-desc">{lesson.description}</p>
+                      )}
+                      {state === "locked" && (
+                        <div className="lesson-card-lock-reason">
+                          {lesson.min_xp_required > (profile?.xp ?? 0) && (
+                            <p>
+                              Necesită <strong>{lesson.min_xp_required} XP</strong>
+                              {" "}(ai {profile?.xp ?? 0} XP)
+                            </p>
+                          )}
+                          {lesson.prerequisite_lesson_id &&
+                            !completedIds.has(lesson.prerequisite_lesson_id) && (
+                              <p>Completează mai întâi lecția prerequisită</p>
+                            )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </article>
               );
             })
