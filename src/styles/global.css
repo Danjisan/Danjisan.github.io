@@ -531,34 +531,166 @@ body {
   font-size: 0.9em;
 }
 
-/* ── Hero (Acasă) ─────────────────────────────────── */
+/* ── Homepage ─────────────────────────────────────── */
 
-.hero {
+.home {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 2.75rem);
+  padding: 48px 0 64px;
+}
+
+.home-brand {
+  line-height: 0;
+  display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 64px 0;
+  width: 100%;
+  animation: home-fade-up 0.7s ease both;
 }
 
-.hero-badge {
+.home-block {
+  width: 100%;
+  max-width: 40rem;
+  animation: home-fade-up 0.7s ease both;
+}
+
+.home-block--why {
+  animation-delay: 0.08s;
+}
+
+.home-block--what {
+  animation-delay: 0.16s;
+}
+
+.home-heading {
+  margin: 0 0 0.55rem;
+  font-size: clamp(0.92rem, 2vw, 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: var(--text-dim);
+}
+
+.home-copy {
   margin: 0;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  background: var(--gold-soft);
-  color: var(--gold);
-  font-size: 0.8rem;
+  color: var(--text);
+  font-size: clamp(1.15rem, 2.8vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.home-axes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 40rem;
+  animation: home-fade-up 0.75s ease both;
+  animation-delay: 0.24s;
+}
+
+.home-axes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: max-content auto max-content;
+  column-gap: 1.1rem;
+  row-gap: 1.15rem;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(1.2rem, 3.6vw, 1.65rem);
+  font-weight: 650;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
-.hero-title {
+.home-axis {
+  display: contents;
+}
+
+.home-axis-pole:nth-child(1) {
+  text-align: right;
+}
+
+.home-axis-pole:nth-child(3) {
+  text-align: left;
+}
+
+.home-axis-link {
+  color: var(--gold);
+  font-size: 1.2em;
+  line-height: 1;
+  opacity: 0.9;
+  text-align: center;
+}
+
+.home-axes-caption {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.home-cta {
   margin: 0;
-  font-size: clamp(2.2rem, 6vw, 3.6rem);
-  line-height: 1.15;
+  width: 100%;
+  max-width: 40rem;
+  color: var(--text-dim);
+  font-size: clamp(1.05rem, 2.4vw, 1.15rem);
+  line-height: 1.65;
+  animation: home-fade-up 0.75s ease both;
+  animation-delay: 0.32s;
+}
+
+.home-cta a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(167, 139, 250, 0.45);
+  text-underline-offset: 0.18em;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.home-cta a:hover {
+  color: var(--gold);
+  text-decoration-color: rgba(251, 191, 36, 0.55);
+}
+
+@keyframes home-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-brand,
+  .home-block,
+  .home-axes,
+  .home-cta {
+    animation: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-axes-list {
+    column-gap: 0.65rem;
+    letter-spacing: 0.04em;
+    font-size: clamp(1.05rem, 5.2vw, 1.25rem);
+  }
+
+  .home-axes-caption {
+    font-size: 0.98rem;
+    padding-inline: 0.25rem;
+  }
 }
 
 .accent {
@@ -566,14 +698,6 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.hero-subtitle {
-  margin: 0;
-  max-width: 36rem;
-  color: var(--text-dim);
-  font-size: 1.1rem;
-  line-height: 1.6;
 }
 
 /* ── Admin pages ──────────────────────────────────── */
