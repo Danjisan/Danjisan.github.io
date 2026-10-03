@@ -90,7 +90,7 @@ body {
 }
 
 .colabme-logo--hero {
-  width: clamp(9.5rem, 38vw, 16rem);
+  width: clamp(14rem, 68vw, 24rem);
   height: auto;
   margin: 0 0.08em;
   background: linear-gradient(100deg, var(--accent) 30%, var(--gold) 100%);
@@ -538,8 +538,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(2rem, 5vw, 2.75rem);
-  padding: 48px 0 64px;
+  gap: clamp(2.25rem, 5.5vw, 3.25rem);
+  padding: 48px 0 72px;
+}
+
+.home-intro {
+  width: 100%;
+  max-width: 42rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 .home-brand {
@@ -550,6 +560,105 @@ body {
   animation: home-fade-up 0.7s ease both;
 }
 
+.home-lead {
+  margin: 0;
+  max-width: 38rem;
+  color: var(--text);
+  font-size: clamp(1.2rem, 2.8vw, 1.48rem);
+  font-weight: 450;
+  line-height: 1.45;
+  letter-spacing: -0.011em;
+  animation: home-fade-up 0.7s ease both;
+  animation-delay: 0.08s;
+}
+
+.home-triad {
+  margin: 0.15rem 0 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(0.45rem, 1.8vw, 0.95rem);
+  font-size: clamp(2.05rem, 8.2vw, 3.7rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  animation: home-fade-up 0.7s ease both;
+  animation-delay: 0.14s;
+}
+
+.home-triad-sep {
+  color: var(--text-dim);
+  font-weight: 400;
+  opacity: 0.55;
+}
+
+.home-triad-word--co,
+.home-pillar--co .home-pillar-word {
+  color: var(--accent);
+}
+
+.home-triad-word--lab,
+.home-pillar--lab .home-pillar-word {
+  color: #3ecf8e;
+}
+
+.home-triad-word--me,
+.home-pillar--me .home-pillar-word {
+  color: var(--gold);
+}
+
+.home-intro-copy {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--text);
+  font-size: clamp(1.05rem, 2.3vw, 1.18rem);
+  line-height: 1.65;
+  animation: home-fade-up 0.7s ease both;
+  animation-delay: 0.2s;
+}
+
+.home-pillar {
+  width: 100%;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  animation: home-fade-up 0.7s ease both;
+}
+
+.home-pillar--co {
+  animation-delay: 0.26s;
+}
+
+.home-pillar--lab {
+  animation-delay: 0.32s;
+}
+
+.home-pillar--me {
+  animation-delay: 0.38s;
+}
+
+.home-pillar-word {
+  margin: 0;
+  font-size: clamp(1.85rem, 4.5vw, 2.35rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.home-pillar-title {
+  margin: 0.55rem 0 0.8rem;
+  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.home-pillar .home-copy + .home-copy {
+  margin-top: 0.85rem;
+}
+
 .home-block {
   width: 100%;
   max-width: 40rem;
@@ -557,11 +666,10 @@ body {
 }
 
 .home-block--why {
-  animation-delay: 0.08s;
-}
-
-.home-block--what {
-  animation-delay: 0.16s;
+  margin-top: 0.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  animation-delay: 0.46s;
 }
 
 .home-heading {
@@ -628,10 +736,10 @@ body {
 }
 
 .home-axes-caption {
-  margin: 1.25rem 0 0;
+  margin: 0 0 1.35rem;
   text-align: center;
   color: var(--text-dim);
-  font-size: 1.05rem;
+  font-size: clamp(1.05rem, 2.4vw, 1.2rem);
   line-height: 1.5;
 }
 
@@ -673,6 +781,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .home-brand,
+  .home-lead,
+  .home-triad,
+  .home-intro-copy,
+  .home-pillar,
   .home-block,
   .home-axes,
   .home-cta {
