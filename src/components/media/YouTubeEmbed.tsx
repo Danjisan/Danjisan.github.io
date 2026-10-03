@@ -11,6 +11,11 @@ interface YouTubeEmbedProps {
    * Respectă prefers-reduced-motion (atunci rămâne click-to-play).
    */
   ambient?: boolean;
+  /**
+   * Doar cu ambient: afișează bara de controale YouTube.
+   * Implicit false → chrome redus (controls=0).
+   */
+  showControls?: boolean;
 }
 
 function prefersReducedMotion() {
@@ -24,6 +29,7 @@ function buildEmbedSrc(
   videoId: string | undefined,
   playlistId: string | undefined,
   ambient: boolean,
+  showControls: boolean,
 ) {
   const params = new URLSearchParams({ autoplay: "1" });
 
@@ -33,9 +39,12 @@ function buildEmbedSrc(
     params.set("playsinline", "1");
     params.set("rel", "0");
     params.set("modestbranding", "1");
-    // Controale vizibile ca să poți da unmute / pauză / skip în playlist
-    params.set("controls", "1");
     params.set("iv_load_policy", "3");
+    params.set("controls", showControls ? "1" : "0");
+    if (!showControls) {
+      params.set("fs", "0");
+      params.set("disablekb", "1");
+    }
   }
 
   if (playlistId) {
@@ -63,6 +72,7 @@ export default function YouTubeEmbed({
   playlistId,
   title = "Video YouTube",
   ambient = false,
+  showControls = false,
 }: YouTubeEmbedProps) {
   const [playing, setPlaying] = useState(
     () => ambient && !prefersReducedMotion(),
@@ -71,11 +81,12 @@ export default function YouTubeEmbed({
   if (playing) {
     return (
       <iframe
+        key={ambient ? `ambient-${showControls ? "ctrl" : "clean"}` : "yt"}
         className="yt-iframe"
-        src={buildEmbedSrc(videoId, playlistId, ambient)}
+        src={buildEmbedSrc(videoId, playlistId, ambient, showControls)}
         title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
+        allowFullScreen={showControls || !ambient}
       />
     );
   }

@@ -760,6 +760,22 @@ body {
   margin-top: 0.85rem;
 }
 
+.home-pillar-pros-label {
+  margin-top: 1.1rem;
+}
+
+.home-pillar-pros {
+  margin: 0.55rem 0 0;
+  padding: 0 0 0 1.2rem;
+  color: var(--text);
+  font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.home-pillar-pros li + li {
+  margin-top: 0.4rem;
+}
+
 .home-block {
   width: 100%;
   max-width: 40rem;

@@ -26,7 +26,12 @@ const PILLARS = [
     id: "lab" as const,
     title: "Laboratorul virtual",
     paragraphs: [
-      "Teoria se verifică în simulator, înainte de lumea reală. Lecțiile folosesc laboratoare virtuale în care repeți un experiment, schimbi o variabilă și vezi ce se întâmplă — fără costul și riscul din teren.",
+      "Laboratorul virtual este locul în care teoria poate fi pusă în aplicare, un spațiu de experimentare, testare și prototipare care simulează materiale și echipamente reale. Simulatorul funcționează în tandem cu baza de date ce conține logica pentru componentele disponibile, lecții și exerciții, și poate fi accesat online prin intermediul platformei ColabMe și a produselor IoT, prin API-uri dedicate.",
+    ],
+    bullets: [
+      "economia de resurse fizice în procesul de învățare și experimentare",
+      "lipsa deșeurilor nocive",
+      "realizarea experimentelor periculoase în siguranță",
     ],
   },
   {
@@ -63,7 +68,7 @@ export default function HomePage() {
             Un produs educațional complet, de la teorie și practică
           </span>
           <span className="home-lead-line">
-            în mediul virtual, la aplicații practice în lumea reală.
+            în mediul virtual, până la aplicații practice în lumea reală.
           </span>
         </h1>
       </header>
@@ -76,6 +81,7 @@ export default function HomePage() {
             playlistId={HOME_PLAYLIST_ID}
             title="ColabMe — playlist"
             ambient
+            showControls={videoInteractive}
           />
         </figure>
         <button
@@ -112,6 +118,16 @@ export default function HomePage() {
                 {paragraph}
               </p>
             ))}
+            {"bullets" in pillar && pillar.bullets && (
+              <>
+                <p className="home-copy home-pillar-pros-label">Avantaje:</p>
+                <ul className="home-pillar-pros">
+                  {pillar.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              </>
+            )}
           </section>
         ))}
       </div>
