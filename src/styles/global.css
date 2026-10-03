@@ -96,6 +96,51 @@ body {
   background: linear-gradient(100deg, var(--accent) 30%, var(--gold) 100%);
 }
 
+/* Fragments stylizate din wordmark-ul ColabMe (Co / lab / Me) */
+.colabme-part {
+  display: inline-block;
+  flex-shrink: 0;
+  height: 1em;
+  width: auto;
+  vertical-align: -0.12em;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.colabme-part--co {
+  aspect-ratio: 292 / 207.4;
+  background: var(--accent);
+  -webkit-mask-image: url("/branding/ColabMe-co-white.svg");
+  mask-image: url("/branding/ColabMe-co-white.svg");
+}
+
+.colabme-part--lab {
+  aspect-ratio: 349 / 207.4;
+  /* Same sweep as the logo: violet on "l/a", peach/gold on the "b" edge */
+  background: linear-gradient(100deg, var(--accent) 18%, var(--gold) 88%);
+  -webkit-mask-image: url("/branding/ColabMe-lab-white.svg");
+  mask-image: url("/branding/ColabMe-lab-white.svg");
+}
+
+.colabme-part--me {
+  aspect-ratio: 315.5 / 207.4;
+  background: var(--gold);
+  -webkit-mask-image: url("/branding/ColabMe-me-white.svg");
+  mask-image: url("/branding/ColabMe-me-white.svg");
+}
+
+.colabme-part--triad {
+  height: 1em;
+}
+
+.colabme-part--pillar {
+  height: clamp(2.1rem, 5vw, 2.7rem);
+}
+
 /* Buton hamburger — vizibil doar pe mobil */
 .menu-toggle {
   display: flex;
@@ -575,12 +620,11 @@ body {
 .home-triad {
   margin: 0.15rem 0 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: clamp(0.45rem, 1.8vw, 0.95rem);
-  font-size: clamp(2.05rem, 8.2vw, 3.7rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
+  gap: clamp(0.55rem, 2vw, 1.1rem);
+  /* Drives .colabme-part--triad height: 1em — same optical size for Co / lab / Me */
+  font-size: clamp(2.35rem, 9vw, 4rem);
   line-height: 1;
   white-space: nowrap;
   animation: home-fade-up 0.7s ease both;
@@ -589,23 +633,10 @@ body {
 
 .home-triad-sep {
   color: var(--text-dim);
+  font-size: 0.45em;
   font-weight: 400;
   opacity: 0.55;
-}
-
-.home-triad-word--co,
-.home-pillar--co .home-pillar-word {
-  color: var(--accent);
-}
-
-.home-triad-word--lab,
-.home-pillar--lab .home-pillar-word {
-  color: #3ecf8e;
-}
-
-.home-triad-word--me,
-.home-pillar--me .home-pillar-word {
-  color: var(--gold);
+  line-height: 1;
 }
 
 .home-intro-copy {
@@ -623,6 +654,8 @@ body {
   max-width: 40rem;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   animation: home-fade-up 0.7s ease both;
 }
 
@@ -636,14 +669,6 @@ body {
 
 .home-pillar--me {
   animation-delay: 0.38s;
-}
-
-.home-pillar-word {
-  margin: 0;
-  font-size: clamp(1.85rem, 4.5vw, 2.35rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  line-height: 1;
 }
 
 .home-pillar-title {

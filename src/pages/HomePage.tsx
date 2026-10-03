@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 import ColabMeLogo from "../components/ColabMeLogo";
+import ColabMeWordPart from "../components/ColabMeWordPart";
 
 const AXES = [
   ["DIGITAL", "REAL"],
@@ -9,8 +10,7 @@ const AXES = [
 
 const PILLARS = [
   {
-    id: "co",
-    word: "Co",
+    id: "co" as const,
     title: "Comunitate și colaborare",
     paragraphs: [
       "Conținutul se construiește împreună. Profesorii, elevii și partenerii lucrează pe platformă: propun lecții, le discută și le îmbunătățesc. Partea socială este modul în care apare materialul educațional.",
@@ -18,16 +18,14 @@ const PILLARS = [
     ],
   },
   {
-    id: "lab",
-    word: "lab",
+    id: "lab" as const,
     title: "Laboratorul virtual",
     paragraphs: [
       "Teoria se verifică în simulator, înainte de lumea reală. Lecțiile folosesc laboratoare virtuale în care repeți un experiment, schimbi o variabilă și vezi ce se întâmplă — fără costul și riscul din teren.",
     ],
   },
   {
-    id: "me",
-    word: "Me",
+    id: "me" as const,
     title: "Modular evolution",
     paragraphs: [
       "Ce testezi virtual continuă în aplicații practice. Modular evolution înseamnă că fiecare lecție, experiment sau proiect este un modul care se leagă de următorul.",
@@ -56,25 +54,25 @@ export default function HomePage() {
 
         <h1 className="home-lead">
           Un proces complet de educație, de la teorie și practică în mediul
-          virtual la aplicații practice în lumea reală.
+          virtual, la aplicații practice în lumea reală.
         </h1>
 
         <p className="home-triad" aria-label="Co, lab, Me">
-          <span className="home-triad-word home-triad-word--co">Co</span>
+          <ColabMeWordPart part="co" className="colabme-part--triad" />
           <span className="home-triad-sep" aria-hidden="true">
             –
           </span>
-          <span className="home-triad-word home-triad-word--lab">lab</span>
+          <ColabMeWordPart part="lab" className="colabme-part--triad" />
           <span className="home-triad-sep" aria-hidden="true">
             –
           </span>
-          <span className="home-triad-word home-triad-word--me">Me</span>
+          <ColabMeWordPart part="me" className="colabme-part--triad" />
         </p>
 
         <p className="home-intro-copy">
-          Conținut educațional realizat prin colaborare în platforma ColabMe și
-          în laboratoare virtuale, folosite pentru a testa experimente și
-          situații cu aplicații în lumea reală.
+          Conținut educațional realizat prin colaborare în laboratoare virtuale
+          din platforma ColabMe, folosite pentru a testa ipoteze și experimente
+          cu aplicații în lumea reală.
         </p>
       </header>
 
@@ -83,7 +81,10 @@ export default function HomePage() {
           key={pillar.id}
           className={`home-pillar home-pillar--${pillar.id}`}
         >
-          <p className="home-pillar-word">{pillar.word}</p>
+          <ColabMeWordPart
+            part={pillar.id}
+            className="colabme-part--pillar"
+          />
           <h2 className="home-pillar-title">{pillar.title}</h2>
           {pillar.paragraphs.map((paragraph) => (
             <p key={paragraph} className="home-copy">
