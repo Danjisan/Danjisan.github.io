@@ -90,7 +90,7 @@ body {
 }
 
 .colabme-logo--hero {
-  width: clamp(14rem, 68vw, 24rem);
+  width: clamp(16rem, 78vw, 28rem);
   height: auto;
   margin: 0 0.08em;
   background: linear-gradient(100deg, var(--accent) 30%, var(--gold) 100%);
@@ -133,12 +133,23 @@ body {
   mask-image: url("/branding/ColabMe-me-white.svg");
 }
 
-.colabme-part--triad {
+.colabme-part--focus {
   height: 1em;
 }
 
-.colabme-part--pillar {
-  height: clamp(2.1rem, 5vw, 2.7rem);
+.colabme-part--muted.colabme-part--co,
+.colabme-part--muted.colabme-part--lab,
+.colabme-part--muted.colabme-part--me {
+  background: #3a3348;
+}
+
+.colabme-logo-focus {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.1em;
+  font-size: clamp(2.1rem, 5vw, 2.7rem);
+  line-height: 0;
 }
 
 /* Buton hamburger — vizibil doar pe mobil */
@@ -583,7 +594,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(2.25rem, 5.5vw, 3.25rem);
+  gap: clamp(2.75rem, 6vw, 4rem);
   padding: 48px 0 72px;
 }
 
@@ -608,50 +619,115 @@ body {
 .home-lead {
   margin: 0;
   max-width: 38rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
   color: var(--text);
   font-size: clamp(1.2rem, 2.8vw, 1.48rem);
   font-weight: 450;
-  line-height: 1.45;
+  line-height: 1.35;
   letter-spacing: -0.011em;
   animation: home-fade-up 0.7s ease both;
   animation-delay: 0.08s;
 }
 
-.home-triad {
-  margin: 0.15rem 0 0;
+.home-lead-line {
+  display: block;
+}
+
+.home-video-block {
+  width: 100%;
+  max-width: 42rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.55rem, 2vw, 1.1rem);
-  /* Drives .colabme-part--triad height: 1em — same optical size for Co / lab / Me */
-  font-size: clamp(2.35rem, 9vw, 4rem);
-  line-height: 1;
-  white-space: nowrap;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
   animation: home-fade-up 0.7s ease both;
   animation-delay: 0.14s;
 }
 
-.home-triad-sep {
-  color: var(--text-dim);
-  font-size: 0.45em;
-  font-weight: 400;
-  opacity: 0.55;
-  line-height: 1;
+.home-video {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
 }
 
-.home-intro-copy {
+/* Implicit: fără hover YouTube; butonul de dedesubt deblochează */
+.home-video:not(.home-video--interactive)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.home-video:not(.home-video--interactive) .yt-iframe {
+  pointer-events: none;
+}
+
+.home-video-unlock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   margin: 0;
-  max-width: 40rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  font-weight: 450;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  cursor: pointer;
+  opacity: 0.45;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
+}
+
+.home-video-unlock-mark {
+  display: inline-block;
+  width: 0.85em;
+  font-size: 0.85em;
+  line-height: 1;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.home-video-unlock:hover,
+.home-video-unlock:focus-visible {
+  opacity: 0.85;
   color: var(--text);
-  font-size: clamp(1.05rem, 2.3vw, 1.18rem);
-  line-height: 1.65;
-  animation: home-fade-up 0.7s ease both;
-  animation-delay: 0.2s;
+  outline: none;
+}
+
+.home-video-unlock.is-on {
+  opacity: 0.35;
+  color: var(--text-dim);
+}
+
+.home-video-unlock.is-on:hover,
+.home-video-unlock.is-on:focus-visible {
+  opacity: 0.7;
+}
+
+.home-pillars {
+  width: 100%;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.75rem, 6.5vw, 4rem);
 }
 
 .home-pillar {
   width: 100%;
-  max-width: 40rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -807,8 +883,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .home-brand,
   .home-lead,
-  .home-triad,
-  .home-intro-copy,
+  .home-video-block,
+  .home-pillars,
   .home-pillar,
   .home-block,
   .home-axes,
@@ -1694,6 +1770,13 @@ body {
 
 .yt-facade:hover .yt-play {
   transform: translate(-50%, -50%) scale(1.1);
+}
+
+.yt-facade-blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-soft);
 }
 
 .yt-privacy-hint {

@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ColabMeLogo from "../components/ColabMeLogo";
-import ColabMeWordPart from "../components/ColabMeWordPart";
+import { ColabMeLogoFocus } from "../components/ColabMeWordPart";
+import YouTubeEmbed from "../components/media/YouTubeEmbed";
+
+/** Playlist ColabMe.eu — https://www.youtube.com/playlist?list=PLURbUKKPSHjc */
+const HOME_PLAYLIST_ID = "PLURbUKKPSHjc";
 
 const AXES = [
   ["DIGITAL", "REAL"],
@@ -37,6 +42,7 @@ const PILLARS = [
 export default function HomePage() {
   const [params] = useSearchParams();
   const deleted = params.get("deleted") === "1";
+  const [videoInteractive, setVideoInteractive] = useState(false);
 
   return (
     <section className="home">
@@ -53,46 +59,62 @@ export default function HomePage() {
         </div>
 
         <h1 className="home-lead">
-          Un proces complet de educație, de la teorie și practică în mediul
-          virtual, la aplicații practice în lumea reală.
+          <span className="home-lead-line">
+            Un produs educațional complet, de la teorie și practică
+          </span>
+          <span className="home-lead-line">
+            în mediul virtual, la aplicații practice în lumea reală.
+          </span>
         </h1>
-
-        <p className="home-triad" aria-label="Co, lab, Me">
-          <ColabMeWordPart part="co" className="colabme-part--triad" />
-          <span className="home-triad-sep" aria-hidden="true">
-            –
-          </span>
-          <ColabMeWordPart part="lab" className="colabme-part--triad" />
-          <span className="home-triad-sep" aria-hidden="true">
-            –
-          </span>
-          <ColabMeWordPart part="me" className="colabme-part--triad" />
-        </p>
-
-        <p className="home-intro-copy">
-          Conținut educațional realizat prin colaborare în laboratoare virtuale
-          din platforma ColabMe, folosite pentru a testa ipoteze și experimente
-          cu aplicații în lumea reală.
-        </p>
       </header>
 
-      {PILLARS.map((pillar) => (
-        <section
-          key={pillar.id}
-          className={`home-pillar home-pillar--${pillar.id}`}
+      <div className="home-video-block">
+        <figure
+          className={`home-video${videoInteractive ? " home-video--interactive" : ""}`}
         >
-          <ColabMeWordPart
-            part={pillar.id}
-            className="colabme-part--pillar"
+          <YouTubeEmbed
+            playlistId={HOME_PLAYLIST_ID}
+            title="ColabMe — playlist"
+            ambient
           />
-          <h2 className="home-pillar-title">{pillar.title}</h2>
-          {pillar.paragraphs.map((paragraph) => (
-            <p key={paragraph} className="home-copy">
-              {paragraph}
-            </p>
-          ))}
-        </section>
-      ))}
+        </figure>
+        <button
+          type="button"
+          className={`home-video-unlock${videoInteractive ? " is-on" : ""}`}
+          aria-pressed={videoInteractive}
+          aria-label={
+            videoInteractive
+              ? "Dezactivează control video"
+              : "Activează control video"
+          }
+          onClick={() => setVideoInteractive((on) => !on)}
+        >
+          <span className="home-video-unlock-mark" aria-hidden="true">
+            {videoInteractive ? "✓" : "✕"}
+          </span>
+          control video
+        </button>
+      </div>
+
+      <div className="home-pillars">
+        {PILLARS.map((pillar) => (
+          <section
+            key={pillar.id}
+            className={`home-pillar home-pillar--${pillar.id}`}
+          >
+            <ColabMeLogoFocus
+              active={pillar.id}
+              className="home-pillar-logo"
+            />
+            <h2 className="home-pillar-title">{pillar.title}</h2>
+            {pillar.paragraphs.map((paragraph) => (
+              <p key={paragraph} className="home-copy">
+                {paragraph}
+              </p>
+            ))}
+          </section>
+        ))}
+      </div>
 
       <section className="home-axes" aria-label="Cele trei axe ColabMe">
         <p className="home-axes-caption">
