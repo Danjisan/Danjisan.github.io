@@ -1870,6 +1870,98 @@ body {
   text-align: center;
 }
 
+/* ── Despre ColabMe ───────────────────────────────── */
+
+.about-page {
+  max-width: 40rem;
+}
+
+.about-block {
+  margin: 0 0 2.35rem;
+}
+
+.about-block:last-child {
+  margin-bottom: 0;
+}
+
+.about-block h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.about-block .about-lead {
+  margin: 0 0 1.25rem;
+  max-width: none;
+  color: var(--text);
+  font-size: clamp(1.22rem, 2.9vw, 1.42rem);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+}
+
+.about-block p:not(.about-lead) {
+  margin: 0;
+  max-width: none;
+  color: var(--text-dim);
+  font-size: clamp(0.98rem, 2.1vw, 1.08rem);
+  line-height: 1.65;
+}
+
+.about-block p:not(.about-lead) + p:not(.about-lead) {
+  margin-top: 0.75rem;
+}
+
+.about-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  margin-top: 0.25rem;
+}
+
+.about-pillar-title {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.02rem, 2.2vw, 1.12rem);
+  font-weight: 550;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.about-pillar-list {
+  margin: 0;
+  padding: 0 0 0 1.15rem;
+  color: var(--text-dim);
+  font-size: clamp(0.98rem, 2.1vw, 1.08rem);
+  line-height: 1.55;
+}
+
+.about-pillar-list li + li {
+  margin-top: 0.35rem;
+}
+
+.about-pillar-todo {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.about-objectives {
+  margin: 0;
+  padding: 0 0 0 1.2rem;
+  color: var(--text);
+  font-size: clamp(1.05rem, 2.3vw, 1.18rem);
+  line-height: 1.55;
+}
+
+.about-objectives li + li {
+  margin-top: 0.55rem;
+}
+
 .button-link {
   display: inline-block;
   margin-top: 8px;
