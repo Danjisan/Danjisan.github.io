@@ -1,14 +1,23 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ColabMeLogo from "./ColabMeLogo";
 import { useAuth } from "../hooks/useAuth";
+import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { to: string; label: string; title?: string }[] = [
   { to: "/", label: "Acasă" },
   { to: "/despre", label: "Despre ColabMe" },
   { to: "/roadmap", label: "Roadmap" },
-  { to: "/proiecte", label: "Proiecte" },
+  ...(import.meta.env.DEV
+    ? [
+        {
+          to: "/proiecte",
+          label: "Proiecte",
+          title: "Doar local — nu apare pe site-ul public",
+        },
+      ]
+    : []),
   { to: "/contact", label: "Contact" },
   { to: "/lectii", label: "Lumea Lectiilor" },
   { to: "/lobby", label: "Lumea Online" },
@@ -18,10 +27,17 @@ const ADMIN_NAV = [
   { to: "/admin/intrebari", label: "Întrebări" },
 ];
 
+const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginTo = authPath(
+    "login",
+    safeNextPath(AUTH_PATHS.includes(location.pathname) ? "/" : location.pathname),
+  );
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -59,6 +75,7 @@ export default function Header() {
               isActive ? "nav-link active" : "nav-link"
             }
             end={item.to === "/"}
+            title={item.title}
             onClick={() => setMenuOpen(false)}
           >
             {item.label}
@@ -100,7 +117,7 @@ export default function Header() {
             </div>
           ) : (
             <NavLink
-              to="/login"
+              to={loginTo}
               className="nav-login-btn"
               onClick={() => setMenuOpen(false)}
             >

@@ -1,9 +1,9 @@
+import { lazy, Suspense } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import RoadmapPage from "./pages/RoadmapPage";
-import ProjectsPage from "./pages/ProjectsPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -20,6 +20,12 @@ import LessonsWorldPage from "./pages/LessonsWorldPage";
 import LessonPage from "./pages/lessons/LessonPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+// Pagină de teste. `import.meta.env.DEV` e true doar la `npm run dev`;
+// în build-ul public (GitHub Pages) ruta dispare și modulul nu e inclus.
+const ProjectsPage = import.meta.env.DEV
+  ? lazy(() => import("./pages/ProjectsPage"))
+  : null;
+
 export default function App() {
   return (
     <div className="app-shell">
@@ -29,7 +35,16 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/despre" element={<AboutPage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
-          <Route path="/proiecte" element={<ProjectsPage />} />
+          {ProjectsPage ? (
+            <Route
+              path="/proiecte"
+              element={
+                <Suspense fallback={null}>
+                  <ProjectsPage />
+                </Suspense>
+              }
+            />
+          ) : null}
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/cookies" element={<CookiesPage />} />

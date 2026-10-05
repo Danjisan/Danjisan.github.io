@@ -16,6 +16,7 @@ export interface Project {
 
 /**
  * Proiectele afișate pe pagina Proiecte, în ordine.
+ * Pagina există doar în `npm run dev` — nu e în build-ul public și nu e indexată.
  * Modelele 3D locale se pun în public/models/ și se referă ca "/models/nume.glb".
  */
 export const PROJECTS: Project[] = [

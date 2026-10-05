@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { getSocket } from "../lib/socket";
+import { disconnectSocket, getSocket } from "../lib/socket";
 import type {
   LobbySession,
   ChatMessage,
@@ -20,7 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function LobbyPage() {
-  const { profile, session: authSession, loading: authLoading } = useAuth();
+  const { user, profile, session: authSession, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [sessions, setSessions] = useState<LobbySession[]>([]);
@@ -38,8 +38,11 @@ export default function LobbyPage() {
 
   useEffect(() => {
     if (authLoading) return;
+    if (!user) {
+      disconnectSocket();
+      return;
+    }
 
-    // Conectare — cu token dacă e logat, fără dacă e anonim
     const token = authSession?.access_token ?? null;
     const sock = getSocket(token);
 
@@ -71,7 +74,7 @@ export default function LobbyPage() {
       sock.off("error");
       sock.off("session:joined");
     };
-  }, [authLoading, authSession?.access_token]);
+  }, [authLoading, user, authSession?.access_token]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,6 +119,42 @@ export default function LobbyPage() {
   }
 
   const onlineCount = onlineUsers.length;
+
+  if (authLoading) {
+    return (
+      <section className="page lobby-gate">
+        <p className="lobby-gate-status">Se încarcă…</p>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className="page lobby-gate">
+        <div className="lobby-gate-card">
+          <h1>Lumea Online</h1>
+          <p className="lobby-gate-lead">
+            Aici joci live, cu alți oameni. Intri într-o sesiune de întrebări
+            sau pornești una, și rămâi cu numele și rezultatul tău.
+          </p>
+          <p className="lobby-gate-label">Ca să intri, îți trebuie un cont:</p>
+          <ol className="lobby-gate-steps">
+            <li>Creează un cont — elev, profesor sau părinte.</li>
+            <li>După login ajungi înapoi pe pagina asta.</li>
+            <li>Pornești o sesiune nouă sau intri într-una deja deschisă.</li>
+          </ol>
+          <div className="lobby-gate-actions">
+            <Link to="/register?next=/lobby" className="button-link">
+              Creează cont
+            </Link>
+            <Link to="/login?next=/lobby" className="lobby-gate-login">
+              Am deja cont
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div className="lobby-layout">

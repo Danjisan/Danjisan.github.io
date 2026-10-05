@@ -1,4 +1,13 @@
 /**
+ * Trei nume, nu unul. În texte, ordinea e asociația, apoi platforma,
+ * apoi SRL-ul:
+ * - Asociația ColabMe: a preluat inițiativa
+ * - ColabMe: platforma, serviciul și produsele educaționale
+ * - Modular Evolution SRL: a început lucrul și rămâne dezvoltatorul principal;
+ *   se menționează după asociație și după platformă
+ * legalName de mai jos e denumirea din acte, pentru politici. Nu înseamnă
+ * că SRL-ul și asociația sunt același lucru.
+ *
  * Date juridice ColabMe — completați / actualizați aici.
  * Orice valoare care începe cu "[COMPLETAȚI:" apare evidențiată pe site.
  * Nu este consultanță juridică; textele legale sunt șablon tehnic.

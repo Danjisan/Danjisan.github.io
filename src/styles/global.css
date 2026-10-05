@@ -765,15 +765,36 @@ body {
 }
 
 .home-pillar-pros {
-  margin: 0.55rem 0 0;
-  padding: 0 0 0 1.2rem;
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
   color: var(--text);
   font-size: clamp(1.05rem, 2.5vw, 1.2rem);
   line-height: 1.55;
 }
 
+.home-pillar-pros li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
 .home-pillar-pros li + li {
-  margin-top: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.home-pillar-pro-icon {
+  flex: none;
+  width: 1.76rem;
+  height: 1.76rem;
+  margin-top: 0.02em;
+  color: var(--accent);
+}
+
+.home-pillar-pro-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .home-block {
@@ -1876,8 +1897,20 @@ body {
   max-width: 40rem;
 }
 
+.about-page-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .about-block {
-  margin: 0 0 2.35rem;
+  margin: 0 0 2.75rem;
 }
 
 .about-block:last-child {
@@ -1885,21 +1918,21 @@ body {
 }
 
 .about-block h2 {
-  margin: 0 0 0.75rem;
-  font-size: clamp(0.92rem, 2vw, 1.02rem);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-dim);
+  margin: 0 0 0.85rem;
+  font-size: clamp(1.7rem, 4vw, 2.05rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--accent);
 }
 
 .about-block .about-lead {
   margin: 0 0 1.25rem;
   max-width: none;
   color: var(--text);
-  font-size: clamp(1.22rem, 2.9vw, 1.42rem);
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: clamp(1.12rem, 2.5vw, 1.28rem);
+  font-weight: 400;
+  line-height: 1.45;
   letter-spacing: -0.012em;
 }
 
@@ -1913,41 +1946,6 @@ body {
 
 .about-block p:not(.about-lead) + p:not(.about-lead) {
   margin-top: 0.75rem;
-}
-
-.about-pillars {
-  display: flex;
-  flex-direction: column;
-  gap: 1.35rem;
-  margin-top: 0.25rem;
-}
-
-.about-pillar-title {
-  margin: 0 0 0.45rem;
-  font-size: clamp(1.02rem, 2.2vw, 1.12rem);
-  font-weight: 550;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-
-.about-pillar-list {
-  margin: 0;
-  padding: 0 0 0 1.15rem;
-  color: var(--text-dim);
-  font-size: clamp(0.98rem, 2.1vw, 1.08rem);
-  line-height: 1.55;
-}
-
-.about-pillar-list li + li {
-  margin-top: 0.35rem;
-}
-
-.about-pillar-todo {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 0.92rem;
-  font-style: italic;
-  opacity: 0.75;
 }
 
 .about-objectives {
@@ -1978,6 +1976,94 @@ body {
 }
 
 /* ── Lobby ────────────────────────────────────────────────── */
+
+.lobby-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1.75rem;
+}
+
+.lobby-gate-card {
+  width: 100%;
+  max-width: 36rem;
+  padding: 1.75rem 1.6rem 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-soft);
+}
+
+.lobby-gate-card h1 {
+  margin: 0 0 0.75rem;
+}
+
+.lobby-gate .lobby-gate-lead {
+  margin: 0 0 1.15rem;
+  max-width: none;
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.lobby-gate .lobby-gate-label {
+  margin: 0 0 0.45rem;
+  max-width: none;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lobby-gate-steps {
+  margin: 0 0 1.4rem;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.lobby-gate-steps li + li {
+  margin-top: 0.4rem;
+}
+
+.lobby-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.lobby-gate-actions .button-link {
+  margin-top: 0;
+}
+
+.lobby-gate-login {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lobby-gate-login:hover {
+  text-decoration: underline;
+}
+
+.lobby-gate .lobby-gate-status {
+  margin: 0;
+  color: var(--text-dim);
+}
+
+@media (max-width: 600px) {
+  .lobby-gate-card {
+    padding: 1.35rem 1.1rem 1.25rem;
+  }
+
+  .lobby-gate-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lobby-gate-actions .button-link,
+  .lobby-gate-login {
+    text-align: center;
+  }
+}
 
 .lobby-layout {
   display: grid;

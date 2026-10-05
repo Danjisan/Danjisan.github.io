@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import {
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
 } from "../lib/authPassword";
+import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
 import type { UserRole } from "../lib/types";
 
@@ -16,6 +17,8 @@ const ROLES: { value: UserRole; label: string; description: string }[] = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -75,9 +78,11 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (data.session) {
-      navigate("/");
+      navigate(next);
     } else {
-      navigate("/login?registered=1");
+      const params = new URLSearchParams({ registered: "1" });
+      if (next !== "/") params.set("next", next);
+      navigate(`/login?${params.toString()}`);
     }
   }
 
@@ -182,7 +187,7 @@ export default function RegisterPage() {
         </form>
         <p className="auth-footer">
           Ai deja cont?{" "}
-          <Link to="/login" className="auth-link">
+          <Link to={authPath("login", next)} className="auth-link">
             Intră în cont
           </Link>
         </p>

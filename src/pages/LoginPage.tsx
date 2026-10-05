@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
 
 export default function LoginPage() {
@@ -7,6 +8,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const justRegistered = searchParams.get("registered") === "1";
   const justReset = searchParams.get("reset") === "1";
+  const next = safeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function LoginPage() {
     if (error) {
       setError("Email sau parolă incorecte.");
     } else {
-      navigate("/");
+      navigate(next);
     }
   }
 
@@ -77,7 +79,7 @@ export default function LoginPage() {
         </form>
         <p className="auth-footer">
           Nu ai cont?{" "}
-          <Link to="/register" className="auth-link">
+          <Link to={authPath("register", next)} className="auth-link">
             Înregistrează-te
           </Link>
         </p>
