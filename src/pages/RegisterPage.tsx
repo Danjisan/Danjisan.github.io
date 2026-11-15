@@ -10,7 +10,7 @@ import type { UserRole } from "../lib/types";
 
 const ROLES: { value: UserRole; label: string; description: string }[] = [
   { value: "elev", label: "Elev", description: "Accesezi lecții și concursuri" },
-  { value: "profesor", label: "Profesor", description: "Creezi conținut și moderezi sesiuni" },
+  { value: "profesor", label: "Profesor", description: "Creezi conținut și moderezi sesiuni (după verificare)" },
   { value: "parinte", label: "Părinte", description: "Urmărești activitatea elevului" },
   { value: "anonim", label: "Vizitator", description: "Acces limitat, fără școală" },
 ];
@@ -57,6 +57,9 @@ export default function RegisterPage() {
       options: {
         data: {
           display_name: displayName,
+          // Doar o cerere: trigger-ul din DB acceptă elev / parinte / anonim,
+          // iar „profesor” rămâne în așteptare până la aprobarea unui admin.
+          requested_role: role,
           accepted_terms_at: new Date().toISOString(),
           age_or_guardian_confirmed: true,
         },
@@ -68,12 +71,6 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
-
-    // Actualizăm rolul în profil (trigger-ul creează profilul cu rol 'anonim')
-    await supabase
-      .from("user_profiles")
-      .update({ role })
-      .eq("id", data.user.id);
 
     setLoading(false);
 
@@ -145,6 +142,12 @@ export default function RegisterPage() {
                 </label>
               ))}
             </div>
+            {role === "profesor" && (
+              <p className="auth-hint">
+                Contul de profesor se activează după ce îl verificăm. Până
+                atunci poți folosi platforma ca vizitator.
+              </p>
+            )}
           </fieldset>
 
           <label className="auth-check">

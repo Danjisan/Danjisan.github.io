@@ -150,6 +150,11 @@ export default function ProfilePage() {
             <span className={`nav-role-badge role-${profile.role}`}>
               {ROLE_LABELS[profile.role]}
             </span>
+            {profile.requested_role === "profesor" && (
+              <p className="auth-hint">
+                Cererea pentru cont de profesor așteaptă verificare.
+              </p>
+            )}
           </div>
         </div>
 
