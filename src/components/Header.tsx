@@ -4,6 +4,7 @@ import ColabMeLogo from "./ColabMeLogo";
 import { useAuth } from "../hooks/useAuth";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
+import type { UserRole } from "../lib/types";
 
 const NAV_ITEMS: { to: string; label: string; title?: string }[] = [
   { to: "/", label: "Acasă" },
@@ -23,8 +24,9 @@ const NAV_ITEMS: { to: string; label: string; title?: string }[] = [
   { to: "/lobby", label: "Lumea Online" },
 ];
 
-const ADMIN_NAV = [
-  { to: "/admin/intrebari", label: "Întrebări" },
+const ADMIN_NAV: { to: string; label: string; roles: UserRole[] }[] = [
+  { to: "/admin/intrebari", label: "Întrebări", roles: ["admin", "profesor"] },
+  { to: "/admin/profesori", label: "Profesori", roles: ["admin"] },
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
@@ -83,8 +85,8 @@ export default function Header() {
         ))}
 
         {/* Link-uri admin/profesor — vizibile doar pentru rolurile permise */}
-        {!loading && profile && ["admin", "profesor"].includes(profile.role) &&
-          ADMIN_NAV.map((item) => (
+        {!loading && profile &&
+          ADMIN_NAV.filter((item) => item.roles.includes(profile.role)).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

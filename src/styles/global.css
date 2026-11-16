@@ -469,6 +469,7 @@ body {
   font-size: 0.88rem;
   color: var(--text-dim);
   line-height: 1.45;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -1107,6 +1108,96 @@ body {
   border-color: rgba(255,255,255,0.2);
 }
 
+/* Aprobare profesori */
+.admin-intro {
+  margin: 0 0 16px;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.page > .auth-info,
+.page > .auth-error {
+  margin-bottom: 16px;
+}
+
+.teacher-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.teacher-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.teacher-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.teacher-name {
+  font-weight: 600;
+}
+
+.teacher-email {
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.teacher-date {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.teacher-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.teacher-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.teacher-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.teacher-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.teacher-btn-primary {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.teacher-btn-danger {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
 .question-item.editing {
   border-color: var(--accent);
 }
@@ -1549,8 +1640,9 @@ body {
 .auth-role-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
+  gap: 2px;
+  padding: 10px 12px;
+  text-align: left;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -1570,7 +1662,14 @@ body {
 .auth-role-label {
   font-size: 0.95rem;
   font-weight: 600;
+  line-height: 1.3;
   color: var(--text);
+}
+
+/* .auth-hint are margine negativă sus (pentru sub titlu); aici stă sub carduri. */
+.auth-role-fieldset .auth-hint {
+  margin: 10px 0 0;
+  text-align: left;
 }
 
 .auth-role-desc {

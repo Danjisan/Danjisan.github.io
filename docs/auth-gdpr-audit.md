@@ -11,7 +11,9 @@
 - [x] Rolul inițial îl decide trigger-ul de înregistrare; „profesor” rămâne în `requested_role` până la aprobare — client `dea40e7`
 - [x] Migrația rulată în Supabase + verificat cine avea deja `admin` / `profesor`
 - [ ] Test manual pe site live: cont nou „Profesor” → apare ca Vizitator cu nota de verificare; `update({ role: "admin" })` din consolă → eroare de permisiune
-- [ ] (Mai târziu) ecran de admin pentru aprobarea cererilor de profesor — deocamdată SQL, vezi comentariile din migrație
+- [x] Ecran de admin `/admin/profesori`: cereri în așteptare (Aprobă / Respinge) și profesori activi (Revocă); verificarea se face întâi pe email, de un admin — `colabme-server` migrația `20261116_teacher_approval.sql` (funcții `admin_list_teachers`, `approve_teacher`, `reject_teacher`, `revoke_teacher`, jurnal în `private.role_changes`)
+- [x] Migrația `20261116_teacher_approval.sql` rulată în Supabase (cu RLS pe `private.role_changes`) + verificarea (a): `anon` nu poate apela nicio funcție (2026-11-16)
+- [ ] Testat pe site live: aprobare, respingere, revocare
 
 ### 2. Emailuri: nu există SMTP propriu
 Serverul de email inclus în Supabase trimite doar către membrii echipei, cu limită de câteva mesaje pe oră. Fără SMTP propriu, ori confirmarea e oprită (oricine creează cont pe emailul altcuiva), ori emailurile nu ajung.
@@ -33,10 +35,11 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 ## 🟠 Important
 
 ### 4. Mesaje la login și înregistrare
-- [ ] Cont neconfirmat: mesaj separat la login (acum apare „Email sau parolă incorecte”) + buton „Retrimite emailul de confirmare”
-- [ ] După înregistrare: „Ți-am trimis un email de confirmare…” în loc de „Cont creat cu succes! Poți să te loghezi acum.”
-- [ ] Erorile Supabase traduse în română la înregistrare (acum apar în engleză, ex. „User already registered”, care mai și confirmă că emailul are cont)
-- [ ] „Nu știu dacă am cont”: mesaj care trimite spre „Am uitat parola” (fără să dezvăluim dacă emailul există)
+- [x] Cont neconfirmat: mesaj separat la login + buton „Retrimite emailul de confirmare” (`src/components/ResendConfirmation.tsx`)
+- [x] După înregistrare: ecran „Verifică-ți emailul” în loc de „Cont creat cu succes! Poți să te loghezi acum.”
+- [x] Erorile Supabase traduse în română (`src/lib/authErrors.ts`); „User already registered” arată același ecran ca succesul
+- [x] „Nu știu dacă am cont”: mesaj la login care trimite spre „Am uitat parola” (fără să dezvăluim dacă emailul există)
+- [ ] Testat pe site live, după pornirea „Confirm email”: cont nou → ecran „Verifică-ți emailul” → link → login; login înainte de confirmare → mesaj + retrimitere
 
 ### 5. YouTube pe pagina principală
 `youtube-nocookie` pornit automat salvează date în browser și trimite IP-ul la Google fără acord (ePrivacy / Legea 506/2004).
@@ -47,6 +50,46 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 ### 6. Ștergerea contului
 - [ ] Verificat că funcția `delete_own_account` există în baza de date live (nu e în migrațiile din `colabme-server`)
 - [ ] Pusă într-o migrație, ca să nu depindă de dashboard
+
+### 7. Date expuse prin API (view-uri, funcții, RLS)
+Tot ce e în schema `public` se poate citi prin API cu cheia publică a site-ului. RLS protejează tabelele, dar un view sau o funcție `security definer` rulează ca proprietarul lor și trece peste RLS.
+- [x] `public.leaderboard` (nume, școală, `user_id` pentru toți utilizatorii, citibil de `anon`) mutat în `private.leaderboard`; clientul folosește `rpc('get_leaderboard')`, doar pentru utilizatori logați, fără `user_id` (2026-11-16, rulat în SQL Editor)
+- [ ] Migrația pentru `leaderboard` / `get_leaderboard` copiată în `colabme-server`
+- [ ] Rulat interogările de mai jos și rezolvat ce apare
+- [ ] Security Advisor (Database → Advisors) rerulat după fiecare migrație nouă: 0 erori, avertismentele rămase sunt intenționate
+
+<details>
+<summary>Interogări de verificare (SQL Editor, câte una pe rând)</summary>
+
+```sql
+-- a) View-uri și materialized views din public care trec peste RLS
+--    (materialized views ignoră RLS mereu → nu au ce căuta în public)
+select c.relname, c.relkind
+from pg_class c join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public' and c.relkind in ('v', 'm')
+  and not coalesce(array_to_string(c.reloptions, ',') ~* 'security_invoker=(on|true)', false);
+
+-- b) Tabele din public fără RLS (oricine le poate citi și modifica)
+select tablename from pg_tables
+where schemaname = 'public' and not rowsecurity;
+
+-- c) Politici RLS deschise tuturor (using/with check = true)
+select tablename, policyname, cmd, roles, qual, with_check
+from pg_policies
+where schemaname = 'public' and (qual = 'true' or with_check = 'true');
+
+-- d) Funcții security definer din public: cine le poate apela
+--    și dacă au search_path fixat (fără el pot fi deturnate)
+select p.proname,
+       has_function_privilege('anon', p.oid, 'execute') as anon_poate,
+       has_function_privilege('authenticated', p.oid, 'execute') as logat_poate,
+       p.proconfig as setari
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.prosecdef;
+```
+
+Ce e în regulă: (a) gol; (b) gol; (c) doar date cu adevărat publice (ex. lista școlilor); (d) `anon_poate = false` peste tot, iar `setari` conține `search_path`. `get_leaderboard` cu `logat_poate = true` e intenționat.
+</details>
 
 ## 🟡 GDPR — completări la texte
 

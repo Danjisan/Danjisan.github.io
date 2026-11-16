@@ -15,6 +15,7 @@ import PrivacyPage from "./pages/legal/PrivacyPage";
 import CookiesPage from "./pages/legal/CookiesPage";
 import TermsPage from "./pages/legal/TermsPage";
 import QuestionsPage from "./pages/admin/QuestionsPage";
+import TeachersPage from "./pages/admin/TeachersPage";
 import LobbyPage from "./pages/LobbyPage";
 import GamePage from "./pages/GamePage";
 import LessonsWorldPage from "./pages/LessonsWorldPage";
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/auth/confirm" element={<AuthConfirmPage />} />
           <Route path="/profil" element={<ProfilePage />} />
           <Route path="/admin/intrebari" element={<QuestionsPage />} />
+          <Route path="/admin/profesori" element={<TeachersPage />} />
           <Route path="/lobby" element={<LobbyPage />} />
           <Route path="/joc/:sessionId" element={<GamePage />} />
           <Route path="/lectii" element={<LessonsWorldPage />} />
