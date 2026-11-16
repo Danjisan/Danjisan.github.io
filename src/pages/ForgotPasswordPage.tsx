@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { getPasswordResetRedirectTo } from "../lib/authOrigin";
+import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { supabase } from "../lib/supabase";
 
 /** Anti-enumeration + basic client throttle after a successful request. */
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: getPasswordResetRedirectTo() },
+      { redirectTo: getAuthConfirmRedirectTo() },
     );
     setLoading(false);
 

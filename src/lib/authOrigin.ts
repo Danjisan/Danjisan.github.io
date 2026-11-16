@@ -17,6 +17,12 @@ export function getAuthRedirectOrigin(): string {
   return "https://colabme.eu";
 }
 
-export function getPasswordResetRedirectTo(): string {
-  return `${getAuthRedirectOrigin()}/reset-password`;
+/**
+ * Ținta linkurilor din emailuri (confirmare cont, resetare parolă).
+ * Șabloanele Supabase construiesc linkul ca
+ * `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=…`
+ * — vezi docs/auth-email-templates.md.
+ */
+export function getAuthConfirmRedirectTo(): string {
+  return `${getAuthRedirectOrigin()}/auth/confirm`;
 }

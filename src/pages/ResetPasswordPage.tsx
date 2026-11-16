@@ -4,11 +4,14 @@ import {
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
 } from "../lib/authPassword";
+import {
+  consumeRecoveryIntent,
+  hasRecoveryIntent,
+  markRecoveryIntent,
+} from "../lib/authRecovery";
 import { supabase } from "../lib/supabase";
 
 type Gate = "checking" | "ready" | "invalid";
-
-const RECOVERY_FLAG_KEY = "colabme_password_recovery";
 
 /** True when the URL still carries an auth redirect (recovery / PKCE). */
 function urlHasAuthRedirectParams(): boolean {
@@ -21,32 +24,6 @@ function urlHasAuthRedirectParams(): boolean {
     Boolean(hashParams.get("access_token")) ||
     Boolean(query.get("code"))
   );
-}
-
-function markRecoveryIntent() {
-  try {
-    sessionStorage.setItem(RECOVERY_FLAG_KEY, "1");
-  } catch {
-    /* private mode / blocked storage */
-  }
-}
-
-function consumeRecoveryIntent(): boolean {
-  try {
-    const ok = sessionStorage.getItem(RECOVERY_FLAG_KEY) === "1";
-    sessionStorage.removeItem(RECOVERY_FLAG_KEY);
-    return ok;
-  } catch {
-    return false;
-  }
-}
-
-function hasRecoveryIntent(): boolean {
-  try {
-    return sessionStorage.getItem(RECOVERY_FLAG_KEY) === "1";
-  } catch {
-    return false;
-  }
 }
 
 export default function ResetPasswordPage() {

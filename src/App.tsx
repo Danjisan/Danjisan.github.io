@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AuthConfirmPage from "./pages/AuthConfirmPage";
 import ProfilePage from "./pages/ProfilePage";
 import PrivacyPage from "./pages/legal/PrivacyPage";
 import CookiesPage from "./pages/legal/CookiesPage";
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/confirm" element={<AuthConfirmPage />} />
           <Route path="/profil" element={<ProfilePage />} />
           <Route path="/admin/intrebari" element={<QuestionsPage />} />
           <Route path="/lobby" element={<LobbyPage />} />

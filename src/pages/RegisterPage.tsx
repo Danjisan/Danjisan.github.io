@@ -4,6 +4,7 @@ import {
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
 } from "../lib/authPassword";
+import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
 import type { UserRole } from "../lib/types";
@@ -55,6 +56,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
+        emailRedirectTo: getAuthConfirmRedirectTo(),
         data: {
           display_name: displayName,
           // Doar o cerere: trigger-ul din DB acceptă elev / parinte / anonim,
