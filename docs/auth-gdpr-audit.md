@@ -101,22 +101,24 @@ Ce e în regulă: (a) gol; (b) gol; (c) doar date cu adevărat publice (ex. list
 - [ ] Cerut la suportul Brevo dezactivarea / anonimizarea urmăririi deschiderilor și click-urilor (emailuri către minori)
 - [ ] Minori: acord parental verificabil (confirmare pe emailul părintelui sau cont creat de profesor) în loc de doar bifă
 - [ ] Rezumat scurt, pe înțelesul copiilor (GDPR art. 12)
-- [ ] DPA Supabase acceptat în dashboard (dublat în „PIN — Legal review” din `COLABME.md`)
+- [x] DPA Supabase descărcat din Organization → Settings → Legal Documents, împreună cu celelalte documente de acolo (TIA etc.), păstrat local în afara repo-ului (2026-11-16)
 
 Banner de cookies: nu e necesar cât timp nu există analytics și video-ul nu pornește automat.
 
 ## Setări Supabase de verificat (în dashboard)
 
-- [ ] Lungimea minimă a parolei = 8 (ca în client; implicit e 6)
-- [ ] „Secure password change” pornit
+- [x] Lungimea minimă a parolei = 8 (ca în client; implicit e 6) (2026-11-16)
+- [x] „Secure password change” pornit (2026-11-16)
 - [ ] „Leaked password protection” (doar pe planul Pro)
-- [ ] Limitele de cereri la autentificare (rate limits)
-- [ ] Site URL + lista de redirect-uri (să coincidă cu `src/lib/authOrigin.ts`)
+- [x] Limitele de cereri la autentificare (rate limits) (2026-11-16)
+- [x] Site URL + lista de redirect-uri (să coincidă cu `src/lib/authOrigin.ts`): doar colabme.eu, www și localhost:5173; `danjisan.github.io` și `127.0.0.1` se adaugă la nevoie, în ambele locuri (2026-11-16)
 - [ ] CAPTCHA (Cloudflare Turnstile) — important după ce pornește trimiterea de emailuri. **Nu se pornește în dashboard înainte de codul din client**: Supabase cere atunci tokenul CAPTCHA și la login / resetare / retrimitere, iar fără el nimeni nu se mai poate loga
   - [x] Cod în client: widget pe înregistrare, login, „Am uitat parola”, „Retrimite emailul” (`src/lib/turnstile.ts`, `src/hooks/useCaptcha.ts`, `src/components/CaptchaWidget.tsx`); fără `VITE_TURNSTILE_SITE_KEY` e oprit; Cloudflare adăugat în `/privacy` și `/cookies`
-  - [ ] Widget Turnstile creat în Cloudflare pentru `colabme.eu`, `www.colabme.eu`, `localhost`
-  - [ ] Site key în `.env.local` și în secretul GitHub `VITE_TURNSTILE_SITE_KEY`; deploy; widget-ul apare pe site live
-  - [ ] Abia apoi: Supabase → Authentication → Attack Protection → CAPTCHA pornit, provider Turnstile, secret key
+  - [x] Widget Turnstile creat în Cloudflare pentru `colabme.eu`, `www.colabme.eu`, `localhost` (mod Managed)
+  - [x] Site key în `.env.local` și în secretul GitHub `VITE_TURNSTILE_SITE_KEY`; deploy; widget-ul apare pe site live (2026-11-16, `bb00dc2`)
+  - [x] Abia apoi: Supabase → Authentication → Attack Protection → CAPTCHA pornit, provider Turnstile, secret key (2026-11-16)
+  - [x] Testat pe site live, cu CAPTCHA pornit: login (2026-11-16)
+  - [ ] Testat „Am uitat parola” cu CAPTCHA pornit — amânat până la următorul utilizator de test
 
 ## Tehnic (fără urgență)
 

@@ -1,13 +1,12 @@
 /**
- * Origins allowed for auth email redirects (must also be listed in
- * Supabase Dashboard → Authentication → URL Configuration).
+ * Origins allowed for auth email redirects. Lista trebuie să fie identică
+ * cu Supabase Dashboard → Authentication → URL Configuration (Redirect URLs,
+ * cu `/auth/confirm` la final). Orice alt origin cade pe colabme.eu.
  */
 const ALLOWED_ORIGINS = new Set([
   "https://colabme.eu",
   "https://www.colabme.eu",
-  "https://danjisan.github.io",
   "http://localhost:5173",
-  "http://127.0.0.1:5173",
 ]);
 
 /** Safe site origin for password-recovery redirectTo. */

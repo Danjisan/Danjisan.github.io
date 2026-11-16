@@ -358,5 +358,5 @@ Ordinea de implementare (fiecare pas are propriile task-uri, detaliate când aju
 - [ ] Verificare date în `src/content/legalOrg.ts` (denumire, CUI, adresă, emailuri)
 - [ ] Confirmare termene retenție (24 luni inactiv, chat ~90 zile) — ajustați dacă e nevoie
 - [ ] Confirmare text minori (16 ani / tutore) cu realitatea operațională
-- [ ] DPA Supabase acceptat în dashboard (dacă e cazul)
+- [x] DPA Supabase descărcat și păstrat (2026-11-16)
 - [ ] Test: Vezi datele mele / Descarcă JSON / Șterge contul (pe un cont de test)
