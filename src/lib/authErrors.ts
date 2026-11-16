@@ -40,6 +40,14 @@ function isNetworkError(error: AuthErrorLike): boolean {
   );
 }
 
+export const CAPTCHA_FAILED_MESSAGE =
+  "Verificarea anti-robot a eșuat sau a expirat. Fă-o din nou și reîncearcă.";
+
+/** Tokenul CAPTCHA lipsește, a expirat sau a fost respins de Supabase. */
+export function isCaptchaFailed(error: AuthErrorLike): boolean {
+  return code(error) === "captcha_failed" || message(error).includes("captcha");
+}
+
 /** Contul există, dar emailul nu a fost confirmat (doar la login). */
 export function isEmailNotConfirmed(error: AuthErrorLike): boolean {
   return (
@@ -67,6 +75,10 @@ export function describeAuthError(
   }
   if (isRateLimited(error)) {
     return "Prea multe încercări. Așteaptă câteva minute și încearcă din nou.";
+  }
+
+  if (isCaptchaFailed(error)) {
+    return CAPTCHA_FAILED_MESSAGE;
   }
 
   const c = code(error);

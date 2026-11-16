@@ -21,8 +21,8 @@ Serverul de email inclus în Supabase trimite doar către membrii echipei, cu li
 - [x] Ales furnizor SMTP din UE: Brevo
 - [x] Domeniul `colabme.eu` autentificat în Brevo (brevo-code + DKIM la GoDaddy; DMARC exista deja)
 - [x] Expeditor `no-reply@colabme.eu`; SMTP configurat în Supabase → Authentication → SMTP Settings (cheia SMTP fără expirare, dar Brevo o dezactivează după 90 de zile fără trimiteri)
-- [ ] DPA Brevo descărcat și păstrat (e inclus în termenii lor)
-- [ ] Verificat că linkul rescris de Brevo (click tracking, nu se poate opri pe planul gratuit) ajunge corect pe `/auth/confirm`
+- [x] DPA Brevo descărcat și păstrat local, în afara repo-ului (Appendix 3 din Terms of Service, versiunea 1 oct. 2025; salvat 2026-11-16)
+- [x] Verificat că linkul rescris de Brevo (click tracking, nu se poate opri pe planul gratuit) ajunge corect pe `/auth/confirm` — conturi confirmate pe site live (2026-11-16)
 - [x] Pornit „Confirm email” în Supabase (2026-11-16)
 - [x] Șabloanele de email în română puse în Supabase — textele sunt în `docs/auth-email-templates.md` (2026-11-16)
 
@@ -31,7 +31,7 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 - [x] Pagină `/auth/confirm` care primește `token_hash` + `type` și apelează `verifyOtp` abia la click pe „Confirmă” (`src/pages/AuthConfirmPage.tsx`; resetarea și înregistrarea trimit `redirectTo` spre ea)
 - [x] Redirect URLs în Supabase: `/auth/confirm` pe colabme.eu, www și localhost (2026-11-16)
 - [x] Șabloanele Supabase (confirmare, resetare) schimbate să trimită spre `/auth/confirm?token_hash={{ .TokenHash }}&type=...`
-- [ ] Testat cross-device: cerere pe laptop, link deschis pe telefon
+- [ ] Testat cross-device: cerere pe laptop, link deschis pe telefon — amânat până la următorul cont de test (adrese noi: `nume+test1@gmail.com`, `nume+test2@gmail.com` ajung toate în aceeași căsuță Gmail)
 
 ## 🟠 Important
 
@@ -94,7 +94,7 @@ Ce e în regulă: (a) gol; (b) gol; (c) doar date cu adevărat publice (ex. list
 
 ## 🟡 GDPR — completări la texte
 
-- [ ] Secțiune despre transferuri în afara UE (GitHub, Supabase Inc., Google — Data Privacy Framework / clauze contractuale standard)
+- [ ] Secțiune despre transferuri în afara UE (GitHub, Supabase Inc., Google, Cloudflare — Data Privacy Framework / clauze contractuale standard)
 - [ ] Temeiuri legale precise per scop: art. 6(1)(b) contract, art. 6(1)(f) interes legitim
 - [ ] Serverul WebSocket / chatul din lobby: numit host-ul real și unde e găzduit
 - [x] Furnizorul SMTP (Brevo) adăugat la procesatori (secțiunea 4), plus mențiunea despre urmărirea deschiderilor / click-urilor (secțiunile 2, 3, 6)
@@ -112,7 +112,11 @@ Banner de cookies: nu e necesar cât timp nu există analytics și video-ul nu p
 - [ ] „Leaked password protection” (doar pe planul Pro)
 - [ ] Limitele de cereri la autentificare (rate limits)
 - [ ] Site URL + lista de redirect-uri (să coincidă cu `src/lib/authOrigin.ts`)
-- [ ] CAPTCHA la înregistrare (Turnstile sau hCaptcha) — important după ce pornește trimiterea de emailuri
+- [ ] CAPTCHA (Cloudflare Turnstile) — important după ce pornește trimiterea de emailuri. **Nu se pornește în dashboard înainte de codul din client**: Supabase cere atunci tokenul CAPTCHA și la login / resetare / retrimitere, iar fără el nimeni nu se mai poate loga
+  - [x] Cod în client: widget pe înregistrare, login, „Am uitat parola”, „Retrimite emailul” (`src/lib/turnstile.ts`, `src/hooks/useCaptcha.ts`, `src/components/CaptchaWidget.tsx`); fără `VITE_TURNSTILE_SITE_KEY` e oprit; Cloudflare adăugat în `/privacy` și `/cookies`
+  - [ ] Widget Turnstile creat în Cloudflare pentru `colabme.eu`, `www.colabme.eu`, `localhost`
+  - [ ] Site key în `.env.local` și în secretul GitHub `VITE_TURNSTILE_SITE_KEY`; deploy; widget-ul apare pe site live
+  - [ ] Abia apoi: Supabase → Authentication → Attack Protection → CAPTCHA pornit, provider Turnstile, secret key
 
 ## Tehnic (fără urgență)
 

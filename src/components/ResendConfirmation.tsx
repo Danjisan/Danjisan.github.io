@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useCaptcha } from "../hooks/useCaptcha";
 import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { describeAuthError } from "../lib/authErrors";
 import { supabase } from "../lib/supabase";
+import CaptchaWidget from "./CaptchaWidget";
 
 const COOLDOWN_SECONDS = 60;
 
@@ -15,6 +17,7 @@ export default function ResendConfirmation({ email }: { email: string }) {
   const [sending, setSending] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const captcha = useCaptcha();
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -31,9 +34,13 @@ export default function ResendConfirmation({ email }: { email: string }) {
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email: address,
-      options: { emailRedirectTo: getAuthConfirmRedirectTo() },
+      options: {
+        emailRedirectTo: getAuthConfirmRedirectTo(),
+        captchaToken: captcha.captchaToken,
+      },
     });
     setSending(false);
+    captcha.reset();
 
     if (resendError) {
       setError(describeAuthError(resendError, "resend"));
@@ -45,11 +52,12 @@ export default function ResendConfirmation({ email }: { email: string }) {
 
   return (
     <div className="auth-resend">
+      {captcha.enabled && <CaptchaWidget {...captcha.widgetProps} />}
       <button
         type="button"
         className="auth-link-button"
         onClick={() => void handleResend()}
-        disabled={sending || secondsLeft > 0 || !email.trim()}
+        disabled={sending || secondsLeft > 0 || !email.trim() || !captcha.ready}
       >
         {sending
           ? "Se trimite…"

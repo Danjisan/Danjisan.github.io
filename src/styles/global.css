@@ -1607,6 +1607,18 @@ body {
   gap: 8px;
 }
 
+/* Turnstile desenează un iframe de 300×65; rezervăm locul ca să nu sară formularul. */
+.auth-captcha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 65px;
+}
+
+.auth-captcha .auth-link-button {
+  display: inline;
+}
+
 .auth-link-button {
   align-self: flex-start;
   padding: 0;

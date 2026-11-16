@@ -4,7 +4,9 @@ import {
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
 } from "../lib/authPassword";
+import CaptchaWidget from "../components/CaptchaWidget";
 import ResendConfirmation from "../components/ResendConfirmation";
+import { useCaptcha } from "../hooks/useCaptcha";
 import { describeAuthError, isAlreadyRegistered } from "../lib/authErrors";
 import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
@@ -31,6 +33,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const captcha = useCaptcha();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +63,7 @@ export default function RegisterPage() {
       password,
       options: {
         emailRedirectTo: getAuthConfirmRedirectTo(),
+        captchaToken: captcha.captchaToken,
         data: {
           display_name: displayName,
           // Doar o cerere: trigger-ul din DB acceptă elev / parinte / anonim,
@@ -72,6 +76,7 @@ export default function RegisterPage() {
     });
 
     setLoading(false);
+    captcha.reset();
 
     // Email deja înregistrat: arătăm același ecran ca la succes, ca să nu
     // dezvăluim ce adrese au cont. (Cu „Confirm email” pornit, Supabase
@@ -217,8 +222,13 @@ export default function RegisterPage() {
             </span>
           </label>
 
+          {captcha.enabled && <CaptchaWidget {...captcha.widgetProps} />}
           {error && <p className="auth-error">{error}</p>}
-          <button type="submit" className="auth-submit" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-submit"
+            disabled={loading || !captcha.ready}
+          >
             {loading ? "Se creează contul…" : "Creează cont"}
           </button>
         </form>

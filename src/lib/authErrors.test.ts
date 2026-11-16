@@ -2,10 +2,21 @@ import { describe, expect, it } from "vitest";
 import {
   describeAuthError,
   isAlreadyRegistered,
+  isCaptchaFailed,
   isEmailNotConfirmed,
 } from "./authErrors";
 
 describe("authErrors", () => {
+  it("recunoaște CAPTCHA respins și nu-l confundă cu parola greșită", () => {
+    expect(isCaptchaFailed({ code: "captcha_failed" })).toBe(true);
+    expect(
+      isCaptchaFailed({ message: "captcha protection: request disallowed (no-captcha-response)" }),
+    ).toBe(true);
+    expect(isCaptchaFailed({ code: "invalid_credentials" })).toBe(false);
+    expect(describeAuthError({ code: "captcha_failed" }, "login")).toMatch(/anti-robot/);
+    expect(describeAuthError({ code: "captcha_failed" }, "signup")).toMatch(/anti-robot/);
+  });
+
   it("recunoaște contul neconfirmat după cod sau mesaj", () => {
     expect(isEmailNotConfirmed({ code: "email_not_confirmed" })).toBe(true);
     expect(isEmailNotConfirmed({ message: "Email not confirmed" })).toBe(true);

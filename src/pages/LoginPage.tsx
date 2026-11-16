@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import CaptchaWidget from "../components/CaptchaWidget";
 import ResendConfirmation from "../components/ResendConfirmation";
+import { useCaptcha } from "../hooks/useCaptcha";
 import { describeAuthError, isEmailNotConfirmed } from "../lib/authErrors";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
@@ -15,6 +17,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const captcha = useCaptcha();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,8 +27,10 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: { captchaToken: captcha.captchaToken },
     });
     setLoading(false);
+    captcha.reset();
     if (error) {
       // Supabase spune „neconfirmat” doar când parola e corectă, deci
       // mesajul nu dezvăluie dacă emailul are cont.
@@ -73,9 +78,14 @@ export default function LoginPage() {
               Am uitat parola?
             </Link>
           </p>
+          {captcha.enabled && <CaptchaWidget {...captcha.widgetProps} />}
           {error && <p className="auth-error">{error}</p>}
           {unconfirmed && <ResendConfirmation email={email} />}
-          <button type="submit" className="auth-submit" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-submit"
+            disabled={loading || !captcha.ready}
+          >
             {loading ? "Se încarcă…" : "Intră în cont"}
           </button>
         </form>

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import CaptchaWidget from "../components/CaptchaWidget";
+import { useCaptcha } from "../hooks/useCaptcha";
+import { CAPTCHA_FAILED_MESSAGE, isCaptchaFailed } from "../lib/authErrors";
 import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { supabase } from "../lib/supabase";
 
@@ -15,6 +18,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
+  const captcha = useCaptcha();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,9 +33,13 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: getAuthConfirmRedirectTo() },
+      {
+        redirectTo: getAuthConfirmRedirectTo(),
+        captchaToken: captcha.captchaToken,
+      },
     );
     setLoading(false);
+    captcha.reset();
 
     // Always show the same success copy when the request is accepted or
     // when Supabase hides whether the address exists. Surface only clear
@@ -40,6 +48,10 @@ export default function ForgotPasswordPage() {
       const msg = resetError.message.toLowerCase();
       if (msg.includes("rate") || msg.includes("too many")) {
         setError("Prea multe încercări. Așteaptă câteva minute și încearcă din nou.");
+        return;
+      }
+      if (isCaptchaFailed(resetError)) {
+        setError(CAPTCHA_FAILED_MESSAGE);
         return;
       }
       // Do not leak account existence via error text.
@@ -73,9 +85,14 @@ export default function ForgotPasswordPage() {
               autoFocus
             />
           </label>
+          {captcha.enabled && <CaptchaWidget {...captcha.widgetProps} />}
           {error && <p className="auth-error">{error}</p>}
           {info && <p className="auth-info">{info}</p>}
-          <button type="submit" className="auth-submit" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-submit"
+            disabled={loading || !captcha.ready}
+          >
             {loading ? "Se trimite…" : "Trimite link de resetare"}
           </button>
         </form>

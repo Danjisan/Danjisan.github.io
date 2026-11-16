@@ -51,6 +51,17 @@ export default function CookiesPage() {
               <td>Da</td>
             </tr>
             <tr>
+              <td>Verificare anti-robot (Cloudflare Turnstile)</td>
+              <td>iframe Cloudflare, doar pe paginile de cont</td>
+              <td>
+                Oprește crearea automată de conturi și trimiterea de emailuri
+                în masă. Cloudflare declară că nu folosește cookie-uri pentru
+                urmărire sau publicitate.
+              </td>
+              <td>Doar cât durează verificarea</td>
+              <td>Da (securitate)</td>
+            </tr>
+            <tr>
               <td>Preferințe UI minore</td>
               <td>local / memorie</td>
               <td>Stări de interfață (ex. player video pornit)</td>

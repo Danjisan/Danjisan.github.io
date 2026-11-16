@@ -47,6 +47,12 @@ export default function PrivacyPage() {
           livrarea și poate înregistra deschiderea mesajului și click-ul pe link
           (data, ora, adresa IP, tipul de browser).
         </li>
+        <li>
+          <strong>Verificare anti-robot:</strong> pe paginile de înregistrare,
+          login și resetare a parolei, Cloudflare Turnstile verifică dacă
+          formularul e completat de un om. Pentru asta, Cloudflare primește
+          adresa IP și date tehnice despre browser și dispozitiv.
+        </li>
       </ul>
       <p>
         Nu folosim momentan instrumente de publicitate sau analytics de tip
@@ -99,6 +105,13 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>GoDaddy</strong> — domeniu / DNS.
+        </li>
+        <li>
+          <strong>Cloudflare Turnstile</strong> (Cloudflare, Inc., SUA) —
+          verificarea anti-robot de pe paginile de cont, ca să oprim conturile
+          create automat și abuzul de emailuri. Datele (adresa IP, date tehnice
+          despre browser) sunt folosite doar pentru verificare, nu pentru
+          publicitate.
         </li>
         <li>
           <strong>YouTube (Google)</strong> — doar dacă apeși play pe un video
