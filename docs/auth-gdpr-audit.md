@@ -49,14 +49,17 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 - [x] Actualizat textul din `/cookies` secțiunea 3 (2026-11-16)
 
 ### 6. Ștergerea contului
-- [ ] Verificat că funcția `delete_own_account` există în baza de date live (nu e în migrațiile din `colabme-server`)
-- [ ] Pusă într-o migrație, ca să nu depindă de dashboard
+- [x] Verificat că funcția `delete_own_account` există în baza de date live (creată din dashboard; `anon` o putea apela, `search_path` fără `pg_temp`) (2026-11-16)
+- [x] Pusă într-o migrație, cu `search_path` gol și fără acces pentru `anon` — `colabme-server` `20261116_delete_own_account.sql`
+- [x] Migrația rulată în Supabase (2026-11-16)
 
 ### 7. Date expuse prin API (view-uri, funcții, RLS)
 Tot ce e în schema `public` se poate citi prin API cu cheia publică a site-ului. RLS protejează tabelele, dar un view sau o funcție `security definer` rulează ca proprietarul lor și trece peste RLS.
-- [x] `public.leaderboard` (nume, școală, `user_id` pentru toți utilizatorii, citibil de `anon`) mutat în `private.leaderboard`; clientul folosește `rpc('get_leaderboard')`, doar pentru utilizatori logați, fără `user_id` (2026-11-16, rulat în SQL Editor)
-- [ ] Migrația pentru `leaderboard` / `get_leaderboard` copiată în `colabme-server`
-- [ ] Rulat interogările de mai jos și rezolvat ce apare
+- [x] `public.leaderboard` (nume, școală, `user_id` pentru toți utilizatorii, citibil de `anon`) mutat în `private.leaderboard`; citirea se face doar prin `rpc('get_leaderboard')`, doar pentru utilizatori logați, fără `user_id` (2026-11-16, rulat în SQL Editor). Clientul nu are încă pagină de clasament — o va folosi când apare
+- [x] Migrația pentru `leaderboard` / `get_leaderboard` copiată în `colabme-server` din definițiile live — `20261116_private_leaderboard.sql`
+- [x] Rulat interogările de mai jos (2026-11-16): (a) și (b) goale; (c) `schools` (intenționat) și `questions` — orice elev logat putea citi `correct_answer`; (d) `delete_own_account`, `handle_new_user`, `rls_auto_enable` apelabile de `anon`
+- [x] Rezolvat ce a apărut: `colabme-server` `20261116_security_hardening.sql` (citirea `questions` doar pentru profesori și admini — serverul de joc folosește cheia de service; acces tăiat la funcțiile-trigger) — rulată în Supabase; interogările rerulate: rămâne doar `schools` la (c), `anon=false` peste tot la (d) (2026-11-16)
+- [ ] Testat pe site live după migrație: cont nou (trigger-ul `handle_new_user` merge), `/admin/intrebari` ca admin (lista apare)
 - [ ] Security Advisor (Database → Advisors) rerulat după fiecare migrație nouă: 0 erori, avertismentele rămase sunt intenționate
 
 <details>
