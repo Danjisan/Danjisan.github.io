@@ -4,6 +4,8 @@ import {
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
 } from "../lib/authPassword";
+import ResendConfirmation from "../components/ResendConfirmation";
+import { describeAuthError, isAlreadyRegistered } from "../lib/authErrors";
 import { getAuthConfirmRedirectTo } from "../lib/authOrigin";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
@@ -28,6 +30,7 @@ export default function RegisterPage() {
   const [ageOk, setAgeOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,21 +71,50 @@ export default function RegisterPage() {
       },
     });
 
-    if (signUpError || !data.user) {
-      setError(signUpError?.message ?? "Eroare la creare cont.");
-      setLoading(false);
+    setLoading(false);
+
+    // Email deja înregistrat: arătăm același ecran ca la succes, ca să nu
+    // dezvăluim ce adrese au cont. (Cu „Confirm email” pornit, Supabase
+    // oricum nu întoarce eroare în cazul ăsta.)
+    if (signUpError && !isAlreadyRegistered(signUpError)) {
+      setError(describeAuthError(signUpError, "signup"));
       return;
     }
 
-    setLoading(false);
-
-    if (data.session) {
+    if (data?.session) {
       navigate(next);
-    } else {
-      const params = new URLSearchParams({ registered: "1" });
-      if (next !== "/") params.set("next", next);
-      navigate(`/login?${params.toString()}`);
+      return;
     }
+
+    setSentTo(email.trim());
+  }
+
+  if (sentTo) {
+    return (
+      <section className="page page-center">
+        <div className="auth-card">
+          <h1>Verifică-ți emailul</h1>
+          <p className="auth-hint">
+            Ți-am trimis un link de confirmare la <strong>{sentTo}</strong>.
+            Deschide-l ca să activezi contul (verifică și folderul Spam), apoi
+            intră în cont.
+          </p>
+          <ResendConfirmation email={sentTo} />
+          <p className="auth-footer">
+            Ai deja cont cu acest email? Nu primești un mail nou —{" "}
+            <Link to="/forgot-password" className="auth-link">
+              folosește „Am uitat parola”
+            </Link>
+            .
+          </p>
+          <p className="auth-footer">
+            <Link to={authPath("login", next)} className="auth-link">
+              Mergi la login
+            </Link>
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (

@@ -1,22 +1,25 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import ResendConfirmation from "../components/ResendConfirmation";
+import { describeAuthError, isEmailNotConfirmed } from "../lib/authErrors";
 import { authPath, safeNextPath } from "../lib/safeNextPath";
 import { supabase } from "../lib/supabase";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const justRegistered = searchParams.get("registered") === "1";
   const justReset = searchParams.get("reset") === "1";
   const next = safeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [unconfirmed, setUnconfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setUnconfirmed(false);
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -24,7 +27,10 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (error) {
-      setError("Email sau parolă incorecte.");
+      // Supabase spune „neconfirmat” doar când parola e corectă, deci
+      // mesajul nu dezvăluie dacă emailul are cont.
+      setUnconfirmed(isEmailNotConfirmed(error));
+      setError(describeAuthError(error, "login"));
     } else {
       navigate(next);
     }
@@ -34,11 +40,6 @@ export default function LoginPage() {
     <section className="page page-center">
       <div className="auth-card">
         <h1>Intră în cont</h1>
-        {justRegistered && (
-          <p className="auth-info">
-            Cont creat cu succes! Poți să te loghezi acum.
-          </p>
-        )}
         {justReset && (
           <p className="auth-info">
             Parola a fost schimbată. Intră în cont cu parola nouă.
@@ -73,6 +74,7 @@ export default function LoginPage() {
             </Link>
           </p>
           {error && <p className="auth-error">{error}</p>}
+          {unconfirmed && <ResendConfirmation email={email} />}
           <button type="submit" className="auth-submit" disabled={loading}>
             {loading ? "Se încarcă…" : "Intră în cont"}
           </button>
@@ -82,6 +84,13 @@ export default function LoginPage() {
           <Link to={authPath("register", next)} className="auth-link">
             Înregistrează-te
           </Link>
+        </p>
+        <p className="auth-footer">
+          Nu mai știi dacă ai cont? Folosește{" "}
+          <Link to="/forgot-password" className="auth-link">
+            „Am uitat parola”
+          </Link>
+          : dacă adresa are cont, primești un link pe email.
         </p>
       </div>
     </section>
