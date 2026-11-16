@@ -7,6 +7,8 @@ import YouTubeEmbed from "../components/media/YouTubeEmbed";
 
 /** Playlist ColabMe.eu — https://www.youtube.com/playlist?list=PLURbUKKPSHjc */
 const HOME_PLAYLIST_ID = "PLURbUKKPSHjc";
+/** Cadru din video, găzduit de noi — se vede până la click pe play. */
+const HOME_VIDEO_POSTER = "/media/home-video-poster.jpg";
 
 function EuroBanknoteIcon() {
   return (
@@ -123,6 +125,7 @@ export default function HomePage() {
           <YouTubeEmbed
             playlistId={HOME_PLAYLIST_ID}
             title="ColabMe — playlist"
+            poster={HOME_VIDEO_POSTER}
             ambient
             showControls={videoInteractive}
           />

@@ -6,6 +6,11 @@ interface YouTubeEmbedProps {
   /** Playlist YouTube — ex. homepage ambient. */
   playlistId?: string;
   title?: string;
+  /**
+   * Imagine de previzualizare găzduită de noi (ex. `/media/...jpg`).
+   * Fără ea: thumbnail-ul YouTube pentru videoId, iar la playlist un fundal gol.
+   */
+  poster?: string;
   /** După click: pornește pe mute, în loop. */
   ambient?: boolean;
   /**
@@ -62,6 +67,7 @@ export default function YouTubeEmbed({
   videoId,
   playlistId,
   title = "Video YouTube",
+  poster,
   ambient = false,
   showControls = false,
 }: YouTubeEmbedProps) {
@@ -87,20 +93,21 @@ export default function YouTubeEmbed({
       aria-label={`Redă video: ${title}`}
       onClick={() => setPlaying(true)}
     >
-      {videoId ? (
+      {poster || videoId ? (
         <img
-          src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+          src={poster ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
           alt=""
           loading="lazy"
+          onError={(e) => {
+            // Imagine lipsă → rămâne fundalul cutiei, fără icon de imagine ruptă.
+            e.currentTarget.style.visibility = "hidden";
+          }}
         />
       ) : (
         <span className="yt-facade-blank" aria-hidden="true" />
       )}
       <span className="yt-play" aria-hidden="true">
         ▶
-      </span>
-      <span className="yt-privacy-hint">
-        Play încarcă YouTube (privacy-enhanced)
       </span>
     </button>
   );
