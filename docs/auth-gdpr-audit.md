@@ -19,7 +19,7 @@ Serverul de email inclus în Supabase trimite doar către membrii echipei, cu li
 - [x] Domeniul `colabme.eu` autentificat în Brevo (brevo-code + DKIM la GoDaddy; DMARC exista deja)
 - [x] Expeditor `no-reply@colabme.eu`; SMTP configurat în Supabase → Authentication → SMTP Settings (cheia SMTP fără expirare, dar Brevo o dezactivează după 90 de zile fără trimiteri)
 - [ ] DPA Brevo descărcat și păstrat (e inclus în termenii lor)
-- [ ] Click tracking oprit în Brevo pentru emailurile tranzacționale
+- [ ] Verificat că linkul rescris de Brevo (click tracking, nu se poate opri pe planul gratuit) ajunge corect pe `/auth/confirm`
 - [ ] Pornit „Confirm email” în Supabase — abia după punctul 3
 - [ ] Șabloanele de email în română puse în Supabase — textele sunt în `docs/auth-email-templates.md`
 
@@ -53,7 +53,8 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 - [ ] Secțiune despre transferuri în afara UE (GitHub, Supabase Inc., Google — Data Privacy Framework / clauze contractuale standard)
 - [ ] Temeiuri legale precise per scop: art. 6(1)(b) contract, art. 6(1)(f) interes legitim
 - [ ] Serverul WebSocket / chatul din lobby: numit host-ul real și unde e găzduit
-- [ ] Furnizorul SMTP adăugat la procesatori (secțiunea 4), după punctul 2
+- [x] Furnizorul SMTP (Brevo) adăugat la procesatori (secțiunea 4), plus mențiunea despre urmărirea deschiderilor / click-urilor (secțiunile 2, 3, 6)
+- [ ] Cerut la suportul Brevo dezactivarea / anonimizarea urmăririi deschiderilor și click-urilor (emailuri către minori)
 - [ ] Minori: acord parental verificabil (confirmare pe emailul părintelui sau cont creat de profesor) în loc de doar bifă
 - [ ] Rezumat scurt, pe înțelesul copiilor (GDPR art. 12)
 - [ ] DPA Supabase acceptat în dashboard (dublat în „PIN — Legal review” din `COLABME.md`)

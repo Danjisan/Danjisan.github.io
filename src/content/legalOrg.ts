@@ -42,7 +42,7 @@ export const LEGAL_ORG = {
   siteUrl: "https://colabme.eu",
 
   /** Data ultimei actualizări a textelor */
-  policiesUpdatedAt: "2026-08-07",
+  policiesUpdatedAt: "2026-11-16",
 } as const;
 
 export type LegalOrgKey = keyof typeof LEGAL_ORG;

@@ -43,7 +43,9 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Emailuri de serviciu:</strong> confirmare cont / resetare
-          parolă (trimise prin Supabase).
+          parolă, trimise prin Brevo. Pentru aceste emailuri, Brevo înregistrează
+          livrarea și poate înregistra deschiderea mesajului și click-ul pe link
+          (data, ora, adresa IP, tipul de browser).
         </li>
       </ul>
       <p>
@@ -58,6 +60,11 @@ export default function PrivacyPage() {
           cu utilizatorul / interes legitim pentru funcționarea platformei).
         </li>
         <li>Securitatea contului (reset parolă, prevenirea abuzului).</li>
+        <li>
+          Trimiterea emailurilor de serviciu și verificarea că ajung (necesare
+          pentru cont). Datele de deschidere / click înregistrate de Brevo nu le
+          folosim pentru marketing sau profilare.
+        </li>
         <li>Îmbunătățirea conținutului educațional și moderarea sesiunilor.</li>
         <li>
           Obligații legale, când există (ex. răspuns la autorități, păstrare
@@ -71,13 +78,20 @@ export default function PrivacyPage() {
         regiune <strong>Central EU (Frankfurt, Germania)</strong>. Site-ul web
         este servit ca fișiere statice (ex. GitHub Pages); domeniul și DNS-ul
         sunt gestionate prin GoDaddy. Emailurile de autentificare sunt trimise
-        prin infrastructura Supabase Auth.
+        prin Brevo, de pe adresa no-reply@colabme.eu.
       </p>
       <ul>
         <li>
           <strong>Supabase</strong> — autentificare, bază de date, stocare
           fișiere (UE). Operatorul poate încheia / accepta DPA-ul Supabase din
           dashboard-ul proiectului.
+        </li>
+        <li>
+          <strong>Brevo</strong> (Sendinblue SAS, Franța) — trimiterea
+          emailurilor de confirmare cont și resetare parolă (UE). Primește
+          adresa de email și conținutul mesajului. Linkurile din emailuri trec
+          printr-un domeniu Brevo, care înregistrează click-ul înainte să te
+          trimită pe colabme.eu.
         </li>
         <li>
           <strong>GitHub Pages</strong> — livrare site static (fără baza de
@@ -142,6 +156,10 @@ export default function PrivacyPage() {
           <strong>Rezultate joc / progres lecții:</strong> cât timp contul există
           și e util scopului educațional; la ștergerea contului, le eliminăm sau
           le anonimizăm.
+        </li>
+        <li>
+          <strong>Jurnalele de trimitere a emailurilor</strong> (Brevo): pe
+          durata stabilită de politica Brevo, apoi se șterg automat.
         </li>
         <li>
           <strong>Backup-uri</strong> la furnizori: pe durata politicii

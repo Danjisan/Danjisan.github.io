@@ -23,8 +23,12 @@ butonul, deci:
      ajunge pe pagina principală în loc de `/auth/confirm` și nu funcționează.
 3. **Authentication → Emails → Templates**: copiază șabloanele de mai jos
    (subiect + conținut) și salvează.
-4. În Brevo: oprește urmărirea click-urilor (click tracking) pentru emailurile
-   tranzacționale, ca Brevo să nu rescrie linkurile.
+4. Brevo rescrie linkurile din emailuri prin propriul domeniu (click tracking).
+   Pe planul gratuit nu se poate opri; Brevo o oprește doar la cerere, pentru
+   clienții Enterprise. Nu strică fluxul: redirecționarea Brevo duce tot la
+   `/auth/confirm?token_hash=…`, iar tokenul se folosește abia la click pe
+   buton. Verifică la test că ajungi pe pagina cu butonul. Dacă nu ajungi,
+   linkul scris ca text în email poate fi lipit direct în browser.
 5. Test „Am uitat parola”: cerere pe laptop, link deschis pe telefon.
 6. Abia apoi: **Authentication → Sign In / Providers → Email → Confirm email** pornit.
 
