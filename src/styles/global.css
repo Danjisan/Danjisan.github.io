@@ -672,6 +672,11 @@ body {
   pointer-events: none;
 }
 
+/* Fațada (înainte de click) stă peste stratul de mai sus, ca să poată fi apăsată */
+.home-video .yt-facade {
+  z-index: 2;
+}
+
 .home-video-unlock {
   display: inline-flex;
   align-items: center;

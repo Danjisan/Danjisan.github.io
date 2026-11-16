@@ -13,7 +13,8 @@
 - [ ] Test manual pe site live: cont nou „Profesor” → apare ca Vizitator cu nota de verificare; `update({ role: "admin" })` din consolă → eroare de permisiune
 - [x] Ecran de admin `/admin/profesori`: cereri în așteptare (Aprobă / Respinge) și profesori activi (Revocă); verificarea se face întâi pe email, de un admin — `colabme-server` migrația `20261116_teacher_approval.sql` (funcții `admin_list_teachers`, `approve_teacher`, `reject_teacher`, `revoke_teacher`, jurnal în `private.role_changes`)
 - [x] Migrația `20261116_teacher_approval.sql` rulată în Supabase (cu RLS pe `private.role_changes`) + verificarea (a): `anon` nu poate apela nicio funcție (2026-11-16)
-- [ ] Testat pe site live: aprobare, respingere, revocare
+- [x] Testat pe site live: aprobare, revocare (2026-11-16)
+- [x] Testat pe site live: respingere (2026-11-16)
 
 ### 2. Emailuri: nu există SMTP propriu
 Serverul de email inclus în Supabase trimite doar către membrii echipei, cu limită de câteva mesaje pe oră. Fără SMTP propriu, ori confirmarea e oprită (oricine creează cont pe emailul altcuiva), ori emailurile nu ajung.
@@ -22,14 +23,14 @@ Serverul de email inclus în Supabase trimite doar către membrii echipei, cu li
 - [x] Expeditor `no-reply@colabme.eu`; SMTP configurat în Supabase → Authentication → SMTP Settings (cheia SMTP fără expirare, dar Brevo o dezactivează după 90 de zile fără trimiteri)
 - [ ] DPA Brevo descărcat și păstrat (e inclus în termenii lor)
 - [ ] Verificat că linkul rescris de Brevo (click tracking, nu se poate opri pe planul gratuit) ajunge corect pe `/auth/confirm`
-- [ ] Pornit „Confirm email” în Supabase — abia după punctul 3
-- [ ] Șabloanele de email în română puse în Supabase — textele sunt în `docs/auth-email-templates.md`
+- [x] Pornit „Confirm email” în Supabase (2026-11-16)
+- [x] Șabloanele de email în română puse în Supabase — textele sunt în `docs/auth-email-templates.md` (2026-11-16)
 
 ### 3. Linkurile din email nu merg pe alt dispozitiv
 Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din care s-a făcut cererea (ex. cerere pe laptop, mail deschis pe telefon → „Link invalid”). Filtrele de email (ex. Microsoft 365 la școli) deschid automat linkurile și consumă tokenul.
 - [x] Pagină `/auth/confirm` care primește `token_hash` + `type` și apelează `verifyOtp` abia la click pe „Confirmă” (`src/pages/AuthConfirmPage.tsx`; resetarea și înregistrarea trimit `redirectTo` spre ea)
-- [ ] Redirect URLs în Supabase: `/auth/confirm` pe colabme.eu, www și localhost
-- [ ] Șabloanele Supabase (confirmare, resetare) schimbate să trimită spre `/auth/confirm?token_hash={{ .TokenHash }}&type=...`
+- [x] Redirect URLs în Supabase: `/auth/confirm` pe colabme.eu, www și localhost (2026-11-16)
+- [x] Șabloanele Supabase (confirmare, resetare) schimbate să trimită spre `/auth/confirm?token_hash={{ .TokenHash }}&type=...`
 - [ ] Testat cross-device: cerere pe laptop, link deschis pe telefon
 
 ## 🟠 Important
@@ -43,9 +44,9 @@ Cu PKCE, linkul de confirmare / resetare funcționează doar în browserul din c
 
 ### 5. YouTube pe pagina principală
 `youtube-nocookie` pornit automat salvează date în browser și trimite IP-ul la Google fără acord (ePrivacy / Legea 506/2004).
-- [ ] Playerul de pe pagina principală se încarcă doar după click, ca pe celelalte pagini
+- [x] Playerul de pe pagina principală se încarcă doar după click, ca pe celelalte pagini (2026-11-16)
 - [ ] (Opțional) thumbnail-uri găzduite local în loc de `i.ytimg.com`
-- [ ] Actualizat textul din `/cookies` secțiunea 3
+- [x] Actualizat textul din `/cookies` secțiunea 3 (2026-11-16)
 
 ### 6. Ștergerea contului
 - [ ] Verificat că funcția `delete_own_account` există în baza de date live (nu e în migrațiile din `colabme-server`)

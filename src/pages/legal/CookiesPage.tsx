@@ -64,11 +64,11 @@ export default function CookiesPage() {
       <h2>3. YouTube</h2>
       <p>
         Unele pagini pot include video prin{" "}
-        <code>youtube-nocookie.com</code>. Pe majoritatea paginilor încărcăm
-        playerul <strong>doar după ce apeși play</strong>. Pe pagina de start,
-        demo-ul ColabMe pornește automat (fără sunet, în buclă); în acel caz
-        iframe-ul YouTube se încarcă odată cu pagina. Google / YouTube pot seta
-        propriile cookies conform politicilor lor.
+        <code>youtube-nocookie.com</code>. Pe toate paginile, inclusiv pe
+        pagina de start, playerul se încarcă{" "}
+        <strong>doar după ce apeși play</strong>. Până atunci nu se trimite
+        nimic către YouTube. După ce apeși play, Google / YouTube primesc
+        adresa ta IP și pot salva date în browser conform politicilor lor.
       </p>
 
       <h2>4. Cum controlezi</h2>

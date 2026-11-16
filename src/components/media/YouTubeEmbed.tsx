@@ -6,23 +6,13 @@ interface YouTubeEmbedProps {
   /** Playlist YouTube — ex. homepage ambient. */
   playlistId?: string;
   title?: string;
-  /**
-   * Autoplay + mute + loop, fără fațadă.
-   * Respectă prefers-reduced-motion (atunci rămâne click-to-play).
-   */
+  /** După click: pornește pe mute, în loop. */
   ambient?: boolean;
   /**
    * Doar cu ambient: afișează bara de controale YouTube.
    * Implicit false → chrome redus (controls=0).
    */
   showControls?: boolean;
-}
-
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
 }
 
 function buildEmbedSrc(
@@ -64,8 +54,9 @@ function buildEmbedSrc(
 }
 
 /**
- * Implicit: thumbnail + play, iframe doar după click.
- * Cu ambient: pornește automat pe mute, în loop (clip sau playlist).
+ * Thumbnail + play; iframe-ul YouTube se încarcă doar după click
+ * (fără click nu pleacă nicio cerere spre Google — vezi /cookies).
+ * Cu ambient: după click pornește pe mute, în loop (clip sau playlist).
  */
 export default function YouTubeEmbed({
   videoId,
@@ -74,9 +65,7 @@ export default function YouTubeEmbed({
   ambient = false,
   showControls = false,
 }: YouTubeEmbedProps) {
-  const [playing, setPlaying] = useState(
-    () => ambient && !prefersReducedMotion(),
-  );
+  const [playing, setPlaying] = useState(false);
 
   if (playing) {
     return (

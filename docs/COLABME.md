@@ -351,6 +351,8 @@ Ordinea de implementare (fiecare pas are propriile task-uri, detaliate când aju
 ## PIN — Legal review (nu uitați)
 
 > Reveniți după publicarea inițială (Aug 2026). Bifați când e făcut.
+>
+> Audit complet cont / login / GDPR (Nov 2026): [`docs/auth-gdpr-audit.md`](./auth-gdpr-audit.md)
 
 - [ ] Recitire `/privacy`, `/cookies`, `/termeni` pe colabme.eu
 - [ ] Verificare date în `src/content/legalOrg.ts` (denumire, CUI, adresă, emailuri)

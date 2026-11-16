@@ -16,6 +16,7 @@ Sursa unică de adevăr rămâne acolo; acest fișier doar le importă și adaug
 | Viziune, arhitectură, roluri, milestones | `docs/COLABME.md` |
 | Template circuit electric (`src/pages/lessons/templates/Circuit*`, `circuit/`) | `.cursor/rules/circuit-electric-context.mdc`, `.cursor/skills/circuit-electric/SKILL.md` |
 | 3D / R3F (`ModelBox`, `ModelViewer3D`, GLB, template-uri 3D) | `.cursor/skills/web3d-r3f/SKILL.md` |
+| Cont, login, emailuri, GDPR (`src/pages/*Login*`, `Register*`, `*Password*`, `legal/`) | `docs/auth-gdpr-audit.md` |
 | Grădina / fasole | `docs/garden-3d-ux-plan.md`, `docs/garden-fasole-assets.md`, `docs/garden-reference-photos.md` |
 
 ## Comenzi
