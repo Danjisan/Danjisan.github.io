@@ -85,7 +85,13 @@ export default function LessonPage() {
     </section>
   );
 
-  const templateProps = { lesson, completed, onToggleComplete: toggleComplete, markingDone };
+  const templateProps = {
+    lesson,
+    userId: user?.id ?? null,
+    completed,
+    onToggleComplete: toggleComplete,
+    markingDone,
+  };
 
   return (
     <section className="page lesson-page">

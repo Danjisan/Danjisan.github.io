@@ -9,7 +9,9 @@ import CircuitEditorToolbar from "./circuit/components/CircuitEditorToolbar";
 import CircuitFullscreenHeader from "./circuit/components/CircuitFullscreenHeader";
 import CircuitWorkbench from "./circuit/components/CircuitWorkbench";
 import ComponentPalette from "./circuit/components/ComponentPalette";
+import { useChallengeProgress } from "./circuit/hooks/useChallengeProgress";
 import { useCircuitState } from "./circuit/hooks/useCircuitState";
+import { challengeStatuses, firstUnsolvedIndex, startingIndex } from "./circuit/logic/challengeProgress";
 import { useWireInteraction } from "./circuit/hooks/useWireInteraction";
 import { useSimulationBurn } from "./circuit/hooks/useSimulationBurn";
 import { useWorkbenchDrag } from "./circuit/hooks/useWorkbenchDrag";
@@ -20,7 +22,7 @@ import { hintsForEditor } from "./circuit/logic/workbenchHints";
 import { canPlaceMore } from "./circuit/constants";
 import type { ComponentType } from "./circuit/types";
 
-export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
+export default function CircuitElectricTemplate({ lesson, userId }: TemplateProps) {
   const { metadata, schemaComplete } = useMemo(
     () => parseCircuitMetadata(lesson.metadata),
     [lesson.metadata],
@@ -63,10 +65,28 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
     return set;
   }, [edges]);
 
-  const sortedChallenges = [...metadata.challenges].sort((a, b) => a.order - b.order);
+  const sortedChallenges = useMemo(
+    () => [...metadata.challenges].sort((a, b) => a.order - b.order),
+    [metadata.challenges],
+  );
+  const { solvedIds, progressKey, markSolved } = useChallengeProgress(lesson.id, userId);
+  const statuses = useMemo(
+    () => challengeStatuses(sortedChallenges, solvedIds),
+    [sortedChallenges, solvedIds],
+  );
   const activeChallenge = sortedChallenges[activeChallengeIndex] ?? null;
-  const nextChallenge = sortedChallenges[activeChallengeIndex + 1] ?? null;
-  const lockedChallenges = sortedChallenges.filter((_, i) => i > activeChallengeIndex + 1);
+
+  // La deschidere (și când se încarcă userul) pornim de la prima provocare nerezolvată.
+  useEffect(() => {
+    setActiveChallengeIndex(startingIndex(sortedChallenges, solvedIds));
+    // Intenționat fără `solvedIds`: doar la schimbarea userului / lecției, nu la fiecare rezolvare.
+  }, [progressKey, sortedChallenges]);
+
+  const frontierIndex = firstUnsolvedIndex(sortedChallenges, solvedIds);
+  const nextUnsolvedIndex =
+    frontierIndex !== -1 && frontierIndex !== activeChallengeIndex ? frontierIndex : null;
+  const nextUnsolvedChallenge =
+    nextUnsolvedIndex !== null ? sortedChallenges[nextUnsolvedIndex] : null;
 
   const challengeSolved = useMemo(
     () =>
@@ -78,6 +98,10 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
         : false,
     [activeChallenge, nodes, edges, metadata.models, metadata.simulation],
   );
+
+  useEffect(() => {
+    if (challengeSolved && activeChallenge) markSolved(activeChallenge.id);
+  }, [challengeSolved, activeChallenge, markSolved]);
 
   const simulation = useMemo(
     () =>
@@ -120,9 +144,14 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
   const inventoryComponents = useMemo(() => {
     if (!activeChallenge) return metadata.components;
     const allowed = new Set(activeChallenge.required_types);
-    return metadata.components.filter(
+    const visible = metadata.components.filter(
       (type) => allowed.has(type) || nodes.some((n) => n.type === type),
     );
+    // Piesele cerute de provocare apar mereu, chiar dacă lipsesc din lista lecției.
+    for (const type of activeChallenge.required_types) {
+      if (!visible.includes(type)) visible.push(type);
+    }
+    return visible;
   }, [metadata.components, activeChallenge, nodes]);
 
   const handlePlaceNode = useCallback(
@@ -227,13 +256,19 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
       ? { type: paletteDragType, position: palettePreview }
       : null;
 
-  const advanceChallenge = useCallback(() => {
-    clearBoard();
-    cancelWire();
-    setActiveChallengeIndex((i) => i + 1);
-    setSelectedType(null);
-    setSelectedNodeId(null);
-  }, [clearBoard, cancelWire]);
+  const goToChallenge = useCallback(
+    (index: number) => {
+      if (statuses[index] === "locked" || index === activeChallengeIndex) return;
+      clearBoard();
+      cancelWire();
+      setActiveChallengeIndex(index);
+      setSelectedType(null);
+      setSelectedNodeId(null);
+      setInfoBubbleNodeId(null);
+      setFailureMessage(null);
+    },
+    [statuses, activeChallengeIndex, clearBoard, cancelWire],
+  );
 
   const resetBoard = useCallback(() => {
     clearBoard();
@@ -357,13 +392,14 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
       {!editorFullscreen &&
         (activeChallenge ? (
           <ChallengeBanner
-            active={activeChallenge}
-            locked={lockedChallenges}
+            challenges={sortedChallenges}
+            statuses={statuses}
+            activeIndex={activeChallengeIndex}
             schemaComplete={schemaComplete}
             solved={challengeSolved}
-            nextChallenge={nextChallenge}
             feedbackHints={simulation.hints}
-            onAdvance={advanceChallenge}
+            nextUnsolvedIndex={nextUnsolvedIndex}
+            onSelect={goToChallenge}
           />
         ) : (
           <p className="circuit-schema-notice">Nicio provocare definită în metadata lecției.</p>
@@ -412,9 +448,13 @@ export default function CircuitElectricTemplate({ lesson }: TemplateProps) {
           {workbench}
         </div>
 
-        {editorFullscreen && challengeSolved && nextChallenge && (
-          <button type="button" className="circuit-fs-advance-btn" onClick={advanceChallenge}>
-            Continuă: {nextChallenge.title}
+        {editorFullscreen && challengeSolved && nextUnsolvedChallenge && nextUnsolvedIndex !== null && (
+          <button
+            type="button"
+            className="circuit-fs-advance-btn"
+            onClick={() => goToChallenge(nextUnsolvedIndex)}
+          >
+            Continuă: {nextUnsolvedChallenge.title}
           </button>
         )}
       </CircuitEditorFrame>

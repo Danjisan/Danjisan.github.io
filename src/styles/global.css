@@ -3894,6 +3894,107 @@ body.circuit-is-dragging * {
   opacity: 0.9;
 }
 
+.circuit-challenge-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.circuit-challenge-steps-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.circuit-challenge-steps-count {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.circuit-challenge-steps-list {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0 0 0.25rem;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  /* Nu lăsăm lista să lățească pagina pe telefon: ocupă lățimea părintelui și derulează orizontal. */
+  width: 0;
+  min-width: 100%;
+}
+
+.circuit-challenge-step {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 14rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.circuit-challenge-step:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.circuit-challenge-step:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.circuit-challenge-step-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--border);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.circuit-challenge-step-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.circuit-challenge-step--solved .circuit-challenge-step-dot {
+  background: #2f6b3a;
+  color: #cfe9d2;
+}
+
+.circuit-challenge-step--open .circuit-challenge-step-dot {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.circuit-challenge-step--locked {
+  border-style: dashed;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.circuit-challenge-step.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
 .circuit-challenge-locked {
   display: flex;
   flex-wrap: wrap;
