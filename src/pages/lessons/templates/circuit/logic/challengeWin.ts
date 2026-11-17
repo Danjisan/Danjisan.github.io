@@ -1,14 +1,20 @@
 import type { CircuitNode, ComponentStateWin, ComponentType } from "../types";
 import type { DcSimulationResult } from "./sim/types";
 
+/** Condiția e îndeplinită dacă cel puțin o piesă de tipul cerut are starea cerută. */
 export function checkComponentStateWin(
   check: ComponentStateWin,
   nodes: CircuitNode[],
   sim: DcSimulationResult,
 ): boolean {
-  const node = nodes.find((n) => n.type === check.target);
-  if (!node) return false;
+  return nodes.some((node) => node.type === check.target && nodeMeetsState(check, node, sim));
+}
 
+function nodeMeetsState(
+  check: ComponentStateWin,
+  node: CircuitNode,
+  sim: DcSimulationResult,
+): boolean {
   if (check.state === "on" && check.target === "led") {
     return sim.ledOn.has(node.id) && !sim.burnedLedIds.has(node.id);
   }

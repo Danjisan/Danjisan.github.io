@@ -18,6 +18,8 @@ import {
 import { nodeVoltage, solveMna } from "./mnaSolve";
 import type { CircuitStamp, DcSimulationResult } from "./types";
 
+const MAX_LED_ITERATIONS = 10;
+
 function pinV(
   solution: ReturnType<typeof solveMna>,
   pinToNode: Map<string, number>,
@@ -79,68 +81,75 @@ export function runDcSimulation(
     return result;
   }
 
-  const ledNodes = nodes.filter((n) => n.type === "led");
-  const probeOpenStamps = ledNodes
-    .filter((n) => !isNodeBurned(n))
-    .map((n) => ledOpenStamp(n.id, netlist.pinToNode));
+  const ledElec = electricalFor(models, "led");
+  const activeLeds = nodes.filter(
+    (n) =>
+      n.type === "led" &&
+      !isNodeBurned(n) &&
+      hasWireOnTerminal(edges, n.id, "+") &&
+      hasWireOnTerminal(edges, n.id, "-"),
+  );
 
-  const probeSolution = solveMna(netlist, probeOpenStamps);
+  const solveWith = (conducting: Set<string>) => {
+    const stamps: CircuitStamp[] = [];
+    let count = netlist.nodeCount;
+    for (const led of activeLeds) {
+      if (conducting.has(led.id)) {
+        stamps.push(
+          ...buildLedConductingStamps(
+            led.id,
+            netlist.pinToNode,
+            ledElec.forward_voltage_v,
+            ledElec.on_resistance_ohm,
+            count++,
+          ),
+        );
+      } else {
+        stamps.push(ledOpenStamp(led.id, netlist.pinToNode));
+      }
+    }
+    return solveMna(netlist, stamps, count);
+  };
 
-  if (!probeSolution) {
-    result.hints.push("Circuitul nu poate fi analizat — verifică conexiunile.");
-    return result;
-  }
-
+  /**
+   * LED-urile sunt neliniare: pornim cu toate blocate și ajustăm până când starea fiecăruia
+   * (conduce / nu) e consistentă cu tensiunile și curenții calculați.
+   */
   const conductingLedIds = new Set<string>();
-
-  for (const led of ledNodes) {
-    if (isNodeBurned(led)) continue;
-
-    const wired = hasWireOnTerminal(edges, led.id, "+") && hasWireOnTerminal(edges, led.id, "-");
-    if (!wired) continue;
-
-    const vPlus = pinV(probeSolution, netlist.pinToNode, led.id, "+");
-    const vMinus = pinV(probeSolution, netlist.pinToNode, led.id, "-");
-    const vDrop = vPlus - vMinus;
-    const elec = electricalFor(models, "led");
-
-    if (vDrop < -0.15) {
-      result.reversedLedIds.add(led.id);
-      continue;
+  let solution = solveWith(conductingLedIds);
+  for (let iter = 0; solution && iter < MAX_LED_ITERATIONS; iter++) {
+    let changed = false;
+    for (const led of activeLeds) {
+      if (conductingLedIds.has(led.id)) {
+        if ((solution.branchCurrents.get(led.id) ?? 0) <= 1e-6) {
+          conductingLedIds.delete(led.id);
+          changed = true;
+        }
+      } else {
+        const vDrop =
+          pinV(solution, netlist.pinToNode, led.id, "+") -
+          pinV(solution, netlist.pinToNode, led.id, "-");
+        if (vDrop >= ledElec.forward_voltage_v * 0.85) {
+          conductingLedIds.add(led.id);
+          changed = true;
+        }
+      }
     }
-
-    if (vDrop >= elec.forward_voltage_v * 0.85) {
-      conductingLedIds.add(led.id);
-    }
+    if (!changed) break;
+    solution = solveWith(conductingLedIds);
   }
 
-  const finalStamps: CircuitStamp[] = [];
-  let nodeCount = netlist.nodeCount;
-
-  for (const led of ledNodes) {
-    if (isNodeBurned(led)) continue;
-    if (!hasWireOnTerminal(edges, led.id, "+") || !hasWireOnTerminal(edges, led.id, "-")) continue;
-
-    if (conductingLedIds.has(led.id)) {
-      const elec = electricalFor(models, "led");
-      finalStamps.push(
-        ...buildLedConductingStamps(
-          led.id,
-          netlist.pinToNode,
-          elec.forward_voltage_v,
-          elec.on_resistance_ohm,
-          nodeCount++,
-        ),
-      );
-    } else {
-      finalStamps.push(ledOpenStamp(led.id, netlist.pinToNode));
-    }
-  }
-
-  const solution = solveMna(netlist, finalStamps, nodeCount);
   if (!solution) {
     result.hints.push("Circuitul nu poate fi analizat — verifică conexiunile.");
     return result;
+  }
+
+  for (const led of activeLeds) {
+    if (conductingLedIds.has(led.id)) continue;
+    const vDrop =
+      pinV(solution, netlist.pinToNode, led.id, "+") -
+      pinV(solution, netlist.pinToNode, led.id, "-");
+    if (vDrop < -0.15) result.reversedLedIds.add(led.id);
   }
 
   const batteryCurrent = Math.abs(solution.branchCurrents.get(battery.id) ?? 0);

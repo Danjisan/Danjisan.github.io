@@ -142,7 +142,8 @@ export function buildNetlist(
       case "potentiometer": {
         if (!shouldStamp(id, ["a", "b", "wiper"])) break;
         const elec = electricalFor(models, "potentiometer");
-        const alpha = Math.min(1, Math.max(0, Number(node.state.value) || 0.5));
+        const raw = Number(node.state.value);
+        const alpha = Math.min(1, Math.max(0, Number.isFinite(raw) ? raw : 0.5));
         const rTotal = Math.max(elec.total_resistance_ohm, 1);
         const nA = pinNode(pinToNode, terminalKey(id, "a"));
         const nW = pinNode(pinToNode, terminalKey(id, "wiper"));

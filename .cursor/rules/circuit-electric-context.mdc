@@ -16,7 +16,9 @@ Arhitect web + programator. Propui arhitectura înainte de cod. Pași mici, test
 
 React + Vite + TS · Frontend GitHub Pages · Config lecții în Supabase `lessons.metadata` JSONB · UI mobil-first, română.
 
-## Prioritate curentă (M1): simulare DC
+## Simulare DC (implementată)
+
+Planul curent de revamp: `docs/circuit-revamp.md`.
 
 **Fizică gimnaziu** — valori reale (V, Ω, A, W), nu SPICE complet.
 
@@ -55,7 +57,7 @@ React + Vite + TS · Frontend GitHub Pages · Config lecții în Supabase `lesso
 - **Implicite** → `circuit/electricalDefaults.ts` (folosite dacă lipsește din DB)
 - **Praguri + mesaje lecție** → `metadata.simulation`
 
-## Arhitectură solver (de implementat)
+## Arhitectură solver
 
 ```
 nodes + edges → buildNetlist() → MNA DC solve → branch V/I/P
@@ -65,12 +67,13 @@ nodes + edges → buildNetlist() → MNA DC solve → branch V/I/P
               UI: overlay select + animație fire
 ```
 
-Fișiere țintă:
-- `circuit/logic/netlist.ts` — union-find terminale → noduri electrice
-- `circuit/logic/mna/` — stamp + solve (matrice mică, fără math.js)
-- `circuit/logic/deviceBehaviors.ts` — timer burn LED, scurtcircuit
+Fișiere:
+- `circuit/logic/sim/netlist.ts` — union-find terminale → noduri electrice
+- `circuit/logic/sim/mnaSolve.ts` — stamp + solve (matrice mică, fără math.js)
+- `circuit/logic/sim/dcSimulation.ts` — LED iterativ, citiri V/I/P, scurtcircuit
+- `circuit/hooks/useSimulationBurn.ts` — timer burn LED
 - `circuit/electricalDefaults.ts` — defaulturi + mesaje
-- `directedCircuit.ts` — **legacy**; înlocuit treptat de solver
+- `circuit/logic/directedCircuit.ts` — **legacy**; folosit doar pentru „bucla e închisă” și pinii accesibili
 
 ## Modele componente (gimnaziu)
 
@@ -93,7 +96,7 @@ Fișiere țintă:
 
 `battery` · `led` · `resistor` · `potentiometer` · `switch` · `dc_motor` · fire SVG 2D
 
-GLB-uri: `null` până la livrare artist — placeholder 2D.
+Piese 2D: le desenăm noi ca SVG (nu așteptăm GLB-uri). 3D doar pentru vederi separate, mai târziu.
 
 ## Fișiere cheie
 
@@ -111,7 +114,8 @@ GLB-uri: `null` până la livrare artist — placeholder 2D.
 | Strat | Status |
 |---|---|
 | 0–1 | Inventar, plasare, fire, pan/zoom, UX compact |
-| **1b** | **MNA DC + burn/short + overlay** ← ACUM |
+| 1b | MNA DC + burn/short + overlay (gata) |
+| **revamp** | **capitole, piese pe instanță, progres + XP, atelier — vezi `docs/circuit-revamp.md`** ← ACUM |
 | 2 | GLB 3D, multimetru, provocări noi |
 | 3 | Editor profesor, generator provocări |
 
