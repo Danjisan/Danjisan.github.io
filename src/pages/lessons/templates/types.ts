@@ -13,4 +13,6 @@ export interface TemplateProps {
   completed: boolean;
   onToggleComplete: () => void;
   markingDone: boolean;
+  /** Progresul s-a salvat pe server (XP, lecție finalizată): pagina reîncarcă profilul și starea. */
+  onProgressChange?: () => void;
 }

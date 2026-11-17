@@ -1,6 +1,6 @@
 # Circuite — pasul 2: capitole, mini-lecții, pași
 
-> Propunere din 2026-11-17. Status: **aprobată și implementată (2a–2d)**; lecția nouă se activează cu `docs/migrations/20261117_circuit_chapter_01.sql`. Continuă `docs/circuit-revamp.md` (secțiunile 1, 2, 4, 5).
+> Propunere din 2026-11-17. Status: **aprobată și implementată (2a–2d)**; lecția nouă se activează cu `colabme-server/supabase/migrations/20261117_circuit_chapter_01.sql`. Continuă `docs/circuit-revamp.md` (secțiunile 1, 2, 4, 5).
 
 ## Ideea de bază: întâi te uiți, apoi schimbi, apoi construiești
 

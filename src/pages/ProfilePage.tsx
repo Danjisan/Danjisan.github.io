@@ -267,6 +267,10 @@ export default function ProfilePage() {
                   {exportData.lessonCompletions.length}
                 </li>
                 <li>
+                  <strong>Mini-lecții terminate:</strong>{" "}
+                  {exportData.lessonItemProgress.length}
+                </li>
+                <li>
                   <strong>Sesiuni de joc:</strong> {exportData.quizSessions.length}
                 </li>
                 <li>

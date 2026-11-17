@@ -11,6 +11,7 @@ export interface UserDataExport {
   };
   profile: Record<string, unknown> | null;
   lessonCompletions: unknown[];
+  lessonItemProgress: unknown[];
   quizSessions: unknown[];
   sessionAnswers: unknown[];
   rightsSummary: string[];
@@ -34,10 +35,11 @@ export async function collectOwnUserData(): Promise<UserDataExport> {
   const user = userData.user;
   const uid = user.id;
 
-  const [profileRes, completionsRes, sessionsRes, answersRes] =
+  const [profileRes, completionsRes, itemProgressRes, sessionsRes, answersRes] =
     await Promise.all([
       supabase.from("user_profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("lesson_completions").select("*").eq("user_id", uid),
+      supabase.from("lesson_item_progress").select("*").eq("user_id", uid),
       supabase
         .from("quiz_sessions")
         .select("*")
@@ -56,6 +58,7 @@ export async function collectOwnUserData(): Promise<UserDataExport> {
     },
     profile: profileRes.data ?? null,
     lessonCompletions: completionsRes.data ?? [],
+    lessonItemProgress: itemProgressRes.data ?? [],
     quizSessions: sessionsRes.data ?? [],
     sessionAnswers: answersRes.data ?? [],
     rightsSummary: [...GDPR_RIGHTS_RO],

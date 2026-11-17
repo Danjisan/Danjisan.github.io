@@ -15,10 +15,10 @@ type LessonStatus = "done" | "next" | "locked";
  * Harta unui capitol: mini-lecțiile în ordine, cu XP. Cele terminate se pot redeschide oricând;
  * următoarea e deschisă; restul așteaptă.
  */
-export default function CircuitChapter({ chapter, lesson, userId }: CircuitChapterProps) {
+export default function CircuitChapter({ chapter, lesson, userId, onProgressChange }: CircuitChapterProps) {
   // Valorile electrice vin din lecție (dacă le are), altfel cele implicite.
   const { metadata } = useMemo(() => parseCircuitMetadata(lesson.metadata), [lesson.metadata]);
-  const { done, markDone } = useChapterProgress(lesson.id, userId);
+  const { done, loading, markDone } = useChapterProgress(lesson.id, userId, onProgressChange);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const statuses: LessonStatus[] = useMemo(() => {
@@ -43,7 +43,8 @@ export default function CircuitChapter({ chapter, lesson, userId }: CircuitChapt
     <div className="template-circuit circuit-chapter">
       <header className="circuit-chapter-head">
         <div>
-          <h2 className="circuit-chapter-title">{chapter.title}</h2>
+          {/* Titlul capitolului apare doar dacă diferă de titlul paginii */}
+          {chapter.title !== lesson.title && <h2 className="circuit-chapter-title">{chapter.title}</h2>}
           <p className="circuit-chapter-intro">{chapter.intro}</p>
         </div>
         <div className="circuit-chapter-xp" aria-label={`${earnedXp} din ${totalXp} XP`}>
@@ -56,7 +57,7 @@ export default function CircuitChapter({ chapter, lesson, userId }: CircuitChapt
         </div>
       </header>
 
-      <ol className="circuit-chapter-list">
+      <ol className="circuit-chapter-list" aria-busy={loading}>
         {chapter.lessons.map((l, i) => {
           const status = statuses[i];
           return (
@@ -97,7 +98,7 @@ export default function CircuitChapter({ chapter, lesson, userId }: CircuitChapt
 
       {!userId && (
         <p className="circuit-chapter-guest">
-          Progresul se păstrează doar pe acest dispozitiv. Fă-ți cont ca să nu-l pierzi.
+          Fără cont, progresul se păstrează doar pe acest dispozitiv și nu primești XP. Când te loghezi, ce ai terminat se adaugă în cont.
         </p>
       )}
 
@@ -108,7 +109,7 @@ export default function CircuitChapter({ chapter, lesson, userId }: CircuitChapt
           number={openIndex + 1}
           metadata={metadata}
           alreadyDone={done.has(open.id)}
-          onFinish={() => markDone(open.id)}
+          onFinish={() => void markDone(open.id)}
           onExit={() => setOpenIndex(null)}
           onNext={
             openIndex + 1 < chapter.lessons.length

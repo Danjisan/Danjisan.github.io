@@ -21,7 +21,7 @@ interface Lesson {
 
 export default function LessonPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -85,12 +85,19 @@ export default function LessonPage() {
     </section>
   );
 
+  // Lecțiile cu capitol (mini-lecții) se finalizează singure, pe server, când termini toate mini-lecțiile.
+  const autoCompleted = typeof lesson.metadata?.chapter === "string";
+
   const templateProps = {
     lesson,
     userId: user?.id ?? null,
     completed,
     onToggleComplete: toggleComplete,
     markingDone,
+    onProgressChange: () => {
+      void refreshProfile();
+      void fetchCompletion();
+    },
   };
 
   return (
@@ -100,7 +107,12 @@ export default function LessonPage() {
           ← Lumea Lectiilor
         </button>
         <div className="lesson-page-completion">
-          {user && (
+          {user && autoCompleted && completed && (
+            <span className="btn-complete done" role="status">
+              ✓ Completată
+            </span>
+          )}
+          {user && !autoCompleted && (
             <button
               className={`btn-complete ${completed ? "done" : ""}`}
               onClick={toggleComplete}

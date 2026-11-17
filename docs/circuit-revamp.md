@@ -107,7 +107,14 @@ interface ExerciseStep {
 
 Limitele (`max_burned`, `budget`) se verifică pe toată încercarea: dacă le depășești, exercițiul se resetează cu o explicație, nu pierzi progresul.
 
-### 6. Progres și XP
+### 6. Progres (implementat 2026-11-17)
+
+- Tabele `lesson_items` (lista albă: mini-lecție → XP, invizibilă din client) și `lesson_item_progress` (elevul își vede doar rândurile lui).
+- Singura cale de scriere: `rpc("complete_lesson_item")` — SECURITY DEFINER, dă XP o singură dată, marchează lecția finalizată la ultima mini-lecție. Id-urile necunoscute sunt respinse.
+- Clientul: `useChapterProgress`; vizitatorii rămân pe localStorage, iar la logare progresul lor urcă în cont. Dacă serverul nu răspunde, progresul rămâne local.
+- La un capitol nou: rânduri noi în `lesson_items` (migrație), cu aceleași id-uri și XP ca în fișierul capitolului; `serverItems.test.ts` verifică potrivirea (local, când `colabme-server` e lângă repo).
+
+### 6 (plan inițial) și XP
 
 - Tabel nou în `colabme-server`: `lesson_step_progress (user_id, lesson_id, step_id, completed_at, xp)` cu RLS.
 - XP pe fiecare mini-lecție terminată, **în funcție de dificultate** (câmp `difficulty` pe mini-lecție → XP); redeschiderea nu mai dă XP.
@@ -153,7 +160,7 @@ Electricitatea e la fizică în clasa a VIII-a; ținta e gimnaziu, curbă lină.
 | 1 ✅ | Catalog de piese (`src/content/circuits/parts.ts`) + parametri pe piesă + inventar per provocare (`inventory` opțional în metadata, altfel din `required_types`). Plus: piesele nelegate nu mai blochează simularea (GMIN) | 2 LED-uri / 2 rezistoare diferite pe masă |
 | 2 ✅ | Schema capitol → mini-lecție → pași, condiții noi, test de rezolvabilitate; capitolul 1 (vezi `docs/circuit-step2.md`) | capitolul 1 jucabil |
 | 3 ✅ | Harta capitolului cu redeschiderea mini-lecțiilor; flux prezice → încearcă → construiește → repară | navigare ușoară între mini-lecții |
-| 4 | Progres + XP salvate (migrație în `colabme-server` + client) + finalizare automată | progresul rămâne după refresh |
+| 4 ✅ | Progres + XP salvate (`colabme-server` `20261117_lesson_item_progress.sql` + client) + finalizare automată | progresul rămâne după refresh și pe alt dispozitiv |
 | 5 | Vizual 2D: ~~piese SVG~~ ✅, ~~curent pe fire (electroni)~~ ✅, luminozitate LED ∝ curent, fire curbe care ocolesc piesele | arată ca un joc |
 | 6 | Atelier: piese deblocate, circuite salvate în cont, vizibile pentru profesori și admini | sandbox |
 | 7 | Capitolele 2–4 | conținut |
