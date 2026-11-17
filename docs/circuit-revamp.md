@@ -151,8 +151,8 @@ Electricitatea e la fizică în clasa a VIII-a; ținta e gimnaziu, curbă lină.
 |---|---|---|
 | 0 ✅ | Bug-uri: potențiometru la 0, câștig doar pe prima piesă, LED iterativ, piese cerute care lipsesc din inventar. Aliniem skill-ul cu regula `.mdc`. Plus: lista de provocări cu revizitare | provocarea 1 se poate trece, simularea e mai corectă |
 | 1 ✅ | Catalog de piese (`src/content/circuits/parts.ts`) + parametri pe piesă + inventar per provocare (`inventory` opțional în metadata, altfel din `required_types`). Plus: piesele nelegate nu mai blochează simularea (GMIN) | 2 LED-uri / 2 rezistoare diferite pe masă |
-| 2 | Schema capitol → mini-lecție → pași, condiții noi, limite, test de rezolvabilitate; capitolul 1 ca exemplu | capitolul 1 jucabil |
-| 3 | Harta capitolului cu redeschiderea mini-lecțiilor; flux concept → exercițiu → scenariu | navigare ușoară între mini-lecții |
+| 2 ✅ | Schema capitol → mini-lecție → pași, condiții noi, test de rezolvabilitate; capitolul 1 (vezi `docs/circuit-step2.md`) | capitolul 1 jucabil |
+| 3 ✅ | Harta capitolului cu redeschiderea mini-lecțiilor; flux prezice → încearcă → construiește → repară | navigare ușoară între mini-lecții |
 | 4 | Progres + XP salvate (migrație în `colabme-server` + client) + finalizare automată | progresul rămâne după refresh |
 | 5 | Vizual 2D: ~~piese SVG~~ ✅, ~~curent pe fire (electroni)~~ ✅, luminozitate LED ∝ curent, fire curbe care ocolesc piesele | arată ca un joc |
 | 6 | Atelier: piese deblocate, circuite salvate în cont, vizibile pentru profesori și admini | sandbox |

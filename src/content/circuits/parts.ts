@@ -5,6 +5,7 @@
  * (vezi docs/circuit-revamp.md, „Catalogul de piese”).
  *
  * - `type` spune simulatorului ce comportament are piesa.
+ * - `label` e numele afișat; lipsă = eticheta tipului din lecție.
  * - `electrical` suprascrie doar ce diferă față de valorile tipului (din lecție sau implicite).
  *   Piesele „implicite” n-au `electrical`, deci se comportă exact ca înainte de catalog.
  * - `price` (lei virtuali) și `unlock` vor fi folosite de exercițiile cu buget și de atelier.
@@ -29,7 +30,7 @@ type AnyPart = { [T in ComponentType]: PartDef<T> }[ComponentType];
 
 export const PARTS: AnyPart[] = [
   // Baterii
-  { id: "battery-9v", type: "battery", price: 6 },
+  { id: "battery-9v", type: "battery", label: "Baterie 9V", price: 6 },
   {
     id: "battery-4v5",
     type: "battery",
@@ -39,7 +40,7 @@ export const PARTS: AnyPart[] = [
   },
 
   // LED-uri (tensiunea de deschidere crește de la roșu la albastru)
-  { id: "led-red", type: "led", color: "red", price: 1 },
+  { id: "led-red", type: "led", label: "LED roșu", color: "red", price: 1 },
   {
     id: "led-yellow",
     type: "led",
@@ -66,7 +67,7 @@ export const PARTS: AnyPart[] = [
   },
 
   // Rezistoare
-  { id: "resistor-220", type: "resistor", price: 1 },
+  { id: "resistor-220", type: "resistor", label: "Rezistor 220Ω", price: 1 },
   {
     id: "resistor-100",
     type: "resistor",

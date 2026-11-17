@@ -44,6 +44,10 @@ interface CircuitWorkbenchProps {
   highlightEdgeIds?: Set<string>;
   /** Etichete mici pe piese (ex. numărul nodului în ajutor) */
   nodeBadges?: Map<string, string>;
+  /** Piese care nu se pot șterge sau roti */
+  lockedNodeIds?: Set<string>;
+  /** Arată îndemnul „Atinge un terminal…” (doar dacă se pot lega fire) */
+  showWireHint?: boolean;
   onSelectEdge?: (edgeId: string) => void;
   onRemoveEdge?: (edgeId: string) => void;
   onSurfacePointerMove?: (e: React.PointerEvent) => void;
@@ -85,6 +89,8 @@ export default function CircuitWorkbench({
   selectedEdgeId = null,
   highlightEdgeIds,
   nodeBadges,
+  lockedNodeIds,
+  showWireHint = true,
   onSelectEdge,
   onRemoveEdge,
   onSurfacePointerMove,
@@ -177,11 +183,11 @@ export default function CircuitWorkbench({
                   : undefined
               }
               onBodyPointerDown={onBodyPointerDown}
-              onRemove={onRemoveNode}
+              onRemove={lockedNodeIds?.has(node.id) ? undefined : onRemoveNode}
               onTerminalPointerDown={onTerminalPointerDown}
               onTerminalPointerUp={onTerminalPointerUp}
               onSwitchToggle={onSwitchToggle}
-              onFlip={onNodeFlip}
+              onFlip={lockedNodeIds?.has(node.id) ? undefined : onNodeFlip}
             />
           ))}
 
@@ -209,7 +215,7 @@ export default function CircuitWorkbench({
             </p>
           )}
 
-          {editable && nodes.length > 0 && !hasCurrent && (
+          {editable && showWireHint && nodes.length > 0 && !hasCurrent && (
             <p className="circuit-workbench-wire-hint">
               Atinge un terminal, apoi altul, ca să legi un fir. Pe un terminal pot fi mai multe fire. Atinge un fir ca să-l ștergi.
             </p>

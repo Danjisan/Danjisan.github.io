@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { electronFlowStyle } from "../logic/electronFlow";
 import { wireLinePath } from "../logic/wireGeometry";
 import { getTerminalDefs, getTerminalPixelPosition } from "../logic/terminalPositions";
@@ -52,10 +52,28 @@ export default function WireLayer({
   viewportRef,
 }: WireLayerProps) {
   const viewportEl = viewportRef.current;
-  const width = viewportEl?.clientWidth ?? 1;
-  const height = viewportEl?.clientHeight ?? 1;
+  // Dimensiunea mesei, urmărită cu ResizeObserver. Stratul de fire e copilul mesei, iar React leagă
+  // ref-ul mesei abia după efectele de layout ale copiilor — de aceea `useEffect`, nu `useLayoutEffect`.
+  // Fără asta, la prima afișare firele pot lipsi până la următoarea schimbare.
+  const [size, setSize] = useState({ width: 1, height: 1 });
+  const { width, height } = size;
   const remPx = readRemPx();
   const ready = width > 1 && height > 1;
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const update = () =>
+      setSize((prev) =>
+        prev.width === el.clientWidth && prev.height === el.clientHeight
+          ? prev
+          : { width: el.clientWidth, height: el.clientHeight },
+      );
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [viewportRef]);
 
   const layoutKey = useMemo(
     () =>

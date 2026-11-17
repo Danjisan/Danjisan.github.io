@@ -1,6 +1,6 @@
 import type { CircuitSolution } from "../../../../../content/circuits/solutions";
 import type { CircuitEdge, CircuitNode, ComponentModel, ComponentType, TerminalId } from "../types";
-import { defaultNodeState } from "./nodeDefaults";
+import { boardToCircuit } from "./board";
 import { getPart, modelForPart } from "./parts";
 
 export interface SolutionCircuit {
@@ -8,25 +8,9 @@ export interface SolutionCircuit {
   edges: CircuitEdge[];
 }
 
-function splitRef(ref: string): { nodeId: string; terminal: TerminalId } {
-  const i = ref.lastIndexOf(":");
-  return { nodeId: ref.slice(0, i), terminal: ref.slice(i + 1) as TerminalId };
-}
-
 /** Circuitul complet al soluției; `switchesOn` închide întrerupătoarele. */
 export function solutionToCircuit(solution: CircuitSolution, switchesOn = true): SolutionCircuit {
-  const nodes: CircuitNode[] = solution.parts.flatMap((p) => {
-    const part = getPart(p.part);
-    if (!part) return [];
-    const state: Record<string, unknown> = { ...defaultNodeState(part.type), partId: part.id };
-    if (part.type === "switch") state.on = switchesOn;
-    return [{ id: p.id, type: part.type, position: { x: p.x, y: p.y }, state }];
-  });
-  const edges: CircuitEdge[] = solution.wires.map(([a, b], i) => ({
-    id: `w${i}`,
-    from: splitRef(a),
-    to: splitRef(b),
-  }));
+  const { nodes, edges } = boardToCircuit(solution, { switchesOn });
   return { nodes, edges };
 }
 

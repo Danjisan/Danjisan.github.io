@@ -9,17 +9,10 @@
  * Întrerupătoarele apar deschise la început; ultimul pas din ajutor le închide.
  */
 
-export interface SolutionPart {
-  id: string;
-  part: string;
-  x: number;
-  y: number;
-}
+import type { BoardSetup } from "./chapters/types";
 
-export interface CircuitSolution {
-  parts: SolutionPart[];
-  wires: [string, string][];
-}
+/** O soluție e o masă completă (aceeași formă ca în capitole). */
+export type CircuitSolution = BoardSetup;
 
 const seriesLed: CircuitSolution = {
   parts: [

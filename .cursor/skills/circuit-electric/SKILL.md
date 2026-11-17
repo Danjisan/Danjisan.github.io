@@ -28,6 +28,13 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - Potențiometru: două rezistențe a–wiper / wiper–b după `state.value` (0..1).
 - Condițiile `component_state` sunt îndeplinite dacă **cel puțin o piesă** de tipul cerut are starea cerută.
 
+## Capitole și mini-lecții
+
+- `lessons.metadata.chapter` → capitol din `src/content/circuits/chapters/` (mini-lecții cu pași `concept` / `predict` / `try` / `build` / `fix`); fără el, template-ul arată provocările vechi din `metadata.challenges`.
+- Orice pas nou are `solution`; `chapters.test.ts` verifică că se poate rezolva, că nu e rezolvat de la început și că respectă acțiunile permise.
+- Editorul e `components/CircuitEditor.tsx` (folosit de ambele moduri); permisiunile și piesele blocate vin din pas.
+- „Rotește” (flip) schimbă doar desenul, nu polaritatea — un LED întors se repară mutând firele.
+
 ## Piese și inventar
 
 - Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și inventarul (`buildInventory`, `canPlacePart`).

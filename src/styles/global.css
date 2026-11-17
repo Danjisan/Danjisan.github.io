@@ -5840,3 +5840,459 @@ body.circuit-is-dragging * {
 .circuit-fs-header .circuit-help-btn--compact {
   margin-right: 2.75rem;
 }
+
+/* ── Capitol de circuite: harta mini-lecțiilor ── */
+.circuit-chapter {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.circuit-chapter-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.circuit-chapter-title {
+  margin: 0 0 0.3rem;
+  font-size: 1.25rem;
+  color: var(--text);
+}
+
+.circuit-chapter-intro {
+  margin: 0;
+  max-width: 38rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.circuit-chapter-xp {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.circuit-chapter-xp-num {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #a3e635;
+}
+
+.circuit-chapter-xp-bar {
+  display: block;
+  width: 9rem;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.circuit-chapter-xp-bar span {
+  display: block;
+  height: 100%;
+  background: #a3e635;
+  transition: width 0.3s;
+}
+
+.circuit-chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.circuit-chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.circuit-chapter-item:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.circuit-chapter-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.circuit-chapter-item--next {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.circuit-chapter-item--locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.circuit-chapter-item-dot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--border);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.circuit-chapter-item--done .circuit-chapter-item-dot {
+  background: #2f6b3a;
+  color: #cfe9d2;
+}
+
+.circuit-chapter-item--next .circuit-chapter-item-dot {
+  background: var(--accent);
+  color: #1a0e2e;
+}
+
+.circuit-chapter-item-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.circuit-chapter-item-title {
+  font-weight: 600;
+}
+
+.circuit-chapter-item-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.circuit-chapter-item-xp {
+  flex: none;
+  font-size: 0.8rem;
+  color: #a3e635;
+  font-weight: 600;
+}
+
+.circuit-chapter-item-go,
+.circuit-chapter-item-again {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.circuit-chapter-item-again {
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .circuit-chapter-item-go,
+  .circuit-chapter-item-again {
+    display: none;
+  }
+}
+
+.circuit-chapter-done,
+.circuit-chapter-guest {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ── Mini-lecție pe tot ecranul ── */
+.circuit-lesson {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.circuit-lesson-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  flex-shrink: 0;
+  padding: 0.6rem 3.5rem 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  background: #0c0618;
+}
+
+.circuit-lesson-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.circuit-lesson-dots {
+  display: flex;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.circuit-lesson-dots li {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.circuit-lesson-dots li.done {
+  background: #a3e635;
+}
+
+.circuit-lesson-dots li.current {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.circuit-lesson-text {
+  flex-shrink: 0;
+  max-height: 38vh;
+  overflow-y: auto;
+  touch-action: pan-y;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.circuit-lesson-text--full {
+  flex: 1;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 40rem;
+  width: 100%;
+  margin: 0 auto;
+  border-bottom: none;
+  font-size: 1.05rem;
+}
+
+.circuit-lesson-text h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+
+.circuit-lesson-text p {
+  margin: 0 0 0.5rem;
+}
+
+.circuit-lesson-kind {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.circuit-lesson-story {
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid #f59e0b;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.circuit-lesson-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.circuit-lesson-option {
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.circuit-lesson-option:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.circuit-lesson-option:disabled {
+  cursor: default;
+}
+
+.circuit-lesson-option.correct {
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+
+.circuit-lesson-option.wrong {
+  border-color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.circuit-lesson-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.circuit-lesson-feedback {
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.circuit-lesson-feedback.ok {
+  background: rgba(74, 222, 128, 0.12);
+  color: #bbf7d0;
+}
+
+.circuit-lesson-feedback.no {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
+}
+
+.circuit-lesson .circuit-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.circuit-lesson .circuit-workbench {
+  order: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border: none;
+}
+
+.circuit-lesson .circuit-workbench-surface {
+  flex: 1;
+  min-height: 0;
+}
+
+.circuit-lesson .circuit-inventory {
+  order: 2;
+  border-radius: 0;
+}
+
+.circuit-lesson-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.55rem 0.9rem;
+  border-top: 1px solid var(--border);
+  background: #0c0618;
+}
+
+.circuit-lesson-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.circuit-lesson-next {
+  margin-left: auto;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #1a0e2e;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.circuit-lesson-next:disabled {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: default;
+}
+
+.circuit-lesson-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.circuit-lesson-end {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.circuit-lesson-end h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.circuit-lesson-end-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: #2f6b3a;
+  color: #dcfce7;
+  font-size: 2rem;
+}
+
+.circuit-lesson-end-xp {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #a3e635;
+}
+
+.circuit-lesson-end-summary {
+  max-width: 30rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.circuit-lesson-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}

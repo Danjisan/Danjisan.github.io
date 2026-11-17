@@ -1,81 +1,53 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { TemplateProps } from "./types";
-import CircuitFailureBanner from "./circuit/components/CircuitFailureBanner";
-import DragGhost from "./circuit/components/DragGhost";
 import { parseCircuitMetadata } from "./circuit/parseMetadata";
 import ChallengeBanner from "./circuit/components/ChallengeBanner";
+import CircuitChapter from "./circuit/components/CircuitChapter";
+import CircuitEditor, { type CircuitEditorState } from "./circuit/components/CircuitEditor";
 import CircuitHelpDialog from "./circuit/components/CircuitHelpDialog";
 import { CIRCUIT_SOLUTIONS } from "../../../content/circuits/solutions";
+import { CIRCUIT_CHAPTERS } from "../../../content/circuits/chapters";
 import CircuitEditorFrame from "./circuit/components/CircuitEditorFrame";
 import CircuitEditorToolbar from "./circuit/components/CircuitEditorToolbar";
 import CircuitFullscreenHeader from "./circuit/components/CircuitFullscreenHeader";
-import CircuitWorkbench from "./circuit/components/CircuitWorkbench";
-import ComponentPalette from "./circuit/components/ComponentPalette";
 import { useChallengeProgress } from "./circuit/hooks/useChallengeProgress";
-import { useCircuitState } from "./circuit/hooks/useCircuitState";
 import { challengeStatuses, firstUnsolvedIndex, startingIndex } from "./circuit/logic/challengeProgress";
-import { useWireInteraction } from "./circuit/hooks/useWireInteraction";
-import { useSimulationBurn } from "./circuit/hooks/useSimulationBurn";
-import { useWorkbenchDrag } from "./circuit/hooks/useWorkbenchDrag";
-import { useWorkbenchViewport } from "./circuit/hooks/useWorkbenchViewport";
-import { simulateCircuit } from "./circuit/logic/simulateCircuit";
 import { isChallengeSolved } from "./circuit/logic/validateCircuit";
 import { hintsForEditor } from "./circuit/logic/workbenchHints";
-import { buildInventory, canPlacePart, getPart, modelForPart, partOfNode } from "./circuit/logic/parts";
+import { buildInventory } from "./circuit/logic/parts";
+import { emptyResult } from "./circuit/logic/sim/netlist";
 
-export default function CircuitElectricTemplate({ lesson, userId }: TemplateProps) {
-  const { metadata, schemaComplete } = useMemo(
-    () => parseCircuitMetadata(lesson.metadata),
-    [lesson.metadata],
-  );
+/**
+ * Template `circuit_electric`.
+ * - Dacă `metadata.chapter` arată spre un capitol din repo → mini-lecții (CircuitChapter).
+ * - Altfel → provocările vechi din `metadata.challenges`.
+ */
+export default function CircuitElectricTemplate(props: TemplateProps) {
+  const chapterId = typeof props.lesson.metadata.chapter === "string" ? props.lesson.metadata.chapter : null;
+  const chapter = chapterId ? CIRCUIT_CHAPTERS[chapterId] : undefined;
+  if (chapter) return <CircuitChapter chapter={chapter} {...props} />;
+  return <LegacyChallenges {...props} />;
+}
 
+const EMPTY_STATE: CircuitEditorState = { nodes: [], edges: [], sim: emptyResult() };
+
+function LegacyChallenges({ lesson, userId }: TemplateProps) {
+  const { metadata, schemaComplete } = useMemo(() => parseCircuitMetadata(lesson.metadata), [lesson.metadata]);
   const editorHints = useMemo(() => hintsForEditor(metadata.workbench_hints), [metadata.workbench_hints]);
 
-  const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
-  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
   const [editorFullscreen, setEditorFullscreen] = useState(false);
-  const [inventoryCollapsed, setInventoryCollapsed] = useState(false);
-  const [infoBubbleNodeId, setInfoBubbleNodeId] = useState<string | null>(null);
-  const [failureMessage, setFailureMessage] = useState<string | null>(null);
-  const workbenchRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-
-  const {
-    nodes,
-    edges,
-    placeNode,
-    moveNode,
-    removeNode,
-    clearBoard,
-    addEdge,
-    removeEdge,
-    toggleSwitch,
-    setPotentiometerValue,
-    toggleNodeFlip,
-    markLedBurned,
-  } = useCircuitState();
-
-  const occupiedTerminals = useMemo(() => {
-    const set = new Set<string>();
-    for (const edge of edges) {
-      set.add(`${edge.from.nodeId}:${edge.from.terminal}`);
-      set.add(`${edge.to.nodeId}:${edge.to.terminal}`);
-    }
-    return set;
-  }, [edges]);
+  /** Schimbat ca să pornim cu masa goală (altă provocare / „Resetează masa”) */
+  const [boardKey, setBoardKey] = useState(0);
+  const [board, setBoard] = useState<CircuitEditorState>(EMPTY_STATE);
 
   const sortedChallenges = useMemo(
     () => [...metadata.challenges].sort((a, b) => a.order - b.order),
     [metadata.challenges],
   );
   const { solvedIds, progressKey, markSolved } = useChallengeProgress(lesson.id, userId);
-  const statuses = useMemo(
-    () => challengeStatuses(sortedChallenges, solvedIds),
-    [sortedChallenges, solvedIds],
-  );
+  const statuses = useMemo(() => challengeStatuses(sortedChallenges, solvedIds), [sortedChallenges, solvedIds]);
   const activeChallenge = sortedChallenges[activeChallengeIndex] ?? null;
   const activeSolution = activeChallenge ? CIRCUIT_SOLUTIONS[activeChallenge.id] ?? null : null;
   const openHelp = activeSolution ? () => setHelpOpen(true) : undefined;
@@ -87,58 +59,17 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
   }, [progressKey, sortedChallenges]);
 
   const frontierIndex = firstUnsolvedIndex(sortedChallenges, solvedIds);
-  const nextUnsolvedIndex =
-    frontierIndex !== -1 && frontierIndex !== activeChallengeIndex ? frontierIndex : null;
-  const nextUnsolvedChallenge =
-    nextUnsolvedIndex !== null ? sortedChallenges[nextUnsolvedIndex] : null;
+  const nextUnsolvedIndex = frontierIndex !== -1 && frontierIndex !== activeChallengeIndex ? frontierIndex : null;
+  const nextUnsolvedChallenge = nextUnsolvedIndex !== null ? sortedChallenges[nextUnsolvedIndex] : null;
 
   const challengeSolved = useMemo(
-    () =>
-      activeChallenge
-        ? isChallengeSolved(nodes, edges, activeChallenge, {
-            models: metadata.models,
-            simulation: metadata.simulation,
-          })
-        : false,
-    [activeChallenge, nodes, edges, metadata.models, metadata.simulation],
+    () => (activeChallenge ? isChallengeSolved(board.nodes, board.edges, activeChallenge, metadata) : false),
+    [activeChallenge, board.nodes, board.edges, metadata],
   );
 
   useEffect(() => {
     if (challengeSolved && activeChallenge) markSolved(activeChallenge.id);
   }, [challengeSolved, activeChallenge, markSolved]);
-
-  const simulation = useMemo(
-    () =>
-      simulateCircuit(nodes, edges, {
-        models: metadata.models,
-        simulation: metadata.simulation,
-      }),
-    [nodes, edges, metadata.models, metadata.simulation],
-  );
-
-  const handleFailureMessage = useCallback((message: string) => {
-    setFailureMessage(message);
-  }, []);
-
-  useSimulationBurn(
-    simulation,
-    nodes,
-    metadata.models,
-    markLedBurned,
-    handleFailureMessage,
-    metadata.simulation,
-  );
-
-  const dismissInfoBubble = useCallback(() => setInfoBubbleNodeId(null), []);
-
-  const enterEditorFullscreen = useCallback(() => {
-    setEditorFullscreen(true);
-    setInventoryCollapsed(true);
-  }, []);
-
-  const toggleInventoryCollapsed = useCallback(() => {
-    setInventoryCollapsed((c) => !c);
-  }, []);
 
   // Ce piese primește elevul: din provocare (inventory / required_types) sau, fără provocare, din lecție.
   const inventory = useMemo(
@@ -146,191 +77,22 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     [activeChallenge, metadata.components],
   );
 
-  const canPlace = useCallback(
-    (partId: string) => canPlacePart(nodes, inventory, partId),
-    [nodes, inventory],
-  );
-
-  const handlePlacePart = useCallback(
-    (partId: string, position: { x: number; y: number }) => {
-      const part = getPart(partId);
-      if (!part) return;
-      placeNode(part, position);
-      setInventoryCollapsed(true);
-    },
-    [placeNode],
-  );
-
-  const handleSelectPart = useCallback((partId: string) => {
-    setSelectedPartId(partId);
-    setSelectedNodeId(null);
-  }, []);
-
-  const handleSelectNode = useCallback(
-    (nodeId: string) => {
-      setInfoBubbleNodeId(null);
-      setSelectedEdgeId(null);
-      setSelectedNodeId(nodeId);
-      const node = nodes.find((n) => n.id === nodeId);
-      setSelectedPartId(node ? partOfNode(node).id : null);
-    },
-    [nodes],
-  );
-
-  const handleNodeTap = useCallback(
-    (nodeId: string) => {
-      handleSelectNode(nodeId);
-    },
-    [handleSelectNode],
-  );
-
-  const handleNodeLongPress = useCallback((nodeId: string) => {
-    setSelectedNodeId(null);
-    setSelectedPartId(null);
-    setInfoBubbleNodeId(nodeId);
-  }, []);
-
-  const handleRemoveNode = useCallback(
-    (nodeId: string) => {
-      removeNode(nodeId);
-      if (selectedNodeId === nodeId) {
-        setSelectedNodeId(null);
-      }
-    },
-    [removeNode, selectedNodeId],
-  );
-
-  const {
-    pendingTerminal,
-    wirePointer,
-    handleTerminalPointerDown,
-    handleTerminalPointerUp,
-    handleWirePointerMove,
-    handleSurfacePointerDown,
-    cancelWire,
-  } = useWireInteraction({
-    onConnect: addEdge,
-  });
-
-  const exitEditorFullscreen = useCallback(() => {
-    cancelWire();
-    setEditorFullscreen(false);
-    setSelectedPartId(null);
-    setSelectedNodeId(null);
-    setSelectedEdgeId(null);
-    setInfoBubbleNodeId(null);
-  }, [cancelWire]);
-
-  const {
-    viewport,
-    resetView,
-    zoomIn,
-    zoomOut,
-    handleWheel,
-    handleSurfacePointerDown: handleViewportPointerDown,
-    handleSurfacePointerMove: handleViewportPointerMove,
-    handleSurfacePointerUp: handleViewportPointerUp,
-  } = useWorkbenchViewport({
-    surfaceRef: workbenchRef,
-    panLocked: Boolean(pendingTerminal),
-  });
-
-  const {
-    ghostPosition,
-    palettePreview,
-    draggingNodeId,
-    paletteDragPartId,
-    startPalettePointer,
-    startNodePointer,
-  } = useWorkbenchDrag({
-    workbenchRef,
-    viewportRef,
-    canPlacePart: canPlace,
-    onPlacePart: handlePlacePart,
-    onMoveNode: moveNode,
-    onSelectPart: handleSelectPart,
-    onNodeTap: handleNodeTap,
-    onNodeLongPress: handleNodeLongPress,
-  });
-
-  const ghostPart = paletteDragPartId ? getPart(paletteDragPartId) ?? null : null;
-  const placementPreview =
-    ghostPart && palettePreview
-      ? { partId: ghostPart.id, type: ghostPart.type, position: palettePreview }
-      : null;
-
   const goToChallenge = useCallback(
     (index: number) => {
       if (statuses[index] === "locked" || index === activeChallengeIndex) return;
-      clearBoard();
-      cancelWire();
       setActiveChallengeIndex(index);
-      setSelectedPartId(null);
-      setSelectedNodeId(null);
-      setSelectedEdgeId(null);
-      setInfoBubbleNodeId(null);
-      setFailureMessage(null);
+      setBoard(EMPTY_STATE);
+      setBoardKey((k) => k + 1);
     },
-    [statuses, activeChallengeIndex, clearBoard, cancelWire],
+    [statuses, activeChallengeIndex],
   );
-
-  const resetBoard = useCallback(() => {
-    clearBoard();
-    cancelWire();
-    resetView();
-    setSelectedPartId(null);
-    setSelectedNodeId(null);
-    setSelectedEdgeId(null);
-    setInfoBubbleNodeId(null);
-  }, [clearBoard, cancelWire, resetView]);
-
-  const onSurfacePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      const isBackdrop =
-        e.target === e.currentTarget ||
-        (e.target instanceof HTMLElement &&
-          (e.target.classList.contains("circuit-workbench-empty") ||
-            e.target.classList.contains("circuit-workbench-wire-hint")));
-      if (editorFullscreen && isBackdrop) {
-        handleSurfacePointerDown(e);
-        dismissInfoBubble();
-        setSelectedNodeId(null);
-        setSelectedEdgeId(null);
-      }
-      if (isBackdrop) handleViewportPointerDown(e);
-    },
-    [editorFullscreen, handleSurfacePointerDown, handleViewportPointerDown, dismissInfoBubble],
-  );
-
-  const onSurfacePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (editorFullscreen) handleWirePointerMove(e);
-      handleViewportPointerMove(e);
-    },
-    [editorFullscreen, handleWirePointerMove, handleViewportPointerMove],
-  );
-
-  const onSurfacePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      handleViewportPointerUp(e);
-    },
-    [handleViewportPointerUp],
-  );
-
-  useEffect(() => {
-    if (!editorFullscreen) {
-      cancelWire();
-      return;
-    }
-    if (paletteDragPartId) setInventoryCollapsed(true);
-  }, [editorFullscreen, paletteDragPartId, cancelWire]);
 
   const editToolbarButton = (
     <button
       type="button"
       className="circuit-workbench-expand-btn"
       aria-label="Deschide editorul pe tot ecranul"
-      onClick={enterEditorFullscreen}
+      onClick={() => setEditorFullscreen(true)}
     >
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
         <path
@@ -346,63 +108,6 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     </button>
   );
 
-  const canResetBoard = nodes.length > 0 || edges.length > 0;
-
-  const workbench = (
-    <CircuitWorkbench
-      surfaceRef={workbenchRef}
-      viewportRef={viewportRef}
-      viewport={viewport}
-      onWheel={handleWheel}
-      hints={editorFullscreen ? editorHints : []}
-      editable={editorFullscreen}
-      nodes={nodes}
-      edges={edges}
-      models={metadata.models}
-      selectedNodeId={selectedNodeId}
-      infoBubbleNodeId={infoBubbleNodeId}
-      draggingNodeId={editorFullscreen ? draggingNodeId : null}
-      placementPreview={editorFullscreen ? placementPreview : null}
-      pendingTerminal={editorFullscreen ? pendingTerminal : null}
-      occupiedTerminals={occupiedTerminals}
-      wirePointer={editorFullscreen ? wirePointer : null}
-      ledOnIds={simulation.ledOn}
-      reversedLedIds={simulation.reversedLedIds}
-      burnedLedIds={simulation.burnedLedIds}
-      motorRunningIds={simulation.motorRunning}
-      electricalReadings={simulation.readings}
-      wireCurrents={simulation.wireCurrents}
-      currentDanger={simulation.shortCircuited || simulation.ledOvercurrent.size > 0}
-      selectedEdgeId={selectedEdgeId}
-      onSelectEdge={editorFullscreen ? (id) => { setSelectedEdgeId(id); setSelectedNodeId(null); } : undefined}
-      onRemoveEdge={
-        editorFullscreen
-          ? (id) => {
-              removeEdge(id);
-              setSelectedEdgeId(null);
-            }
-          : undefined
-      }
-      onSurfacePointerMove={onSurfacePointerMove}
-      onSurfacePointerDown={onSurfacePointerDown}
-      onSurfacePointerUp={onSurfacePointerUp}
-      onBodyPointerDown={
-        editorFullscreen
-          ? (e, nodeId) => {
-              const node = nodes.find((n) => n.id === nodeId);
-              if (node) startNodePointer(e, nodeId, node.type, node.position);
-            }
-          : undefined
-      }
-      onRemoveNode={editorFullscreen ? handleRemoveNode : undefined}
-      onTerminalPointerDown={editorFullscreen ? handleTerminalPointerDown : undefined}
-      onTerminalPointerUp={editorFullscreen ? handleTerminalPointerUp : undefined}
-      onSwitchToggle={toggleSwitch}
-      onNodeFlip={editorFullscreen ? toggleNodeFlip : undefined}
-      onPotentiometerChange={editorFullscreen ? setPotentiometerValue : undefined}
-    />
-  );
-
   return (
     <div className="template-circuit">
       <p className="template-description">{lesson.description}</p>
@@ -415,7 +120,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
             activeIndex={activeChallengeIndex}
             schemaComplete={schemaComplete}
             solved={challengeSolved}
-            feedbackHints={simulation.hints}
+            feedbackHints={board.sim.hints}
             nextUnsolvedIndex={nextUnsolvedIndex}
             onSelect={goToChallenge}
             onHelp={openHelp}
@@ -424,69 +129,45 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
           <p className="circuit-schema-notice">Nicio provocare definită în metadata lecției.</p>
         ))}
 
-      <CircuitFailureBanner message={failureMessage} onDismiss={() => setFailureMessage(null)} />
-
-      <CircuitEditorFrame fullscreen={editorFullscreen} onExitFullscreen={exitEditorFullscreen}>
+      <CircuitEditorFrame fullscreen={editorFullscreen} onExitFullscreen={() => setEditorFullscreen(false)}>
         {editorFullscreen && activeChallenge && (
           <CircuitFullscreenHeader
             challenge={activeChallenge}
             solved={challengeSolved}
-            feedbackHints={simulation.hints}
+            feedbackHints={board.sim.hints}
             onHelp={openHelp}
           />
         )}
 
-        {!editorFullscreen && (
-          <CircuitEditorToolbar
-            canReset={canResetBoard}
-            onResetBoard={resetBoard}
-            viewport={viewport}
-            onZoomIn={zoomIn}
-            onZoomOut={zoomOut}
-            onResetView={resetView}
-            end={editToolbarButton}
-          />
-        )}
-
-        <div
-          className={`circuit-workspace ${editorFullscreen ? "circuit-workspace--editor" : "circuit-workspace--preview"}`}
-        >
-          {editorFullscreen && (
-            <ComponentPalette
-              inventory={inventory}
-              models={metadata.models}
-              selected={selectedPartId}
-              nodes={nodes}
-              canPlacePart={canPlace}
-              compact
-              collapsed={inventoryCollapsed}
-              onToggleCollapse={toggleInventoryCollapsed}
-              onTapSelect={handleSelectPart}
-              onPalettePointerDown={startPalettePointer}
-            />
-          )}
-          {workbench}
-        </div>
+        <CircuitEditor
+          key={boardKey}
+          metadata={metadata}
+          inventory={inventory}
+          editing={editorFullscreen}
+          hints={editorHints}
+          onChange={setBoard}
+          renderToolbar={(api) =>
+            !editorFullscreen && (
+              <CircuitEditorToolbar
+                canReset={api.canReset}
+                onResetBoard={api.clear}
+                viewport={api.viewport}
+                onZoomIn={api.zoomIn}
+                onZoomOut={api.zoomOut}
+                onResetView={api.resetView}
+                end={editToolbarButton}
+              />
+            )
+          }
+        />
 
         {editorFullscreen && challengeSolved && nextUnsolvedChallenge && nextUnsolvedIndex !== null && (
-          <button
-            type="button"
-            className="circuit-fs-advance-btn"
-            onClick={() => goToChallenge(nextUnsolvedIndex)}
-          >
+          <button type="button" className="circuit-fs-advance-btn" onClick={() => goToChallenge(nextUnsolvedIndex)}>
             Continuă: {nextUnsolvedChallenge.title}
           </button>
         )}
       </CircuitEditorFrame>
 
-      {editorFullscreen && ghostPart && ghostPosition && !palettePreview && (
-        <DragGhost
-          part={ghostPart}
-          model={modelForPart(ghostPart, metadata.models)}
-          x={ghostPosition.x}
-          y={ghostPosition.y}
-        />
-      )}
       {helpOpen && activeChallenge && activeSolution && (
         <CircuitHelpDialog
           title={activeChallenge.title}

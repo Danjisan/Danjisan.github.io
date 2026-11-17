@@ -11,9 +11,10 @@ function sameTerminal(a: CircuitTerminalRef, b: CircuitTerminalRef): boolean {
   return a.nodeId === b.nodeId && a.terminal === b.terminal;
 }
 
-export function useCircuitState() {
-  const [nodes, setNodes] = useState<CircuitNode[]>([]);
-  const [edges, setEdges] = useState<CircuitEdge[]>([]);
+/** `initial` = masa de la început (ex. un pas dintr-o mini-lecție). Pentru o masă nouă, remontează cu alt `key`. */
+export function useCircuitState(initial?: { nodes: CircuitNode[]; edges: CircuitEdge[] }) {
+  const [nodes, setNodes] = useState<CircuitNode[]>(() => initial?.nodes ?? []);
+  const [edges, setEdges] = useState<CircuitEdge[]>(() => initial?.edges ?? []);
 
   /** Limita din inventar o verifică apelantul (canPlacePart). */
   const placeNode = useCallback((part: PartDef, position: { x: number; y: number }) => {
