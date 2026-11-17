@@ -126,6 +126,16 @@ function parseChallenge(raw: unknown): CircuitChallenge | null {
       })
     : undefined;
 
+  const inventory = Array.isArray(c.inventory)
+    ? c.inventory.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const entry = item as Record<string, unknown>;
+        const partId = typeof entry.part === "string" ? entry.part : entry.partId;
+        const count = typeof entry.count === "number" ? Math.floor(entry.count) : 1;
+        return typeof partId === "string" && count > 0 ? [{ partId, count }] : [];
+      })
+    : [];
+
   return {
     id: c.id,
     order: typeof c.order === "number" ? c.order : 1,
@@ -139,6 +149,7 @@ function parseChallenge(raw: unknown): CircuitChallenge | null {
       ...(also && also.length > 0 ? { also } : {}),
     },
     required_types: required,
+    ...(inventory.length > 0 ? { inventory } : {}),
   };
 }
 

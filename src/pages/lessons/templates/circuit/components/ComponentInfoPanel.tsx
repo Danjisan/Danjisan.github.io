@@ -1,4 +1,5 @@
-import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
+import ComponentIcon from "./ComponentIcon";
+import { COMPONENT_COLORS } from "../constants";
 import type { ComponentModel, ComponentType } from "../types";
 
 interface ComponentInfoPanelProps {
@@ -39,7 +40,7 @@ export default function ComponentInfoPanel({
           style={{ backgroundColor: COMPONENT_COLORS[type] }}
           aria-hidden="true"
         >
-          {COMPONENT_ICONS[type]}
+          <ComponentIcon type={type} />
         </span>
         <h3 className="circuit-info-title">{model.label}</h3>
       </div>

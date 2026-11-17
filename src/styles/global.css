@@ -3820,15 +3820,16 @@ body {
 
 .circuit-inventory-item.icon-only {
   flex-shrink: 0;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 3rem;
+  height: 2.5rem;
   padding: 0;
   justify-content: center;
   gap: 0;
 }
 
 .circuit-inventory-item.icon-only .circuit-inventory-icon {
-  font-size: 1.25rem;
+  width: 2.5rem;
+  height: 1.8rem;
 }
 
 body.circuit-is-dragging {
@@ -4124,8 +4125,18 @@ body.circuit-is-dragging * {
 }
 
 .circuit-inventory-icon {
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 1.7rem;
   line-height: 1;
+}
+
+.circuit-inventory-icon .circuit-icon,
+.circuit-drag-ghost-icon .circuit-icon {
+  width: 100%;
+  height: 100%;
 }
 
 .circuit-inventory-label {
@@ -4417,6 +4428,52 @@ body.circuit-is-dragging * {
   stroke-linecap: round;
 }
 
+/* Electroni pe fir: buline care curg; viteza și sensul vin din electronFlowStyle() */
+.circuit-wire-electrons {
+  fill: none;
+  stroke: #7dd3fc;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 0 14;
+  animation-name: circuit-electron-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.circuit-wire-electrons--hot {
+  stroke: #fb923c;
+}
+
+@keyframes circuit-electron-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -14; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-wire-electrons {
+    animation: none;
+  }
+}
+
+.circuit-electron-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.circuit-electron-legend-dot {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #7dd3fc;
+}
+
 .circuit-wire--pending {
   stroke: #b88cff;
   stroke-dasharray: 6 4;
@@ -4680,9 +4737,10 @@ body.circuit-is-dragging * {
   cursor: pointer;
 }
 
-.circuit-node-2d.motor-running .circuit-node-2d-icon {
-  display: inline-block;
-  animation: circuit-motor-spin 1.2s linear infinite;
+.circuit-node-2d.motor-running .circuit-icon-motor-rotor {
+  transform-box: view-box;
+  transform-origin: 20px 20px;
+  animation: circuit-motor-spin 0.9s linear infinite;
 }
 
 @keyframes circuit-motor-spin {
@@ -4793,7 +4851,13 @@ body.circuit-is-dragging * {
   width: 2rem;
   height: 2rem;
   border-radius: 8px;
-  font-size: 1.1rem;
+  padding: 0.2rem;
+}
+
+.circuit-info-icon .circuit-icon {
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
 }
 
 .circuit-info-title {
@@ -4920,8 +4984,39 @@ body.circuit-is-dragging * {
 }
 
 .circuit-node-2d-icon {
-  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.6rem;
   line-height: 1;
+}
+
+/* Desenele pieselor (ComponentIcon) */
+.circuit-icon {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
+.circuit-node-2d-icon .circuit-icon--battery,
+.circuit-node-2d-icon .circuit-icon--resistor,
+.circuit-node-2d-icon .circuit-icon--switch {
+  height: 2.1rem;
+}
+
+.circuit-icon-switch-lever {
+  transition: transform 0.18s ease-out, stroke 0.18s;
+}
+
+/* Pe masă, LED-ul stins e mai închis; aprins devine strălucitor */
+.circuit-node-2d .circuit-icon-led-dome {
+  filter: brightness(0.55) saturate(0.75);
+  transition: filter 0.15s;
+}
+
+.circuit-node-2d.led-on .circuit-icon-led-dome {
+  filter: brightness(1.2) saturate(1.1);
 }
 
 .circuit-node-2d-label {
@@ -4948,8 +5043,7 @@ body.circuit-is-dragging * {
 }
 
 .circuit-node-2d--junction .circuit-node-2d-icon {
-  font-size: 1rem;
-  opacity: 0.9;
+  height: 1.4rem;
 }
 
 .circuit-inventory-placed-tag--partial {
@@ -5031,7 +5125,9 @@ body.circuit-is-dragging * {
 }
 
 .circuit-drag-ghost-icon {
-  font-size: 1.2rem;
+  display: flex;
+  width: 3rem;
+  height: 2rem;
 }
 
 .circuit-drag-ghost-label {

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useState } from "react";
+import { electronFlowStyle } from "../logic/electronFlow";
 import { wireLinePath } from "../logic/wireGeometry";
 import { getTerminalDefs, getTerminalPixelPosition } from "../logic/terminalPositions";
 import {
@@ -12,6 +13,10 @@ import type { CircuitEdge, CircuitNode, CircuitTerminalRef } from "../types";
 interface WireLayerProps {
   nodes: CircuitNode[];
   edges: CircuitEdge[];
+  /** edge.id → curent (A), sens convențional from → to */
+  wireCurrents?: Map<string, number>;
+  /** Un LED primește prea mult curent sau e scurtcircuit: electronii se colorează portocaliu */
+  danger?: boolean;
   pendingTerminal: CircuitTerminalRef | null;
   pointer: { x: number; y: number } | null;
   viewportRef: React.RefObject<HTMLDivElement | null>;
@@ -28,6 +33,8 @@ function readRemPx(): number {
 export default function WireLayer({
   nodes,
   edges,
+  wireCurrents,
+  danger = false,
   pendingTerminal,
   pointer,
   viewportRef,
@@ -91,13 +98,20 @@ export default function WireLayer({
         const from = resolveTerminal(edge.from);
         const to = resolveTerminal(edge.to);
         if (!from || !to) return null;
+        const d = wireLinePath(from, to);
+        const flow = electronFlowStyle(wireCurrents?.get(edge.id) ?? 0, danger);
         return (
-          <path
-            key={edge.id}
-            className="circuit-wire"
-            d={wireLinePath(from, to)}
-            vectorEffect="non-scaling-stroke"
-          />
+          <g key={edge.id}>
+            <path className="circuit-wire" d={d} vectorEffect="non-scaling-stroke" />
+            {flow && (
+              <path
+                className={`circuit-wire-electrons${flow.hot ? " circuit-wire-electrons--hot" : ""}`}
+                d={d}
+                vectorEffect="non-scaling-stroke"
+                style={flow.style}
+              />
+            )}
+          </g>
         );
       })}
 

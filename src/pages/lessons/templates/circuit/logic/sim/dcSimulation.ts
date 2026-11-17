@@ -6,7 +6,7 @@ import type {
 } from "../../types";
 import { isBatteryLoopClosed } from "../directedCircuit";
 import { terminalKey } from "../terminalPositions";
-import { electricalFor } from "./electricalFor";
+import { electricalForNode } from "../parts";
 import {
   buildLedConductingStamps,
   buildNetlist,
@@ -16,6 +16,7 @@ import {
   ledOpenStamp,
 } from "./netlist";
 import { nodeVoltage, solveMna } from "./mnaSolve";
+import { computeWireCurrents } from "./wireCurrents";
 import type { CircuitStamp, DcSimulationResult } from "./types";
 
 const MAX_LED_ITERATIONS = 10;
@@ -63,6 +64,14 @@ export function runDcSimulation(
   if (batPlus !== undefined && batPlus === batMinus) {
     result.shortCircuited = true;
     result.isClosed = true;
+    const shortSolution = solveMna(
+      netlist,
+      nodes
+        .filter((n) => n.type === "led" && !isNodeBurned(n))
+        .filter((n) => hasWireOnTerminal(edges, n.id, "+") && hasWireOnTerminal(edges, n.id, "-"))
+        .map((n) => ledOpenStamp(n.id, netlist.pinToNode)),
+    );
+    if (shortSolution) result.wireCurrents = computeWireCurrents(nodes, edges, shortSolution);
     result.newFailures.push("short_circuit");
     result.hints.push(simulation.failure_messages.short_circuit);
     return result;
@@ -81,7 +90,6 @@ export function runDcSimulation(
     return result;
   }
 
-  const ledElec = electricalFor(models, "led");
   const activeLeds = nodes.filter(
     (n) =>
       n.type === "led" &&
@@ -99,8 +107,8 @@ export function runDcSimulation(
           ...buildLedConductingStamps(
             led.id,
             netlist.pinToNode,
-            ledElec.forward_voltage_v,
-            ledElec.on_resistance_ohm,
+            electricalForNode(models, led, "led").forward_voltage_v,
+            electricalForNode(models, led, "led").on_resistance_ohm,
             count++,
           ),
         );
@@ -129,7 +137,7 @@ export function runDcSimulation(
         const vDrop =
           pinV(solution, netlist.pinToNode, led.id, "+") -
           pinV(solution, netlist.pinToNode, led.id, "-");
-        if (vDrop >= ledElec.forward_voltage_v * 0.85) {
+        if (vDrop >= electricalForNode(models, led, "led").forward_voltage_v * 0.85) {
           conductingLedIds.add(led.id);
           changed = true;
         }
@@ -152,6 +160,8 @@ export function runDcSimulation(
     if (vDrop < -0.15) result.reversedLedIds.add(led.id);
   }
 
+  result.wireCurrents = computeWireCurrents(nodes, edges, solution);
+
   const batteryCurrent = Math.abs(solution.branchCurrents.get(battery.id) ?? 0);
   result.batteryCurrent_a = batteryCurrent;
   result.shortCircuited = batteryCurrent > simulation.short_circuit_current_a;
@@ -168,13 +178,13 @@ export function runDcSimulation(
 
     if (node.type === "resistor") {
       const i = solution.branchCurrents.get(id) ?? 0;
-      const v = Math.abs(i) * electricalFor(models, "resistor").resistance_ohm;
+      const v = Math.abs(i) * electricalForNode(models, node, "resistor").resistance_ohm;
       result.readings.set(id, makeReading(v, Math.abs(i)));
     }
 
     if (node.type === "switch" && node.state.on === true) {
       const i = Math.abs(solution.branchCurrents.get(id) ?? 0);
-      const v = i * electricalFor(models, "switch").contact_resistance_ohm;
+      const v = i * electricalForNode(models, node, "switch").contact_resistance_ohm;
       result.readings.set(id, makeReading(v, i));
     }
 
@@ -183,16 +193,16 @@ export function runDcSimulation(
         hasWireOnTerminal(edges, id, "+") && hasWireOnTerminal(edges, id, "-");
       if (!wired) continue;
       const i = solution.branchCurrents.get(id) ?? 0;
-      const r = electricalFor(models, "dc_motor").winding_resistance_ohm;
+      const r = electricalForNode(models, node, "dc_motor").winding_resistance_ohm;
       const v = Math.abs(i) * r;
       result.readings.set(id, makeReading(v, Math.abs(i)));
-      if (Math.abs(i) >= electricalFor(models, "dc_motor").min_run_current_a) {
+      if (Math.abs(i) >= electricalForNode(models, node, "dc_motor").min_run_current_a) {
         result.motorRunning.add(id);
       }
     }
 
     if (node.type === "battery") {
-      const v = electricalFor(models, "battery").voltage_v;
+      const v = electricalForNode(models, node, "battery").voltage_v;
       result.readings.set(id, makeReading(v, batteryCurrent));
     }
 
@@ -209,7 +219,7 @@ export function runDcSimulation(
       const vPlus = pinV(solution, netlist.pinToNode, id, "+");
       const vMinus = pinV(solution, netlist.pinToNode, id, "-");
       const vDrop = vPlus - vMinus;
-      const elec = electricalFor(models, "led");
+      const elec = electricalForNode(models, node, "led");
       const i = Math.abs(solution.branchCurrents.get(id) ?? 0);
 
       result.readings.set(id, makeReading(Math.abs(vDrop), i));

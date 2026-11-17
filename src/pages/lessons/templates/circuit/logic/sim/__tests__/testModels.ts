@@ -52,7 +52,7 @@ export const testMetadata: Pick<CircuitElectricMetadata, "models" | "simulation"
 export function edge(
   from: { nodeId: string; terminal: string },
   to: { nodeId: string; terminal: string },
-  id = crypto.randomUUID(),
+  id: string = crypto.randomUUID(),
 ): CircuitEdge {
   return {
     id,

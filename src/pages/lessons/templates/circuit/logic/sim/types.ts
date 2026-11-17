@@ -47,4 +47,6 @@ export interface DcSimulationResult {
   ledOvercurrent: Map<string, { current_a: number; max_a: number }>;
   /** Evenimente noi de afișat după eșec */
   newFailures: SimulationFailureKind[];
+  /** edge.id → curent (A) în sens convențional de la `from` la `to`; 0 = fără curent */
+  wireCurrents: Map<string, number>;
 }

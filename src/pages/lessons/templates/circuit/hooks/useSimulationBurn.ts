@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { electricalFor } from "../logic/sim/electricalFor";
+import { electricalForNode } from "../logic/parts";
 import type { CircuitElectricMetadata, CircuitNode } from "../types";
 import type { DcSimulationResult } from "../logic/sim/types";
 
@@ -42,7 +42,7 @@ export function useSimulationBurn(
         const node = nodes.find((n) => n.id === ledId);
         if (!node || node.state.burned === true) continue;
 
-        const burnAfterS = electricalFor(models, "led").burn_after_s;
+        const burnAfterS = electricalForNode(models, node, "led").burn_after_s;
         const prev = overcurrentMs.current.get(ledId) ?? 0;
         const next = prev + TICK_MS;
         overcurrentMs.current.set(ledId, next);

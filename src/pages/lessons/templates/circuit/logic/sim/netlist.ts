@@ -2,11 +2,12 @@ import { COMPONENT_TERMINALS } from "../../constants";
 import type { CircuitEdge, CircuitNode, CircuitElectricMetadata, TerminalId } from "../../types";
 import { collectBatteryReachablePins } from "../directedCircuit";
 import { terminalKey } from "../terminalPositions";
-import { electricalFor } from "./electricalFor";
+import { electricalForNode } from "../parts";
 import type { BuiltNetlist, CircuitStamp, ResistorStamp } from "./types";
 import { UnionFind } from "./unionFind";
 
-const OPEN_RESISTANCE = 1e12;
+/** LED blocat: 1 GΩ — de 1000 de ori mai conductiv decât GMIN, dar curentul (~9 nA) e neglijabil. */
+const OPEN_RESISTANCE = 1e9;
 
 function collectPinKeys(nodes: CircuitNode[]): string[] {
   const keys: string[] = [];
@@ -82,7 +83,7 @@ export function buildNetlist(
 
     switch (node.type) {
       case "battery": {
-        const elec = electricalFor(models, "battery");
+        const elec = electricalForNode(models, node, "battery");
         const nPlus = pinNode(pinToNode, terminalKey(id, "+"));
         const nMinus = pinNode(pinToNode, terminalKey(id, "-"));
         const nInt = allocInternal();
@@ -104,7 +105,7 @@ export function buildNetlist(
       }
       case "resistor": {
         if (!shouldStamp(id, ["a", "b"])) break;
-        const elec = electricalFor(models, "resistor");
+        const elec = electricalForNode(models, node, "resistor");
         stamps.push({
           kind: "resistor",
           n1: pinNode(pinToNode, terminalKey(id, "a")),
@@ -116,7 +117,7 @@ export function buildNetlist(
       }
       case "switch": {
         if (node.state.on === true && shouldStamp(id, ["a", "b"])) {
-          const elec = electricalFor(models, "switch");
+          const elec = electricalForNode(models, node, "switch");
           stamps.push({
             kind: "resistor",
             n1: pinNode(pinToNode, terminalKey(id, "a")),
@@ -129,7 +130,7 @@ export function buildNetlist(
       }
       case "dc_motor": {
         if (!shouldStamp(id, ["+", "-"])) break;
-        const elec = electricalFor(models, "dc_motor");
+        const elec = electricalForNode(models, node, "dc_motor");
         stamps.push({
           kind: "resistor",
           n1: pinNode(pinToNode, terminalKey(id, "+")),
@@ -141,7 +142,7 @@ export function buildNetlist(
       }
       case "potentiometer": {
         if (!shouldStamp(id, ["a", "b", "wiper"])) break;
-        const elec = electricalFor(models, "potentiometer");
+        const elec = electricalForNode(models, node, "potentiometer");
         const raw = Number(node.state.value);
         const alpha = Math.min(1, Math.max(0, Number.isFinite(raw) ? raw : 0.5));
         const rTotal = Math.max(elec.total_resistance_ohm, 1);
@@ -245,5 +246,6 @@ export function emptyResult(): import("./types").DcSimulationResult {
     readings: new Map(),
     ledOvercurrent: new Map(),
     newFailures: [],
+    wireCurrents: new Map(),
   };
 }

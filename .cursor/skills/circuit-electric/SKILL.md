@@ -28,12 +28,18 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - Potențiometru: două rezistențe a–wiper / wiper–b după `state.value` (0..1).
 - Condițiile `component_state` sunt îndeplinite dacă **cel puțin o piesă** de tipul cerut are starea cerută.
 
+## Piese și inventar
+
+- Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și inventarul (`buildInventory`, `canPlacePart`).
+- Parametrii = valorile tipului din lecție + ce suprascrie piesa. Piesele implicite nu suprascriu nimic.
+- Desenele: `components/ComponentIcon.tsx` (SVG; LED colorat după piesă, benzi de rezistor după valoare).
+- Electronii pe fire: `logic/sim/wireCurrents.ts` (curent per fir) + `logic/electronFlow.ts` (viteză/sens).
+- Solverul are GMIN (`mnaSolve.ts`) ca piesele nelegate să nu facă matricea singulară; LED-ul blocat (`OPEN_RESISTANCE`) trebuie să rămână mult mai conductiv decât GMIN.
+
 ## Limitări cunoscute (rezolvate în pașii din `docs/circuit-revamp.md`)
 
-- Parametrii electrici sunt **pe tip**, nu pe piesă (toate rezistoarele au aceeași valoare).
-- Maxim o piesă din fiecare tip pe masă (`COMPONENT_INVENTORY_LIMITS`).
-- Progresul provocărilor nu se salvează; finalizarea lecției e manuală.
-- Piesele sunt placeholder-e (emoji + culoare); le vom desena noi ca SVG (nu așteptăm GLB-uri).
+- Progresul provocărilor se ține doar local; finalizarea lecției e manuală.
+- Firele sunt linii drepte și pot trece peste piese.
 
 ## Reguli de lucru
 

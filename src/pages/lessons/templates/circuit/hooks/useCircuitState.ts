@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { canPlaceMore } from "../constants";
 import { defaultNodeState } from "../logic/nodeDefaults";
-import type { CircuitEdge, CircuitNode, CircuitTerminalRef, ComponentType } from "../types";
+import type { PartDef } from "../../../../../content/circuits/parts";
+import type { CircuitEdge, CircuitNode, CircuitTerminalRef } from "../types";
 
 function newId(): string {
   return crypto.randomUUID();
@@ -15,11 +15,17 @@ export function useCircuitState() {
   const [nodes, setNodes] = useState<CircuitNode[]>([]);
   const [edges, setEdges] = useState<CircuitEdge[]>([]);
 
-  const placeNode = useCallback((type: ComponentType, position: { x: number; y: number }) => {
-    setNodes((prev) => {
-      if (!canPlaceMore(prev, type)) return prev;
-      return [...prev, { id: newId(), type, position, state: defaultNodeState(type) }];
-    });
+  /** Limita din inventar o verifică apelantul (canPlacePart). */
+  const placeNode = useCallback((part: PartDef, position: { x: number; y: number }) => {
+    setNodes((prev) => [
+      ...prev,
+      {
+        id: newId(),
+        type: part.type,
+        position,
+        state: { ...defaultNodeState(part.type), partId: part.id },
+      },
+    ]);
   }, []);
 
   const moveNode = useCallback((id: string, position: { x: number; y: number }) => {

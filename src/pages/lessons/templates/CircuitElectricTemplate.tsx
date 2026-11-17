@@ -19,8 +19,7 @@ import { useWorkbenchViewport } from "./circuit/hooks/useWorkbenchViewport";
 import { simulateCircuit } from "./circuit/logic/simulateCircuit";
 import { isChallengeSolved } from "./circuit/logic/validateCircuit";
 import { hintsForEditor } from "./circuit/logic/workbenchHints";
-import { canPlaceMore } from "./circuit/constants";
-import type { ComponentType } from "./circuit/types";
+import { buildInventory, canPlacePart, getPart, modelForPart, partOfNode } from "./circuit/logic/parts";
 
 export default function CircuitElectricTemplate({ lesson, userId }: TemplateProps) {
   const { metadata, schemaComplete } = useMemo(
@@ -30,7 +29,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
 
   const editorHints = useMemo(() => hintsForEditor(metadata.workbench_hints), [metadata.workbench_hints]);
 
-  const [selectedType, setSelectedType] = useState<ComponentType | null>(null);
+  const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
   const [editorFullscreen, setEditorFullscreen] = useState(false);
@@ -136,53 +135,52 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     setInventoryCollapsed((c) => !c);
   }, []);
 
-  const canPlaceType = useCallback(
-    (type: ComponentType) => canPlaceMore(nodes, type),
-    [nodes],
+  // Ce piese primește elevul: din provocare (inventory / required_types) sau, fără provocare, din lecție.
+  const inventory = useMemo(
+    () => buildInventory(activeChallenge, metadata.components),
+    [activeChallenge, metadata.components],
   );
 
-  const inventoryComponents = useMemo(() => {
-    if (!activeChallenge) return metadata.components;
-    const allowed = new Set(activeChallenge.required_types);
-    const visible = metadata.components.filter(
-      (type) => allowed.has(type) || nodes.some((n) => n.type === type),
-    );
-    // Piesele cerute de provocare apar mereu, chiar dacă lipsesc din lista lecției.
-    for (const type of activeChallenge.required_types) {
-      if (!visible.includes(type)) visible.push(type);
-    }
-    return visible;
-  }, [metadata.components, activeChallenge, nodes]);
+  const canPlace = useCallback(
+    (partId: string) => canPlacePart(nodes, inventory, partId),
+    [nodes, inventory],
+  );
 
-  const handlePlaceNode = useCallback(
-    (type: ComponentType, position: { x: number; y: number }) => {
-      placeNode(type, position);
+  const handlePlacePart = useCallback(
+    (partId: string, position: { x: number; y: number }) => {
+      const part = getPart(partId);
+      if (!part) return;
+      placeNode(part, position);
       setInventoryCollapsed(true);
     },
     [placeNode],
   );
 
-  const handleSelectType = useCallback((type: ComponentType) => {
-    setSelectedType(type);
+  const handleSelectPart = useCallback((partId: string) => {
+    setSelectedPartId(partId);
     setSelectedNodeId(null);
   }, []);
 
-  const handleSelectNode = useCallback((nodeId: string, type: ComponentType) => {
-    setInfoBubbleNodeId(null);
-    setSelectedNodeId(nodeId);
-    setSelectedType(type);
-  }, []);
+  const handleSelectNode = useCallback(
+    (nodeId: string) => {
+      setInfoBubbleNodeId(null);
+      setSelectedNodeId(nodeId);
+      const node = nodes.find((n) => n.id === nodeId);
+      setSelectedPartId(node ? partOfNode(node).id : null);
+    },
+    [nodes],
+  );
 
   const handleNodeTap = useCallback(
-    (nodeId: string, type: ComponentType) => {
-      handleSelectNode(nodeId, type);
+    (nodeId: string) => {
+      handleSelectNode(nodeId);
     },
     [handleSelectNode],
   );
 
-  const handleNodeLongPress = useCallback((nodeId: string, type: ComponentType) => {
+  const handleNodeLongPress = useCallback((nodeId: string) => {
     setSelectedNodeId(null);
-    setSelectedType(type);
+    setSelectedPartId(null);
     setInfoBubbleNodeId(nodeId);
   }, []);
 
@@ -213,7 +211,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
   const exitEditorFullscreen = useCallback(() => {
     cancelWire();
     setEditorFullscreen(false);
-    setSelectedType(null);
+    setSelectedPartId(null);
     setSelectedNodeId(null);
     setInfoBubbleNodeId(null);
   }, [cancelWire]);
@@ -236,24 +234,24 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     ghostPosition,
     palettePreview,
     draggingNodeId,
-    paletteDragType,
+    paletteDragPartId,
     startPalettePointer,
     startNodePointer,
   } = useWorkbenchDrag({
     workbenchRef,
     viewportRef,
-    canPlaceType,
-    onPlaceNode: handlePlaceNode,
+    canPlacePart: canPlace,
+    onPlacePart: handlePlacePart,
     onMoveNode: moveNode,
-    onSelectType: handleSelectType,
+    onSelectPart: handleSelectPart,
     onNodeTap: handleNodeTap,
     onNodeLongPress: handleNodeLongPress,
   });
 
-  const ghostType = paletteDragType;
+  const ghostPart = paletteDragPartId ? getPart(paletteDragPartId) ?? null : null;
   const placementPreview =
-    paletteDragType && palettePreview
-      ? { type: paletteDragType, position: palettePreview }
+    ghostPart && palettePreview
+      ? { partId: ghostPart.id, type: ghostPart.type, position: palettePreview }
       : null;
 
   const goToChallenge = useCallback(
@@ -262,7 +260,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
       clearBoard();
       cancelWire();
       setActiveChallengeIndex(index);
-      setSelectedType(null);
+      setSelectedPartId(null);
       setSelectedNodeId(null);
       setInfoBubbleNodeId(null);
       setFailureMessage(null);
@@ -274,7 +272,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     clearBoard();
     cancelWire();
     resetView();
-    setSelectedType(null);
+    setSelectedPartId(null);
     setSelectedNodeId(null);
     setInfoBubbleNodeId(null);
   }, [clearBoard, cancelWire, resetView]);
@@ -316,8 +314,8 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
       cancelWire();
       return;
     }
-    if (paletteDragType) setInventoryCollapsed(true);
-  }, [editorFullscreen, paletteDragType, cancelWire]);
+    if (paletteDragPartId) setInventoryCollapsed(true);
+  }, [editorFullscreen, paletteDragPartId, cancelWire]);
 
   const editToolbarButton = (
     <button
@@ -365,6 +363,8 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
       burnedLedIds={simulation.burnedLedIds}
       motorRunningIds={simulation.motorRunning}
       electricalReadings={simulation.readings}
+      wireCurrents={simulation.wireCurrents}
+      currentDanger={simulation.shortCircuited || simulation.ledOvercurrent.size > 0}
       onSurfacePointerMove={onSurfacePointerMove}
       onSurfacePointerDown={onSurfacePointerDown}
       onSurfacePointerUp={onSurfacePointerUp}
@@ -433,15 +433,15 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
         >
           {editorFullscreen && (
             <ComponentPalette
-              components={inventoryComponents}
+              inventory={inventory}
               models={metadata.models}
-              selected={selectedType}
+              selected={selectedPartId}
               nodes={nodes}
-              canPlaceType={canPlaceType}
+              canPlacePart={canPlace}
               compact
               collapsed={inventoryCollapsed}
               onToggleCollapse={toggleInventoryCollapsed}
-              onTapSelect={handleSelectType}
+              onTapSelect={handleSelectPart}
               onPalettePointerDown={startPalettePointer}
             />
           )}
@@ -459,10 +459,10 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
         )}
       </CircuitEditorFrame>
 
-      {editorFullscreen && ghostType && ghostPosition && !palettePreview && (
+      {editorFullscreen && ghostPart && ghostPosition && !palettePreview && (
         <DragGhost
-          type={ghostType}
-          model={metadata.models[ghostType]}
+          part={ghostPart}
+          model={modelForPart(ghostPart, metadata.models)}
           x={ghostPosition.x}
           y={ghostPosition.y}
         />

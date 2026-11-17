@@ -1,15 +1,5 @@
 import type { ComponentType, TerminalDef } from "./types";
 
-export const COMPONENT_ICONS: Record<ComponentType, string> = {
-  battery: "🔋",
-  led: "💡",
-  resistor: "➖",
-  switch: "🔘",
-  dc_motor: "⚙️",
-  potentiometer: "🎚️",
-  wire_junction: "⚌",
-};
-
 export const COMPONENT_COLORS: Record<ComponentType, string> = {
   battery: "#f5c842",
   led: "#e74c3c",
@@ -29,33 +19,6 @@ export const DEFAULT_LABELS: Record<ComponentType, string> = {
   potentiometer: "Potențiometru",
   wire_junction: "Nod de legătură",
 };
-
-/** Câte instanțe pot fi plasate pe masă (implicit 1) */
-export const COMPONENT_INVENTORY_LIMITS: Partial<Record<ComponentType, number>> = {
-  wire_junction: 2,
-};
-
-export const DEFAULT_INVENTORY_LIMIT = 1;
-
-export function inventoryLimit(type: ComponentType): number {
-  return COMPONENT_INVENTORY_LIMITS[type] ?? DEFAULT_INVENTORY_LIMIT;
-}
-
-export function inventoryPlacedCount(nodes: { type: ComponentType }[], type: ComponentType): number {
-  return nodes.filter((n) => n.type === type).length;
-}
-
-export function canPlaceMore(nodes: { type: ComponentType }[], type: ComponentType): boolean {
-  return inventoryPlacedCount(nodes, type) < inventoryLimit(type);
-}
-
-export function inventoryTotalSlots(components: ComponentType[]): number {
-  return components.reduce((sum, type) => sum + inventoryLimit(type), 0);
-}
-
-export function inventoryPlacedSlots(nodes: { type: ComponentType }[], components: ComponentType[]): number {
-  return components.reduce((sum, type) => sum + inventoryPlacedCount(nodes, type), 0);
-}
 
 export const COMPONENT_TERMINALS: Record<ComponentType, TerminalDef[]> = {
   battery: [

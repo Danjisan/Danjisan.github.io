@@ -7,11 +7,11 @@ const DRAG_THRESHOLD_PX = 10;
 const LONG_PRESS_MS = 480;
 
 type ActiveDrag =
-  | { kind: "palette"; type: ComponentType; pointerId: number }
+  | { kind: "palette"; partId: string; pointerId: number }
   | { kind: "node"; nodeId: string; pointerId: number };
 
 type PendingPalette = {
-  type: ComponentType;
+  partId: string;
   pointerId: number;
   startX: number;
   startY: number;
@@ -40,10 +40,10 @@ interface PointerPoint {
 interface UseWorkbenchDragOptions {
   workbenchRef: React.RefObject<HTMLDivElement | null>;
   viewportRef: React.RefObject<HTMLDivElement | null>;
-  canPlaceType: (type: ComponentType) => boolean;
-  onPlaceNode: (type: ComponentType, position: { x: number; y: number }) => void;
+  canPlacePart: (partId: string) => boolean;
+  onPlacePart: (partId: string, position: { x: number; y: number }) => void;
   onMoveNode: (nodeId: string, position: { x: number; y: number }) => void;
-  onSelectType: (type: ComponentType) => void;
+  onSelectPart: (partId: string) => void;
   onNodeTap: (nodeId: string, type: ComponentType) => void;
   onNodeLongPress: (nodeId: string, type: ComponentType) => void;
 }
@@ -51,10 +51,10 @@ interface UseWorkbenchDragOptions {
 export function useWorkbenchDrag({
   workbenchRef,
   viewportRef,
-  canPlaceType,
-  onPlaceNode,
+  canPlacePart,
+  onPlacePart,
   onMoveNode,
-  onSelectType,
+  onSelectPart,
   onNodeTap,
   onNodeLongPress,
 }: UseWorkbenchDragOptions) {
@@ -84,14 +84,14 @@ export function useWorkbenchDrag({
   }, []);
 
   const startPalettePointer = useCallback(
-    (type: ComponentType, e: React.PointerEvent) => {
-      if (!canPlaceType(type)) return;
+    (partId: string, e: React.PointerEvent) => {
+      if (!canPlacePart(partId)) return;
       e.preventDefault();
       e.stopPropagation();
       clearLongPressTimer();
       setPendingNode(null);
       setPendingPalette({
-        type,
+        partId,
         pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
@@ -102,7 +102,7 @@ export function useWorkbenchDrag({
         /* ignore */
       }
     },
-    [canPlaceType, clearLongPressTimer],
+    [canPlacePart, clearLongPressTimer],
   );
 
   const startNodePointer = useCallback(
@@ -232,7 +232,7 @@ export function useWorkbenchDrag({
         const dy = e.clientY - pendingP.startY;
         if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
 
-        const next: ActiveDrag = { kind: "palette", type: pendingP.type, pointerId: e.pointerId };
+        const next: ActiveDrag = { kind: "palette", partId: pendingP.partId, pointerId: e.pointerId };
         activeDragRef.current = next;
         pendingPaletteRef.current = null;
         setPendingPalette(null);
@@ -262,7 +262,7 @@ export function useWorkbenchDrag({
       }
 
       if (pendingP && !drag && e.pointerId === pendingP.pointerId) {
-        onSelectType(pendingP.type);
+        onSelectPart(pendingP.partId);
         finishDrag();
         return;
       }
@@ -277,8 +277,8 @@ export function useWorkbenchDrag({
 
         if (inside) {
           const ptr = clientToWorkbenchNormalized(e.clientX, e.clientY, viewportEl);
-          if (drag.kind === "palette" && canPlaceType(drag.type)) {
-            onPlaceNode(drag.type, clampWorkbenchPosition(ptr.x, ptr.y));
+          if (drag.kind === "palette" && canPlacePart(drag.partId)) {
+            onPlacePart(drag.partId, clampWorkbenchPosition(ptr.x, ptr.y));
           }
         } else if (drag.kind === "node") {
           const origin = nodeDragOriginRef.current;
@@ -304,13 +304,13 @@ export function useWorkbenchDrag({
     activeDrag,
     pendingPalette,
     pendingNode,
-    canPlaceType,
+    canPlacePart,
     clearLongPressTimer,
     finishDrag,
     onMoveNode,
     onNodeTap,
-    onPlaceNode,
-    onSelectType,
+    onPlacePart,
+    onSelectPart,
     viewportRef,
     workbenchRef,
   ]);
@@ -322,7 +322,7 @@ export function useWorkbenchDrag({
     ghostPosition,
     palettePreview,
     draggingNodeId: activeDrag?.kind === "node" ? activeDrag.nodeId : null,
-    paletteDragType: activeDrag?.kind === "palette" ? activeDrag.type : null,
+    paletteDragPartId: activeDrag?.kind === "palette" ? activeDrag.partId : null,
     startPalettePointer,
     startNodePointer,
   };

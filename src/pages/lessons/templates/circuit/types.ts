@@ -94,6 +94,8 @@ export interface CircuitChallenge {
   hint: string;
   win_condition: WinCondition;
   required_types: ComponentType[];
+  /** Piese exacte din catalog (src/content/circuits/parts.ts); dacă lipsește, se deduc din required_types */
+  inventory?: { partId: string; count: number }[];
 }
 
 export type SimulationFailureKind =

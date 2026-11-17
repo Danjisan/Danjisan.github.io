@@ -1,6 +1,7 @@
 import { type RefObject } from "react";
 import CircuitNode2D from "./CircuitNode2D";
 import WireLayer from "./WireLayer";
+import { modelForPart, partOfNode } from "../logic/parts";
 import { viewportTransformStyle, type WorkbenchViewport } from "../logic/viewportCoords";
 import type {
   BranchElectricalReading,
@@ -26,7 +27,7 @@ interface CircuitWorkbenchProps {
   selectedNodeId: string | null;
   infoBubbleNodeId: string | null;
   draggingNodeId: string | null;
-  placementPreview: { type: ComponentType; position: { x: number; y: number } } | null;
+  placementPreview: { partId: string; type: ComponentType; position: { x: number; y: number } } | null;
   pendingTerminal: CircuitTerminalRef | null;
   occupiedTerminals: Set<string>;
   wirePointer: { x: number; y: number } | null;
@@ -35,6 +36,10 @@ interface CircuitWorkbenchProps {
   burnedLedIds: Set<string>;
   motorRunningIds: Set<string>;
   electricalReadings: Map<string, BranchElectricalReading>;
+  /** edge.id → curent (A), sens convențional from → to */
+  wireCurrents: Map<string, number>;
+  /** LED peste limită sau scurtcircuit */
+  currentDanger?: boolean;
   onSurfacePointerMove?: (e: React.PointerEvent) => void;
   onSurfacePointerDown?: (e: React.PointerEvent) => void;
   onSurfacePointerUp?: (e: React.PointerEvent) => void;
@@ -69,6 +74,8 @@ export default function CircuitWorkbench({
   burnedLedIds,
   motorRunningIds,
   electricalReadings,
+  wireCurrents,
+  currentDanger = false,
   onSurfacePointerMove,
   onSurfacePointerDown,
   onSurfacePointerUp,
@@ -83,6 +90,7 @@ export default function CircuitWorkbench({
   const isEmpty = nodes.length === 0 && !placementPreview;
   const readOnly = !editable;
   const isPannable = viewport.zoom !== 1 || viewport.panX !== 0 || viewport.panY !== 0;
+  const hasCurrent = [...wireCurrents.values()].some((i) => i !== 0);
 
   return (
     <div
@@ -105,6 +113,8 @@ export default function CircuitWorkbench({
           <WireLayer
             nodes={nodes}
             edges={edges}
+            wireCurrents={wireCurrents}
+            danger={currentDanger}
             pendingTerminal={editable ? pendingTerminal : null}
             pointer={editable ? wirePointer : null}
             viewportRef={viewportRef}
@@ -127,7 +137,7 @@ export default function CircuitWorkbench({
             <CircuitNode2D
               key={node.id}
               node={node}
-              model={models[node.type]}
+              model={modelForPart(partOfNode(node), models)}
               selected={editable && selectedNodeId === node.id}
               showInfoBubble={editable && infoBubbleNodeId === node.id}
               dragging={draggingNodeId === node.id}
@@ -164,7 +174,7 @@ export default function CircuitWorkbench({
                 id: "placement-preview",
                 type: placementPreview.type,
                 position: placementPreview.position,
-                state: {},
+                state: { partId: placementPreview.partId },
               }}
               model={models[placementPreview.type]}
               selected={false}
@@ -182,13 +192,20 @@ export default function CircuitWorkbench({
             </p>
           )}
 
-          {editable && nodes.length > 0 && (
+          {editable && nodes.length > 0 && !hasCurrent && (
             <p className="circuit-workbench-wire-hint">
               Trage sau atinge un terminal, apoi altul, pentru a conecta un fir
             </p>
           )}
         </div>
       </div>
+
+      {hasCurrent && (
+        <p className="circuit-electron-legend">
+          <span className="circuit-electron-legend-dot" aria-hidden="true" />
+          Electronii pleacă de la − și merg spre + . Cu cât trec mai repede, cu atât curentul e mai mare.
+        </p>
+      )}
     </div>
   );
 }

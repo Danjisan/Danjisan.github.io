@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 import CircuitElectricalOverlay from "./CircuitElectricalOverlay";
 import ComponentInfoBubble from "./ComponentInfoBubble";
-import { COMPONENT_COLORS, COMPONENT_ICONS } from "../constants";
+import ComponentIcon from "./ComponentIcon";
+import { COMPONENT_COLORS } from "../constants";
+import { partOfNode } from "../logic/parts";
 import { getTerminalDefs, isNodeFlipped, terminalEdgeStyle } from "../logic/terminalPositions";
 import type {
   BranchElectricalReading,
@@ -104,7 +106,11 @@ export default function CircuitNode2D({
         onPointerDown={preview || readOnly ? undefined : (e) => onBodyPointerDown?.(e, node.id)}
       >
         <span className="circuit-node-2d-icon" aria-hidden="true">
-          {COMPONENT_ICONS[node.type]}
+          <ComponentIcon
+            part={partOfNode(node)}
+            switchOn={switchOn}
+            potValue={typeof potentiometerValue === "number" ? potentiometerValue : undefined}
+          />
         </span>
         {!isJunction && <span className="circuit-node-2d-label">{model.label}</span>}
         {node.type === "switch" && !preview && (

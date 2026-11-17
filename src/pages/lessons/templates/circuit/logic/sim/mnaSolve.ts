@@ -1,5 +1,12 @@
 import type { BuiltNetlist, CircuitStamp, MnaSolution, ResistorStamp } from "./types";
 
+/**
+ * Conductanță infimă (S) de la fiecare nod la masă, ca la SPICE (GMIN).
+ * Fără ea, o piesă nelegată sau legată doar la un capăt lasă noduri „în aer” și matricea nu se poate rezolva.
+ * Trebuie să fie mult mai mică decât conductanța unui LED blocat (vezi OPEN_RESISTANCE în netlist.ts).
+ */
+const GMIN_S = 1e-12;
+
 function nodeVAt(voltages: number[], node: number): number {
   return voltages[node] ?? 0;
 }
@@ -25,6 +32,8 @@ export function solveMna(
 
   const A: number[][] = Array.from({ length: size }, () => new Array(size).fill(0));
   const b = new Array(size).fill(0);
+
+  for (let i = 0; i < n - 1; i++) A[i][i] += GMIN_S;
 
   for (const r of resistors) {
     const g = 1 / r.ohms;
@@ -92,7 +101,7 @@ function solveLinear(A: number[][], b: number[]): number[] | null {
     for (let row = col + 1; row < n; row++) {
       if (Math.abs(aug[row][col]) > Math.abs(aug[pivot][col])) pivot = row;
     }
-    if (Math.abs(aug[pivot][col]) < 1e-12) return null;
+    if (Math.abs(aug[pivot][col]) < 1e-15) return null;
 
     [aug[col], aug[pivot]] = [aug[pivot], aug[col]];
 
