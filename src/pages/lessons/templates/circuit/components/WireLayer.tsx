@@ -17,6 +17,13 @@ interface WireLayerProps {
   wireCurrents?: Map<string, number>;
   /** Un LED primește prea mult curent sau e scurtcircuit: electronii se colorează portocaliu */
   danger?: boolean;
+  /** Firele se pot selecta și șterge doar în editor */
+  editable?: boolean;
+  selectedEdgeId?: string | null;
+  /** Fire evidențiate (ex. pasul curent din ajutor) */
+  highlightEdgeIds?: Set<string>;
+  onSelectEdge?: (edgeId: string) => void;
+  onRemoveEdge?: (edgeId: string) => void;
   pendingTerminal: CircuitTerminalRef | null;
   pointer: { x: number; y: number } | null;
   viewportRef: React.RefObject<HTMLDivElement | null>;
@@ -35,6 +42,11 @@ export default function WireLayer({
   edges,
   wireCurrents,
   danger = false,
+  editable = false,
+  selectedEdgeId = null,
+  highlightEdgeIds,
+  onSelectEdge,
+  onRemoveEdge,
   pendingTerminal,
   pointer,
   viewportRef,
@@ -100,9 +112,16 @@ export default function WireLayer({
         if (!from || !to) return null;
         const d = wireLinePath(from, to);
         const flow = electronFlowStyle(wireCurrents?.get(edge.id) ?? 0, danger);
+        const selected = editable && selectedEdgeId === edge.id;
+        const highlighted = highlightEdgeIds?.has(edge.id) ?? false;
+        const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
         return (
           <g key={edge.id}>
-            <path className="circuit-wire" d={d} vectorEffect="non-scaling-stroke" />
+            <path
+              className={`circuit-wire${selected ? " circuit-wire--selected" : ""}${highlighted ? " circuit-wire--highlight" : ""}`}
+              d={d}
+              vectorEffect="non-scaling-stroke"
+            />
             {flow && (
               <path
                 className={`circuit-wire-electrons${flow.hot ? " circuit-wire-electrons--hot" : ""}`}
@@ -110,6 +129,32 @@ export default function WireLayer({
                 vectorEffect="non-scaling-stroke"
                 style={flow.style}
               />
+            )}
+            {editable && onSelectEdge && (
+              <path
+                className="circuit-wire-hit"
+                d={d}
+                vectorEffect="non-scaling-stroke"
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  onSelectEdge(edge.id);
+                }}
+              />
+            )}
+            {selected && onRemoveEdge && (
+              <g
+                className="circuit-wire-remove"
+                transform={`translate(${mid.x} ${mid.y})`}
+                role="button"
+                aria-label="Șterge firul"
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  onRemoveEdge(edge.id);
+                }}
+              >
+                <circle r="12" />
+                <path d="M-4.5 -4.5 L4.5 4.5 M4.5 -4.5 L-4.5 4.5" />
+              </g>
             )}
           </g>
         );

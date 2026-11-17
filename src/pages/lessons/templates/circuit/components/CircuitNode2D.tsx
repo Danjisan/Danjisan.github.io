@@ -46,6 +46,8 @@ interface CircuitNode2DProps {
   ledBurned?: boolean;
   motorRunning?: boolean;
   reversedLed?: boolean;
+  /** Etichetă mică afișată pe piesă (ex. „1”, „2” pentru noduri) */
+  badge?: string;
   electricalReading?: BranchElectricalReading;
   pendingTerminal: CircuitTerminalRef | null;
   occupiedTerminals: Set<string>;
@@ -71,6 +73,7 @@ export default function CircuitNode2D({
   ledBurned = false,
   motorRunning = false,
   reversedLed = false,
+  badge,
   electricalReading,
   pendingTerminal,
   occupiedTerminals,
@@ -113,6 +116,7 @@ export default function CircuitNode2D({
           />
         </span>
         {!isJunction && <span className="circuit-node-2d-label">{model.label}</span>}
+        {badge && <span className="circuit-node-2d-badge-num">{badge}</span>}
         {node.type === "switch" && !preview && (
           <button
             type="button"

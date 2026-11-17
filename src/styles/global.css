@@ -4474,6 +4474,42 @@ body.circuit-is-dragging * {
   background: #7dd3fc;
 }
 
+.circuit-wire--selected {
+  stroke: #f472b6;
+  stroke-width: 4;
+}
+
+.circuit-wire--highlight {
+  stroke: #a3e635;
+  stroke-width: 4.5;
+}
+
+/* Zonă invizibilă, mai lată decât firul, ca să-l poți atinge ușor pe telefon */
+.circuit-wire-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.circuit-wire-remove {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.circuit-wire-remove circle {
+  fill: #3b0a24;
+  stroke: #f472b6;
+  stroke-width: 2;
+}
+
+.circuit-wire-remove path {
+  stroke: #fbcfe8;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
 .circuit-wire--pending {
   stroke: #b88cff;
   stroke-dasharray: 6 4;
@@ -4521,8 +4557,8 @@ body.circuit-is-dragging * {
 }
 
 .circuit-terminal-label {
-  font-size: 0.7rem;
-  font-weight: 900;
+  font-size: 0.72rem;
+  font-weight: 600;
   line-height: 1;
   pointer-events: none;
 }
@@ -4539,8 +4575,10 @@ body.circuit-is-dragging * {
 .circuit-terminal[data-terminal="a"] .circuit-terminal-label,
 .circuit-terminal[data-terminal="b"] .circuit-terminal-label,
 .circuit-terminal[data-terminal="wiper"] .circuit-terminal-label {
-  font-size: 0.68rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0;
 }
 
 /* Terminal liber — polaritate vizibilă (convenție breadboard: roșu +, albastru −) */
@@ -5615,4 +5653,190 @@ body.circuit-is-dragging * {
 
 .garden-footnote {
   margin-top: 8px;
+}
+
+/* ── Ajutor circuit: „Arată-mi cum” ── */
+.circuit-challenge-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.circuit-challenge-title-row .circuit-challenge-title {
+  margin: 0;
+}
+
+.circuit-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #a3e635;
+  background: rgba(163, 230, 53, 0.1);
+  color: #d9f99d;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.circuit-help-btn:hover {
+  background: rgba(163, 230, 53, 0.2);
+}
+
+.circuit-help-btn:focus-visible {
+  outline: 2px solid #a3e635;
+  outline-offset: 2px;
+}
+
+.circuit-help-btn--compact {
+  margin-left: auto;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.circuit-help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(5, 2, 12, 0.78);
+}
+
+.circuit-help {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(820px, 100%);
+  max-height: calc(100dvh - 32px);
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  overflow: auto;
+}
+
+.circuit-help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.circuit-help-head h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.circuit-help-close {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.circuit-help-step {
+  margin: 0;
+  min-height: 2.8em;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.circuit-help-step-count {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #a3e635;
+}
+
+.circuit-help-board .circuit-workbench {
+  height: min(52vh, 420px);
+  min-height: 260px;
+}
+
+.circuit-help-board .circuit-workbench-surface,
+.circuit-help-board .circuit-workbench-viewport {
+  height: 100%;
+}
+
+.circuit-help-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.circuit-help-nav .circuit-challenge-advance-btn {
+  margin-top: 0;
+}
+
+.circuit-help-all {
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.circuit-help-back {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.circuit-help-back:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.circuit-node-2d-badge-num {
+  position: absolute;
+  top: -0.55rem;
+  right: -0.55rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #a3e635;
+  color: #1a2e05;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+/* Ancoră pentru eticheta numerică (ajutor) */
+.circuit-node-2d--junction .circuit-node-2d-body {
+  position: relative;
+}
+
+/* Lasă loc butonului de închidere al editorului (colțul dreapta-sus) */
+.circuit-fs-header .circuit-help-btn--compact {
+  margin-right: 2.75rem;
 }

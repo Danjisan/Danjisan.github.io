@@ -4,6 +4,8 @@ import CircuitFailureBanner from "./circuit/components/CircuitFailureBanner";
 import DragGhost from "./circuit/components/DragGhost";
 import { parseCircuitMetadata } from "./circuit/parseMetadata";
 import ChallengeBanner from "./circuit/components/ChallengeBanner";
+import CircuitHelpDialog from "./circuit/components/CircuitHelpDialog";
+import { CIRCUIT_SOLUTIONS } from "../../../content/circuits/solutions";
 import CircuitEditorFrame from "./circuit/components/CircuitEditorFrame";
 import CircuitEditorToolbar from "./circuit/components/CircuitEditorToolbar";
 import CircuitFullscreenHeader from "./circuit/components/CircuitFullscreenHeader";
@@ -30,6 +32,8 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
   const editorHints = useMemo(() => hintsForEditor(metadata.workbench_hints), [metadata.workbench_hints]);
 
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
   const [editorFullscreen, setEditorFullscreen] = useState(false);
@@ -48,7 +52,6 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     clearBoard,
     addEdge,
     removeEdge,
-    edgeAtTerminal,
     toggleSwitch,
     setPotentiometerValue,
     toggleNodeFlip,
@@ -74,6 +77,8 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     [sortedChallenges, solvedIds],
   );
   const activeChallenge = sortedChallenges[activeChallengeIndex] ?? null;
+  const activeSolution = activeChallenge ? CIRCUIT_SOLUTIONS[activeChallenge.id] ?? null : null;
+  const openHelp = activeSolution ? () => setHelpOpen(true) : undefined;
 
   // La deschidere (și când se încarcă userul) pornim de la prima provocare nerezolvată.
   useEffect(() => {
@@ -164,6 +169,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
   const handleSelectNode = useCallback(
     (nodeId: string) => {
       setInfoBubbleNodeId(null);
+      setSelectedEdgeId(null);
       setSelectedNodeId(nodeId);
       const node = nodes.find((n) => n.id === nodeId);
       setSelectedPartId(node ? partOfNode(node).id : null);
@@ -204,8 +210,6 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     cancelWire,
   } = useWireInteraction({
     onConnect: addEdge,
-    onDisconnect: removeEdge,
-    getEdgeAtTerminal: edgeAtTerminal,
   });
 
   const exitEditorFullscreen = useCallback(() => {
@@ -213,6 +217,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     setEditorFullscreen(false);
     setSelectedPartId(null);
     setSelectedNodeId(null);
+    setSelectedEdgeId(null);
     setInfoBubbleNodeId(null);
   }, [cancelWire]);
 
@@ -262,6 +267,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
       setActiveChallengeIndex(index);
       setSelectedPartId(null);
       setSelectedNodeId(null);
+      setSelectedEdgeId(null);
       setInfoBubbleNodeId(null);
       setFailureMessage(null);
     },
@@ -274,6 +280,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
     resetView();
     setSelectedPartId(null);
     setSelectedNodeId(null);
+    setSelectedEdgeId(null);
     setInfoBubbleNodeId(null);
   }, [clearBoard, cancelWire, resetView]);
 
@@ -288,6 +295,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
         handleSurfacePointerDown(e);
         dismissInfoBubble();
         setSelectedNodeId(null);
+        setSelectedEdgeId(null);
       }
       if (isBackdrop) handleViewportPointerDown(e);
     },
@@ -365,6 +373,16 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
       electricalReadings={simulation.readings}
       wireCurrents={simulation.wireCurrents}
       currentDanger={simulation.shortCircuited || simulation.ledOvercurrent.size > 0}
+      selectedEdgeId={selectedEdgeId}
+      onSelectEdge={editorFullscreen ? (id) => { setSelectedEdgeId(id); setSelectedNodeId(null); } : undefined}
+      onRemoveEdge={
+        editorFullscreen
+          ? (id) => {
+              removeEdge(id);
+              setSelectedEdgeId(null);
+            }
+          : undefined
+      }
       onSurfacePointerMove={onSurfacePointerMove}
       onSurfacePointerDown={onSurfacePointerDown}
       onSurfacePointerUp={onSurfacePointerUp}
@@ -400,6 +418,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
             feedbackHints={simulation.hints}
             nextUnsolvedIndex={nextUnsolvedIndex}
             onSelect={goToChallenge}
+            onHelp={openHelp}
           />
         ) : (
           <p className="circuit-schema-notice">Nicio provocare definită în metadata lecției.</p>
@@ -413,6 +432,7 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
             challenge={activeChallenge}
             solved={challengeSolved}
             feedbackHints={simulation.hints}
+            onHelp={openHelp}
           />
         )}
 
@@ -465,6 +485,14 @@ export default function CircuitElectricTemplate({ lesson, userId }: TemplateProp
           model={modelForPart(ghostPart, metadata.models)}
           x={ghostPosition.x}
           y={ghostPosition.y}
+        />
+      )}
+      {helpOpen && activeChallenge && activeSolution && (
+        <CircuitHelpDialog
+          title={activeChallenge.title}
+          solution={activeSolution}
+          metadata={metadata}
+          onClose={() => setHelpOpen(false)}
         />
       )}
     </div>

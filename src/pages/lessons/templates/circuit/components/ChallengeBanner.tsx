@@ -13,6 +13,8 @@ interface ChallengeBannerProps {
   /** Index-ul următoarei provocări nerezolvate (alta decât cea activă), dacă există */
   nextUnsolvedIndex: number | null;
   onSelect: (index: number) => void;
+  /** Deschide schema montată pas cu pas; lipsă = provocarea n-are soluție desenată */
+  onHelp?: () => void;
 }
 
 const STATUS_LABEL: Record<ChallengeStatus, string> = {
@@ -30,6 +32,7 @@ export default function ChallengeBanner({
   feedbackHints = [],
   nextUnsolvedIndex,
   onSelect,
+  onHelp,
 }: ChallengeBannerProps) {
   const listRef = useRef<HTMLOListElement>(null);
 
@@ -92,7 +95,14 @@ export default function ChallengeBanner({
           Provocare {activeIndex + 1}
           {activeWasSolved && !solved ? " · deja rezolvată" : ""}
         </span>
-        <h3 className="circuit-challenge-title">{active.title}</h3>
+        <div className="circuit-challenge-title-row">
+          <h3 className="circuit-challenge-title">{active.title}</h3>
+          {onHelp && (
+            <button type="button" className="circuit-help-btn" onClick={onHelp}>
+              <span aria-hidden="true">🧩</span> Arată-mi cum
+            </button>
+          )}
+        </div>
         <p className="circuit-challenge-desc">{active.description}</p>
         {active.hint && !solved && <p className="circuit-challenge-hint">💡 {active.hint}</p>}
         {!solved &&

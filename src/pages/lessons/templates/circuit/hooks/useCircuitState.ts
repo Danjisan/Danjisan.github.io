@@ -53,18 +53,19 @@ export function useCircuitState() {
     setEdges((prev) => prev.filter((e) => e.id !== edgeId));
   }, []);
 
-  /** Opțiunea C: un fir per terminal; înlocuiește firele existente dacă e nevoie */
+  /**
+   * Pe un terminal se pot lega oricâte fire (ca în realitate): așa se fac ramificațiile fără piese extra.
+   * Nu legăm o piesă cu ea însăși și nu dublăm un fir care există deja.
+   */
   const addEdge = useCallback((from: CircuitTerminalRef, to: CircuitTerminalRef) => {
-    if (from.nodeId === to.nodeId && from.terminal === to.terminal) return;
     if (from.nodeId === to.nodeId) return;
     setEdges((prev) => {
-      const withoutFrom = prev.filter(
-        (e) => !sameTerminal(e.from, from) && !sameTerminal(e.to, from),
+      const duplicate = prev.some(
+        (e) =>
+          (sameTerminal(e.from, from) && sameTerminal(e.to, to)) ||
+          (sameTerminal(e.from, to) && sameTerminal(e.to, from)),
       );
-      const withoutBoth = withoutFrom.filter(
-        (e) => !sameTerminal(e.from, to) && !sameTerminal(e.to, to),
-      );
-      return [...withoutBoth, { id: newId(), from, to }];
+      return duplicate ? prev : [...prev, { id: newId(), from, to }];
     });
   }, []);
 

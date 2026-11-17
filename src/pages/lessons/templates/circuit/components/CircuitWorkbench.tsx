@@ -40,6 +40,12 @@ interface CircuitWorkbenchProps {
   wireCurrents: Map<string, number>;
   /** LED peste limită sau scurtcircuit */
   currentDanger?: boolean;
+  selectedEdgeId?: string | null;
+  highlightEdgeIds?: Set<string>;
+  /** Etichete mici pe piese (ex. numărul nodului în ajutor) */
+  nodeBadges?: Map<string, string>;
+  onSelectEdge?: (edgeId: string) => void;
+  onRemoveEdge?: (edgeId: string) => void;
   onSurfacePointerMove?: (e: React.PointerEvent) => void;
   onSurfacePointerDown?: (e: React.PointerEvent) => void;
   onSurfacePointerUp?: (e: React.PointerEvent) => void;
@@ -76,6 +82,11 @@ export default function CircuitWorkbench({
   electricalReadings,
   wireCurrents,
   currentDanger = false,
+  selectedEdgeId = null,
+  highlightEdgeIds,
+  nodeBadges,
+  onSelectEdge,
+  onRemoveEdge,
   onSurfacePointerMove,
   onSurfacePointerDown,
   onSurfacePointerUp,
@@ -115,6 +126,11 @@ export default function CircuitWorkbench({
             edges={edges}
             wireCurrents={wireCurrents}
             danger={currentDanger}
+            editable={editable}
+            selectedEdgeId={selectedEdgeId}
+            highlightEdgeIds={highlightEdgeIds}
+            onSelectEdge={onSelectEdge}
+            onRemoveEdge={onRemoveEdge}
             pendingTerminal={editable ? pendingTerminal : null}
             pointer={editable ? wirePointer : null}
             viewportRef={viewportRef}
@@ -146,6 +162,7 @@ export default function CircuitWorkbench({
               reversedLed={reversedLedIds.has(node.id)}
               ledBurned={burnedLedIds.has(node.id)}
               motorRunning={motorRunningIds.has(node.id)}
+              badge={nodeBadges?.get(node.id)}
               electricalReading={
                 selectedNodeId === node.id ? electricalReadings.get(node.id) : undefined
               }
@@ -194,7 +211,7 @@ export default function CircuitWorkbench({
 
           {editable && nodes.length > 0 && !hasCurrent && (
             <p className="circuit-workbench-wire-hint">
-              Trage sau atinge un terminal, apoi altul, pentru a conecta un fir
+              Atinge un terminal, apoi altul, ca să legi un fir. Pe un terminal pot fi mai multe fire. Atinge un fir ca să-l ștergi.
             </p>
           )}
         </div>

@@ -82,6 +82,18 @@ interface ExerciseStep {
 }
 ```
 
+### 4b. Fire și ramificații (decis 2026-11-17)
+
+- Pe un terminal se pot lega **oricâte fire**, ca în realitate. Ramificațiile (paralel) nu mai cer piesa „nod de legătură”; ea rămâne opțională, pentru scheme mai ordonate. `required_types` ignoră nodurile.
+- Un fir se șterge atingând firul (apare „×”), nu terminalul.
+- Motiv: cu un singur fir pe terminal, provocarea „Potențiometru în circuit” era imposibilă (9 capete de legat, număr impar), iar nodurile erau greu de folosit.
+
+### 4c. Soluții de referință și „Arată-mi cum”
+
+- `src/content/circuits/solutions.ts`: soluția fiecărei provocări (piese + fire), doar date.
+- Butonul „Arată-mi cum” o desenează pas cu pas: piesele, apoi câte un fir (evidențiat), la final întrerupătorul — cu simularea pornită, deci se văd LED-ul și electronii.
+- Testul `logic/__tests__/solutions.test.ts` verifică pe o copie a provocărilor din DB (`fixtures/`) că fiecare soluție chiar rezolvă provocarea și folosește doar piese din inventar. La pasul 2, provocările se mută în repo și fixture-ul dispare.
+
 ### 5. Condiții de câștig
 
 | Tip | Exemplu |

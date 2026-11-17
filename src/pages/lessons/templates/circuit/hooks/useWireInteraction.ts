@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CircuitEdge, CircuitTerminalRef, TerminalId } from "../types";
+import type { CircuitTerminalRef, TerminalId } from "../types";
 
 interface PointerPoint {
   x: number;
@@ -12,15 +12,9 @@ function sameTerminal(a: CircuitTerminalRef, b: CircuitTerminalRef): boolean {
 
 interface UseWireInteractionOptions {
   onConnect: (from: CircuitTerminalRef, to: CircuitTerminalRef) => void;
-  onDisconnect: (edgeId: string) => void;
-  getEdgeAtTerminal: (ref: CircuitTerminalRef) => CircuitEdge | undefined;
 }
 
-export function useWireInteraction({
-  onConnect,
-  onDisconnect,
-  getEdgeAtTerminal,
-}: UseWireInteractionOptions) {
+export function useWireInteraction({ onConnect }: UseWireInteractionOptions) {
   const [pendingTerminal, setPendingTerminal] = useState<CircuitTerminalRef | null>(null);
   const [wirePointer, setWirePointer] = useState<PointerPoint | null>(null);
   const activePointerId = useRef<number | null>(null);
@@ -66,23 +60,12 @@ export function useWireInteraction({
         return;
       }
 
-      // Niciun pending activ — verifică dacă terminalul are deja un fir
-      const existingEdge = getEdgeAtTerminal(ref);
-      if (existingEdge) {
-        // Deconectează: ia firul existent și pornește un nou fir din celălalt capăt
-        const otherEnd = sameTerminal(existingEdge.from, ref)
-          ? existingEdge.to
-          : existingEdge.from;
-        onDisconnect(existingEdge.id);
-        setPendingTerminal(otherEnd);
-        setWirePointer({ x: e.clientX, y: e.clientY });
-      } else {
-        // Terminal liber — pornește fir nou
-        setPendingTerminal(ref);
-        setWirePointer({ x: e.clientX, y: e.clientY });
-      }
+      // Pornește un fir nou, chiar dacă terminalul are deja fire (ramificație).
+      // Firele se șterg atingând firul, nu terminalul.
+      setPendingTerminal(ref);
+      setWirePointer({ x: e.clientX, y: e.clientY });
     },
-    [clearWire, connect, getEdgeAtTerminal, onDisconnect],
+    [clearWire, connect],
   );
 
   const handleTerminalPointerUp = useCallback((e: React.PointerEvent) => {

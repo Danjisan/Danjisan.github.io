@@ -31,6 +31,8 @@ export function requiredTypesPlaced(
 
   const requiredCounts = new Map<ComponentType, number>();
   for (const type of required) {
+    // Nodurile de legătură sunt opționale: ramificațiile se pot face legând mai multe fire pe un terminal.
+    if (type === "wire_junction") continue;
     requiredCounts.set(type, (requiredCounts.get(type) ?? 0) + 1);
   }
 

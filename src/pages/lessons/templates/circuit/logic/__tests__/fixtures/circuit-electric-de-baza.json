@@ -1,0 +1,112 @@
+{
+  "_note": "Copie a lessons.metadata pentru circuit-electric-de-baza (Supabase, 2026-11-17). Doar pentru teste.",
+  "components": [
+    "battery",
+    "dc_motor",
+    "led",
+    "potentiometer",
+    "resistor",
+    "switch",
+    "wire_junction"
+  ],
+  "challenges": [
+    {
+      "id": "led-basic",
+      "hint": "Conectează componentele în serie: baterie → întrerupător → rezistor → LED → înapoi la baterie. Rezistorul limitează curentul.",
+      "order": 1,
+      "title": "Aprinde LED-ul",
+      "description": "Construiește un circuit cu baterie, întrerupător, rezistor și LED. Închide întrerupătorul ca să aprinzi LED-ul fără să se ardă.",
+      "win_condition": {
+        "type": "component_state",
+        "state": "on",
+        "target": "led"
+      },
+      "required_types": [
+        "battery",
+        "switch",
+        "resistor",
+        "led"
+      ]
+    },
+    {
+      "id": "motor-run",
+      "hint": "Leagă bateria la întrerupător, apoi la motor (+ și −), și revino la baterie. Ambele terminale ale motorului trebuie conectate.",
+      "order": 2,
+      "title": "Pornește motorul",
+      "description": "Construiește un circuit închis care pornește motorul DC când întrerupătorul e închis.",
+      "win_condition": {
+        "type": "component_state",
+        "state": "running",
+        "target": "dc_motor"
+      },
+      "required_types": [
+        "battery",
+        "switch",
+        "dc_motor"
+      ]
+    },
+    {
+      "id": "led-motor-parallel",
+      "hint": "Plasează 2 noduri de legătură. Nod 1: A de la întrerupător, B spre rezistor+LED, C spre motor. Nod 2: A de la LED −, B de la motor −, C spre bateria −.",
+      "order": 3,
+      "title": "LED și motor împreună",
+      "description": "Aprinde LED-ul (cu rezistor!) și pornește motorul în același timp. Folosește două noduri de legătură: unul după întrerupător ca să separi ramurile, altul înainte de bateria − ca să le reuni.",
+      "win_condition": {
+        "also": [
+          {
+            "state": "on",
+            "target": "led"
+          }
+        ],
+        "type": "component_state",
+        "state": "running",
+        "target": "dc_motor"
+      },
+      "required_types": [
+        "battery",
+        "switch",
+        "resistor",
+        "led",
+        "dc_motor",
+        "wire_junction",
+        "wire_junction"
+      ]
+    },
+    {
+      "id": "pot-led",
+      "hint": "Folosește potențiometrul ca rezistor variabil în serie cu LED-ul: baterie → întrerupător → potențiometru → LED → baterie.",
+      "order": 4,
+      "title": "Potențiometru în circuit",
+      "description": "Include potențiometrul într-un circuit care aprinde LED-ul. Conectează toate cele trei terminale (A, W, B) ale potențiometrului.",
+      "win_condition": {
+        "type": "component_state",
+        "state": "on",
+        "target": "led"
+      },
+      "required_types": [
+        "battery",
+        "switch",
+        "potentiometer",
+        "led"
+      ]
+    },
+    {
+      "id": "led-polarity",
+      "hint": "Dacă LED-ul nu se aprinde, rotește-l cu butonul de flip sau schimbă firele. Rezistorul rămâne obligatoriu!",
+      "order": 5,
+      "title": "Polaritate corectă",
+      "description": "Aprinde LED-ul verificând polaritatea: terminalul + al LED-ului spre partea pozitivă a circuitului, − spre negativ.",
+      "win_condition": {
+        "type": "component_state",
+        "state": "on_polarized",
+        "target": "led"
+      },
+      "required_types": [
+        "battery",
+        "switch",
+        "resistor",
+        "led"
+      ]
+    }
+  ]
+}
