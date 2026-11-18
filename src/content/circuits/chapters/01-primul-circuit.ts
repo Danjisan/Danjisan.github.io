@@ -14,6 +14,8 @@ const SW_OPEN: BoardPart = { id: "sw", part: "switch", x: 0.62, y: 0.22, locked:
 const SW_ON: BoardPart = { ...SW_OPEN, state: { on: true } };
 const RES: BoardPart = { id: "res", part: "resistor-220", x: 0.72, y: 0.68, locked: true };
 const LED: BoardPart = { id: "led", part: "led-red", x: 0.32, y: 0.68, locked: true };
+/** LED montat invers: desenat întors, ca să se vadă. Fixat pe loc, dar elevul îl poate roti după ce mută firele. */
+const LED_REVERSED: BoardPart = { ...LED, locked: "pinned", state: { rotation: 180 } };
 
 /** Fără întrerupător: baterie → rezistor → LED → baterie */
 const RES_TOP: BoardPart = { ...RES, x: 0.7, y: 0.3 };
@@ -182,7 +184,12 @@ export const CHAPTER_01: Chapter = {
             "💡 Ana a montat un întrerupător pentru lumina din cameră. Doar că lumina stă mereu aprinsă, orice ar face cu întrerupătorul.",
           goal: "Fă în așa fel încât întrerupătorul să aprindă și să stingă LED-ul.",
           board: {
-            parts: [BAT, SW_OPEN, { ...RES, x: 0.75, y: 0.62 }, LED],
+            parts: [
+              { ...BAT, x: 0.2, y: 0.26 },
+              { ...SW_OPEN, x: 0.55, y: 0.14 },
+              { ...RES, x: 0.84, y: 0.5, state: { rotation: 90 } },
+              { ...LED, x: 0.45, y: 0.8 },
+            ],
             wires: [
               ["bat:+", "sw:a"],
               ["sw:b", "res:a"],
@@ -200,7 +207,12 @@ export const CHAPTER_01: Chapter = {
           explain_after:
             "Firul acela făcea un drum ocolitor: curentul trecea pe lângă întrerupător. La instalațiile adevărate, așa ceva se repară doar de electrician, cu curentul oprit!",
           solution: {
-            parts: [BAT, SW_OPEN, { ...RES, x: 0.75, y: 0.62 }, LED],
+            parts: [
+              { ...BAT, x: 0.2, y: 0.26 },
+              { ...SW_OPEN, x: 0.55, y: 0.14 },
+              { ...RES, x: 0.84, y: 0.5, state: { rotation: 90 } },
+              { ...LED, x: 0.45, y: 0.8 },
+            ],
             wires: [
               ["bat:+", "sw:a"],
               ["sw:b", "res:a"],
@@ -230,7 +242,7 @@ export const CHAPTER_01: Chapter = {
           id: "c1-led-predict",
           question: "Aici LED-ul e legat invers. Ce se întâmplă când închizi întrerupătorul?",
           board: {
-            parts: [BAT, SW_OPEN, RES, LED],
+            parts: [BAT, SW_OPEN, RES, LED_REVERSED],
             wires: [
               ["bat:+", "sw:a"],
               ["sw:b", "res:b"],
@@ -252,7 +264,7 @@ export const CHAPTER_01: Chapter = {
           story: "🚲 Luminița de la bicicleta lui Mihai nu merge, deși toate firele sunt legate și bateria e nouă.",
           goal: "Fă luminița să meargă.",
           board: {
-            parts: [BAT, SW_ON, RES, LED],
+            parts: [BAT, SW_ON, RES, LED_REVERSED],
             wires: [
               ["bat:+", "sw:a"],
               ["sw:b", "res:b"],
@@ -365,7 +377,7 @@ export const CHAPTER_01: Chapter = {
             "🔦 Radu și-a făcut singur o lanternă, dar nu se aprinde. A verificat bateria: e bună. Se pare că a greșit două lucruri.",
           goal: "Găsește ambele greșeli și fă lanterna să meargă.",
           board: {
-            parts: [BAT, SW_ON, RES, LED],
+            parts: [BAT, SW_ON, RES, LED_REVERSED],
             wires: [
               ["bat:+", "sw:a"],
               ["res:a", "led:-"],

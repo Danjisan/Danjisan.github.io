@@ -4581,76 +4581,48 @@ body.circuit-is-dragging * {
   letter-spacing: 0;
 }
 
-/* Terminal liber — polaritate vizibilă (convenție breadboard: roșu +, albastru −) */
-.circuit-terminal--free {
-  border-color: #c4a040;
-  background: #1a1028;
-  color: #e8c547;
-}
-
-.circuit-terminal--free[data-terminal="+"] {
-  background: #4a1414;
-  border-color: #d64545;
-  color: #ffc4c4;
-}
-
-.circuit-terminal--free[data-terminal="-"] {
-  background: #0c1a32;
-  border-color: #4a7ab8;
-  color: #b8d4ff;
-}
-
-.circuit-terminal--free[data-terminal="a"],
-.circuit-terminal--free[data-terminal="b"],
-.circuit-terminal--free[data-terminal="wiper"] {
-  background: #1c1810;
+/* Borne: culoarea arată polaritatea și rămâne la fel și după ce legi un fir
+   (+ roșu, − negru, A/B/C/W neutre). Că e legat se vede din fir și din electroni. */
+.circuit-terminal--free,
+.circuit-terminal--occupied {
   border-color: #a89068;
+  background: #1c1810;
   color: #e8dcc0;
 }
 
-.circuit-terminal--free:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 0 0 3px rgba(232, 197, 71, 0.2);
-}
-
-.circuit-terminal--free[data-terminal="+"]:hover {
-  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.28);
-}
-
-.circuit-terminal--free[data-terminal="-"]:hover {
-  box-shadow: 0 0 0 3px rgba(74, 122, 184, 0.28);
-}
-
-/* Terminal ocupat (are fir) — păstrează nuanța de polaritate */
-.circuit-terminal--occupied {
-  border-color: #5cb85c;
-  background: #0e2a10;
-  color: #8e8;
-}
-
+.circuit-terminal--free[data-terminal="+"],
 .circuit-terminal--occupied[data-terminal="+"] {
-  background: #2a1818;
-  border-color: #5cb85c;
-  color: #ffb0b0;
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: #fff1f1;
 }
 
+.circuit-terminal--free[data-terminal="-"],
 .circuit-terminal--occupied[data-terminal="-"] {
-  background: #101e30;
-  border-color: #5cb85c;
-  color: #a8c8f0;
+  background: #050506;
+  border-color: #d4d4d8;
+  color: #fafafa;
 }
 
-.circuit-terminal--occupied[data-terminal="a"],
-.circuit-terminal--occupied[data-terminal="b"],
-.circuit-terminal--occupied[data-terminal="wiper"] {
-  background: #1a2418;
-  border-color: #5cb85c;
-  color: #b8d8b0;
+/* O bornă cu fir e plină (fără inel transparent), ca să se vadă că firul „intră” în ea */
+.circuit-terminal--occupied {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
+.circuit-terminal--free:hover,
 .circuit-terminal--occupied:hover {
-  background: #1a3a1a;
-  box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.3);
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 3px rgba(232, 197, 71, 0.22);
+}
+
+.circuit-terminal--free[data-terminal="+"]:hover,
+.circuit-terminal--occupied[data-terminal="+"]:hover {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+.circuit-terminal--free[data-terminal="-"]:hover,
+.circuit-terminal--occupied[data-terminal="-"]:hover {
+  box-shadow: 0 0 0 3px rgba(212, 212, 216, 0.3);
 }
 
 /* Terminal pending (primul tap) */
@@ -5089,15 +5061,15 @@ body.circuit-is-dragging * {
   font-weight: 500;
 }
 
+/* În colțul stânga-jos (simetric cu × din dreapta-sus), ca să nu acopere bornele de pe laturi */
 .circuit-node-2d-flip {
   position: absolute;
-  left: 50%;
-  top: calc(50% + 58%);
-  transform: translate(-50%, -50%);
-  width: 2rem;
-  height: 2rem;
-  min-width: 32px;
-  min-height: 32px;
+  left: -0.7rem;
+  bottom: -0.7rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 28px;
+  min-height: 28px;
   padding: 0;
   border: none;
   border-radius: 8px;
@@ -6295,4 +6267,31 @@ body.circuit-is-dragging * {
   justify-content: center;
   gap: 0.6rem;
   margin-top: 0.5rem;
+}
+
+/* ── Piese rotite (pași de 90°) ──
+   Corpul rămâne orizontal (eticheta se citește normal); se rotește desenul, iar bornele
+   își schimbă latura (terminalPlacements). Textele din desen (+ / −) rămân drepte. */
+.circuit-node-2d .circuit-node-2d-icon .circuit-icon {
+  transform: rotate(var(--rot, 0deg));
+  transition: transform 0.18s ease-out;
+}
+
+.circuit-node-2d.rot-vertical .circuit-node-2d-icon {
+  position: relative;
+  width: 2.6rem;
+  height: 4.4rem;
+}
+
+.circuit-node-2d.rot-vertical .circuit-node-2d-icon .circuit-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+
+.circuit-icon-upright {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(calc(-1 * var(--rot, 0deg)));
 }

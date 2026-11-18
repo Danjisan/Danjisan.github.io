@@ -33,7 +33,11 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - `lessons.metadata.chapter` → capitol din `src/content/circuits/chapters/` (mini-lecții cu pași `concept` / `predict` / `try` / `build` / `fix`); fără el, template-ul arată provocările vechi din `metadata.challenges`.
 - Orice pas nou are `solution`; `chapters.test.ts` verifică că se poate rezolva, că nu e rezolvat de la început și că respectă acțiunile permise.
 - Editorul e `components/CircuitEditor.tsx` (folosit de ambele moduri); permisiunile și piesele blocate vin din pas.
-- „Rotește” (flip) schimbă doar desenul, nu polaritatea — un LED întors se repară mutând firele.
+- Piesele se rotesc în pași de 90° (`state.rotation`); bornele își schimbă latura, dar rămân aceleași borne electric. Rotirea nu schimbă polaritatea — un LED întors se repară mutând firele. Nodurile vechi cu `flipped: true` = 180°.
+- Aranjamente alternative de borne, alese de exercițiu cu `state.layout` (ex. LED `legs`: ambele picioare jos, pentru scene realiste) — în `logic/terminalPositions.ts`.
+- Piesele din exerciții: `locked: true` (nu se mută / șterg / rotesc) sau `locked: "pinned"` (nu se mută / șterg, dar se rotesc).
+- Firele sunt curbe care ies din bornă spre exterior (`logic/wireGeometry.ts`). `wireLayout.test.ts` verifică pe toate mesele noastre (laptop + telefon) că niciun fir nu trece printr-o piesă sau peste o bornă străină: dacă pică, reașează piesele sau rotește-le.
+- Bornele: + roșu, − negru, A/B/C/W neutre — aceeași culoare și după ce sunt legate.
 
 ## Piese și inventar
 

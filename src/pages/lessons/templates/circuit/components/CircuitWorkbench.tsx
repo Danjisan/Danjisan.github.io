@@ -46,6 +46,8 @@ interface CircuitWorkbenchProps {
   nodeBadges?: Map<string, string>;
   /** Piese care nu se pot șterge sau roti */
   lockedNodeIds?: Set<string>;
+  /** Piese care nu se pot șterge (dar se pot roti) */
+  pinnedNodeIds?: Set<string>;
   /** Arată îndemnul „Atinge un terminal…” (doar dacă se pot lega fire) */
   showWireHint?: boolean;
   onSelectEdge?: (edgeId: string) => void;
@@ -90,6 +92,7 @@ export default function CircuitWorkbench({
   highlightEdgeIds,
   nodeBadges,
   lockedNodeIds,
+  pinnedNodeIds,
   showWireHint = true,
   onSelectEdge,
   onRemoveEdge,
@@ -183,7 +186,7 @@ export default function CircuitWorkbench({
                   : undefined
               }
               onBodyPointerDown={onBodyPointerDown}
-              onRemove={lockedNodeIds?.has(node.id) ? undefined : onRemoveNode}
+              onRemove={lockedNodeIds?.has(node.id) || pinnedNodeIds?.has(node.id) ? undefined : onRemoveNode}
               onTerminalPointerDown={onTerminalPointerDown}
               onTerminalPointerUp={onTerminalPointerUp}
               onSwitchToggle={onSwitchToggle}

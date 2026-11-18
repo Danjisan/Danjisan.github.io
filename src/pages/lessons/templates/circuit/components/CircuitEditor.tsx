@@ -63,6 +63,8 @@ interface CircuitEditorProps {
   editing: boolean;
   permissions?: Partial<EditorPermissions>;
   lockedNodeIds?: Set<string>;
+  /** Fixate pe loc (nu se mută / șterg), dar se pot roti */
+  pinnedNodeIds?: Set<string>;
   lockedEdgeIds?: Set<string>;
   hints?: WorkbenchHint[];
   /** Simularea oprită (ex. la „prezice”, înainte de „Pornește”) */
@@ -83,6 +85,7 @@ export default function CircuitEditor({
   editing,
   permissions: permissionsProp,
   lockedNodeIds,
+  pinnedNodeIds,
   lockedEdgeIds,
   hints = [],
   paused = false,
@@ -178,19 +181,19 @@ export default function CircuitEditor({
 
   const handleMoveNode = useCallback(
     (nodeId: string, position: { x: number; y: number }) => {
-      if (!permissions.move || lockedNodeIds?.has(nodeId)) return;
+      if (!permissions.move || lockedNodeIds?.has(nodeId) || pinnedNodeIds?.has(nodeId)) return;
       moveNode(nodeId, position);
     },
-    [permissions.move, lockedNodeIds, moveNode],
+    [permissions.move, lockedNodeIds, pinnedNodeIds, moveNode],
   );
 
   const handleRemoveNode = useCallback(
     (nodeId: string) => {
-      if (lockedNodeIds?.has(nodeId)) return;
+      if (lockedNodeIds?.has(nodeId) || pinnedNodeIds?.has(nodeId)) return;
       removeNode(nodeId);
       if (selectedNodeId === nodeId) setSelectedNodeId(null);
     },
-    [lockedNodeIds, removeNode, selectedNodeId],
+    [lockedNodeIds, pinnedNodeIds, removeNode, selectedNodeId],
   );
 
   const { pendingTerminal, wirePointer, handleTerminalPointerDown, handleTerminalPointerUp, handleWirePointerMove, handleSurfacePointerDown, cancelWire } =
@@ -331,7 +334,8 @@ export default function CircuitEditor({
           electricalReadings={simulation.readings}
           wireCurrents={simulation.wireCurrents}
           currentDanger={simulation.shortCircuited || simulation.ledOvercurrent.size > 0}
-          lockedNodeIds={permissions.removeNode ? lockedNodeIds : new Set(nodes.map((n) => n.id))}
+          lockedNodeIds={lockedNodeIds}
+          pinnedNodeIds={permissions.removeNode ? pinnedNodeIds : new Set(nodes.map((n) => n.id))}
           showWireHint={canWire}
           selectedEdgeId={selectedEdgeId}
           onSelectEdge={

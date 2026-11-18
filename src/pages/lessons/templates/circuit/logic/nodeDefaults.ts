@@ -2,7 +2,7 @@ import type { ComponentType } from "../types";
 import { clientToWorkbenchPosition as clientToWorkbenchPositionFromViewport } from "./viewportCoords";
 
 export function defaultNodeState(type: ComponentType): Record<string, unknown> {
-  const base = { flipped: false };
+  const base = { rotation: 0 };
   switch (type) {
     case "switch":
       return { ...base, on: false };

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { defaultNodeState } from "../logic/nodeDefaults";
+import { nextRotation } from "../logic/terminalPositions";
 import type { PartDef } from "../../../../../content/circuits/parts";
 import type { CircuitEdge, CircuitNode, CircuitTerminalRef } from "../types";
 
@@ -90,10 +91,11 @@ export function useCircuitState(initial?: { nodes: CircuitNode[]; edges: Circuit
     );
   }, []);
 
+  /** Rotește piesa cu 90° (în sensul acelor de ceasornic). */
   const toggleNodeFlip = useCallback((nodeId: string) => {
     setNodes((prev) =>
       prev.map((n) =>
-        n.id === nodeId ? { ...n, state: { ...n.state, flipped: !n.state.flipped } } : n,
+        n.id === nodeId ? { ...n, state: { ...n.state, rotation: nextRotation(n), flipped: false } } : n,
       ),
     );
   }, []);

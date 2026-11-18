@@ -8,6 +8,8 @@ export interface BoardCircuit {
   nodes: CircuitNode[];
   edges: CircuitEdge[];
   lockedNodeIds: Set<string>;
+  /** Fixate pe loc, dar se pot roti */
+  pinnedNodeIds: Set<string>;
   lockedEdgeIds: Set<string>;
 }
 
@@ -22,12 +24,14 @@ export function splitTerminalRef(ref: string): { nodeId: string; terminal: Termi
  */
 export function boardToCircuit(board: BoardSetup, opts: { switchesOn?: boolean } = {}): BoardCircuit {
   const lockedNodeIds = new Set<string>();
+  const pinnedNodeIds = new Set<string>();
   const nodes: CircuitNode[] = board.parts.flatMap((p) => {
     const part = getPart(p.part);
     if (!part) return [];
     const state: Record<string, unknown> = { ...defaultNodeState(part.type), ...p.state, partId: part.id };
     if (part.type === "switch" && opts.switchesOn !== undefined) state.on = opts.switchesOn;
-    if (p.locked) lockedNodeIds.add(p.id);
+    if (p.locked === "pinned") pinnedNodeIds.add(p.id);
+    else if (p.locked) lockedNodeIds.add(p.id);
     return [{ id: p.id, type: part.type, position: { x: p.x, y: p.y }, state }];
   });
   const edges: CircuitEdge[] = board.wires.map(([a, b], i) => ({
@@ -36,7 +40,7 @@ export function boardToCircuit(board: BoardSetup, opts: { switchesOn?: boolean }
     to: splitTerminalRef(b),
   }));
   const lockedEdgeIds = new Set(board.lockedWires ? edges.map((e) => e.id) : []);
-  return { nodes, edges, lockedNodeIds, lockedEdgeIds };
+  return { nodes, edges, lockedNodeIds, pinnedNodeIds, lockedEdgeIds };
 }
 
 /** Probleme de structură într-o masă (piese necunoscute, fire spre terminale inexistente). Gol = ok. */

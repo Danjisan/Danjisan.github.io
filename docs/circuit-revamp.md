@@ -88,6 +88,12 @@ interface ExerciseStep {
 - Un fir se șterge atingând firul (apare „×”), nu terminalul.
 - Motiv: cu un singur fir pe terminal, provocarea „Potențiometru în circuit” era imposibilă (9 capete de legat, număr impar), iar nodurile erau greu de folosit.
 
+### 4d. Borne și fire (decis 2026-11-18)
+
+- Bornele nu se mișcă singure (copiii învață tocmai unde e + și −). În schimb: piese rotibile la 90°, fire curbe care ies din bornă spre exterior, aranjamente de borne pe scenă (LED cu picioarele jos în scenele realiste).
+- Test automat: în mesele noastre niciun fir nu trece printr-o piesă sau peste o bornă străină.
+- Mai târziu, dacă în atelier firele tot se încâlcesc: rutare automată care ocolește piesele (în unghi drept).
+
 ### 4c. Soluții de referință și „Arată-mi cum”
 
 - `src/content/circuits/solutions.ts`: soluția fiecărei provocări (piese + fire), doar date.

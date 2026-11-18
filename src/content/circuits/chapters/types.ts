@@ -12,8 +12,11 @@ export interface BoardPart {
   y: number;
   /** Starea inițială, ex. `{ on: true }` pentru întrerupător, `{ flipped: true }` pentru LED întors */
   state?: Record<string, unknown>;
-  /** Nu poate fi mutată, ștearsă sau rotită (dar poate fi folosită, ex. întrerupătorul se apasă) */
-  locked?: boolean;
+  /**
+   * true = nu poate fi mutată, ștearsă sau rotită (dar poate fi folosită, ex. întrerupătorul se apasă).
+   * "pinned" = nu poate fi mutată sau ștearsă, dar se poate roti (ex. un LED montat invers, de îndreptat).
+   */
+  locked?: boolean | "pinned";
 }
 
 export interface BoardSetup {

@@ -4,7 +4,7 @@ import ComponentInfoBubble from "./ComponentInfoBubble";
 import ComponentIcon from "./ComponentIcon";
 import { COMPONENT_COLORS } from "../constants";
 import { partOfNode } from "../logic/parts";
-import { getTerminalDefs, isNodeFlipped, terminalEdgeStyle } from "../logic/terminalPositions";
+import { isVertical, nodeRotation, terminalEdgeStyle, terminalPlacements } from "../logic/terminalPositions";
 import type {
   BranchElectricalReading,
   CircuitNode,
@@ -88,18 +88,19 @@ export default function CircuitNode2D({
   onPotentiometerChange,
 }: CircuitNode2DProps) {
   const switchOn = node.type === "switch" && node.state.on === true;
-  const flipped = isNodeFlipped(node);
+  const rotation = nodeRotation(node);
   const isJunction = node.type === "wire_junction";
-  const terminals = getTerminalDefs(node);
+  const terminals = terminalPlacements(node);
 
   return (
     <div
-      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${flipped ? "flipped" : ""} ${isJunction ? "circuit-node-2d--junction" : ""} ${ledBurned ? "led-burned" : ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
+      className={`circuit-node-2d ${selected ? "selected" : ""} ${dragging ? "dragging" : ""} ${preview ? "preview" : ""} ${readOnly ? "readonly" : ""} ${rotation ? `rot-${rotation}` : ""} ${isVertical(node) ? "rot-vertical" : ""} ${isJunction ? "circuit-node-2d--junction" : ""} ${ledBurned ? "led-burned" : ledOn ? "led-on" : ""} ${reversedLed ? "led-reversed" : ""} ${motorRunning ? "motor-running" : ""}`}
       style={
         {
           left: `${node.position.x * 100}%`,
           top: `${node.position.y * 100}%`,
           "--comp-color": COMPONENT_COLORS[node.type],
+          "--rot": `${rotation}deg`,
         } as CSSProperties
       }
     >
@@ -196,7 +197,6 @@ export default function CircuitNode2D({
           type="button"
           className="circuit-node-2d-flip"
           aria-label={`Rotește ${model.label}`}
-          aria-pressed={flipped}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => onFlip(node.id)}
         >

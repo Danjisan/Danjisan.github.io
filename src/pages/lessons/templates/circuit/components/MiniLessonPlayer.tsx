@@ -343,6 +343,7 @@ function TaskView({
         editing
         permissions={permissions}
         lockedNodeIds={board.lockedNodeIds}
+        pinnedNodeIds={board.pinnedNodeIds}
         lockedEdgeIds={board.lockedEdgeIds}
         onChange={handleChange}
       />

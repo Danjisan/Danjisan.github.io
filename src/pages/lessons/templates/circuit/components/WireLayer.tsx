@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { electronFlowStyle } from "../logic/electronFlow";
-import { wireLinePath } from "../logic/wireGeometry";
-import { getTerminalDefs, getTerminalPixelPosition } from "../logic/terminalPositions";
+import { pointOnWire, wireCurve, wireLinePath, wirePathD, type Direction } from "../logic/wireGeometry";
+import { sideDirection, terminalPixelPosition, terminalPlacement } from "../logic/terminalPositions";
 import {
   clientToViewportLocal,
   measureTerminalNorms,
@@ -29,9 +29,6 @@ interface WireLayerProps {
   viewportRef: React.RefObject<HTMLDivElement | null>;
 }
 
-function readRemPx(): number {
-  return parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-}
 
 /**
  * Fire în coordonate layout pe viewport.
@@ -57,7 +54,6 @@ export default function WireLayer({
   // Fără asta, la prima afișare firele pot lipsi până la următoarea schimbare.
   const [size, setSize] = useState({ width: 1, height: 1 });
   const { width, height } = size;
-  const remPx = readRemPx();
   const ready = width > 1 && height > 1;
 
   useEffect(() => {
@@ -80,7 +76,7 @@ export default function WireLayer({
       nodes
         .map(
           (n) =>
-            `${n.id}:${n.position.x.toFixed(5)}:${n.position.y.toFixed(5)}:${n.state.flipped ? 1 : 0}`,
+            `${n.id}:${n.position.x.toFixed(5)}:${n.position.y.toFixed(5)}:${String(n.state.rotation ?? "")}:${n.state.flipped ? 1 : 0}:${String(n.state.layout ?? "")}`,
         )
         .join("|"),
     [nodes],
@@ -103,9 +99,14 @@ export default function WireLayer({
 
     const node = nodeMap.get(ref.nodeId);
     if (!node) return null;
-    const def = getTerminalDefs(node).find((t) => t.id === ref.terminal);
-    if (!def) return null;
-    return getTerminalPixelPosition(node, def, width, height, remPx);
+    return terminalPixelPosition(node, ref.terminal, width, height);
+  };
+
+  /** Spre ce parte iese firul din bornă (latura piesei, după rotire și aranjament). */
+  const directionOf = (ref: CircuitTerminalRef): Direction => {
+    const node = nodeMap.get(ref.nodeId);
+    const placement = node ? terminalPlacement(node, ref.terminal) : undefined;
+    return placement ? sideDirection(placement.side) : { x: 0, y: 0 };
   };
 
   let pendingLineEnd: { x: number; y: number } | null = null;
@@ -128,11 +129,12 @@ export default function WireLayer({
         const from = resolveTerminal(edge.from);
         const to = resolveTerminal(edge.to);
         if (!from || !to) return null;
-        const d = wireLinePath(from, to);
+        const curve = wireCurve(from, directionOf(edge.from), to, directionOf(edge.to));
+        const d = wirePathD(curve);
         const flow = electronFlowStyle(wireCurrents?.get(edge.id) ?? 0, danger);
         const selected = editable && selectedEdgeId === edge.id;
         const highlighted = highlightEdgeIds?.has(edge.id) ?? false;
-        const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+        const mid = pointOnWire(curve, 0.5);
         return (
           <g key={edge.id}>
             <path
@@ -181,7 +183,11 @@ export default function WireLayer({
       {pendingStart && pendingLineEnd && (
         <path
           className="circuit-wire circuit-wire--pending"
-          d={wireLinePath(pendingStart, pendingLineEnd)}
+          d={
+            pendingTerminal
+              ? wirePathD(wireCurve(pendingStart, directionOf(pendingTerminal), pendingLineEnd, { x: 0, y: 0 }))
+              : wireLinePath(pendingStart, pendingLineEnd)
+          }
           vectorEffect="non-scaling-stroke"
         />
       )}

@@ -59,8 +59,8 @@ export default function ComponentIcon({
           <path d="M34 5h16a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H34z" fill="#f59e0b" />
           {/* borna + */}
           <rect x="54" y="11" width="6" height="10" rx="1.5" fill="#d4d4d8" stroke="#f2f2f2" strokeWidth="1" />
-          <text x="44" y="21.5" textAnchor="middle" fontSize="14" fontWeight="800" fill="#1d1d24">+</text>
-          <text x="17" y="21.5" textAnchor="middle" fontSize="15" fontWeight="800" fill="#f2f2f2">−</text>
+          <text className="circuit-icon-upright" x="44" y="21.5" textAnchor="middle" fontSize="14" fontWeight="800" fill="#1d1d24">+</text>
+          <text className="circuit-icon-upright" x="17" y="21.5" textAnchor="middle" fontSize="15" fontWeight="800" fill="#f2f2f2">−</text>
         </svg>
       );
 
@@ -106,8 +106,8 @@ export default function ComponentIcon({
       const c = LED_COLORS[part?.color ?? "red"];
       return (
         <svg className={cls} viewBox="0 0 40 40" aria-hidden="true">
-          {/* picioare: cel lung e + */}
-          <path d="M16 26v12M24 26v8" stroke="#c9c9cf" strokeWidth="2" strokeLinecap="round" />
+          {/* picioare: cel lung (dreapta) e +, ca borna + din dreapta */}
+          <path d="M16 26v8M24 26v12" stroke="#c9c9cf" strokeWidth="2" strokeLinecap="round" />
           <path className="circuit-icon-led-dome" d="M10 26V15a10 10 0 0 1 20 0v11z" fill={c.dome} stroke={c.edge} strokeWidth="1.2" />
           <rect x="8" y="25" width="24" height="3.5" rx="1" fill={c.base} />
           <path d="M15 12a6 6 0 0 1 5-4" stroke={c.shine} strokeWidth="1.8" fill="none" strokeLinecap="round" />
@@ -125,7 +125,7 @@ export default function ComponentIcon({
             <path d="M20 20 L9 26 A13 13 0 0 1 9 14z" fill="#38bdf8" opacity="0.5" />
           </g>
           <circle cx="20" cy="20" r="4" fill="#e0f2fe" />
-          <text x="20" y="23" textAnchor="middle" fontSize="7" fontWeight="800" fill="#1e3a5f">M</text>
+          <text className="circuit-icon-upright" x="20" y="23" textAnchor="middle" fontSize="7" fontWeight="800" fill="#1e3a5f">M</text>
         </svg>
       );
 
