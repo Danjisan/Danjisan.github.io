@@ -41,12 +41,16 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
   const pinchRef = useRef<{ distance: number; zoom: number; panX: number; panY: number } | null>(
     null,
   );
+  /** Elevul a mărit / micșorat / mutat masa singur — încadrarea automată nu-i mai strică vederea. */
+  const userAdjustedRef = useRef(false);
 
   const resetView = useCallback(() => {
+    userAdjustedRef.current = false;
     setViewport({ zoom: 1, panX: 0, panY: 0 });
   }, []);
 
   const zoomIn = useCallback(() => {
+    userAdjustedRef.current = true;
     setViewport((v) => {
       const el = surfaceRef.current;
       if (!el) return { ...v, zoom: clampZoom(v.zoom + VIEWPORT_ZOOM_STEP) };
@@ -64,6 +68,7 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
   }, [surfaceRef]);
 
   const zoomOut = useCallback(() => {
+    userAdjustedRef.current = true;
     setViewport((v) => {
       const el = surfaceRef.current;
       if (!el) return { ...v, zoom: clampZoom(v.zoom - VIEWPORT_ZOOM_STEP) };
@@ -87,6 +92,7 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
       const rect = el.getBoundingClientRect();
       const mx = clientX - rect.left;
       const my = clientY - rect.top;
+      userAdjustedRef.current = true;
       setViewport((v) => {
         const newZoom = clampZoom(v.zoom + deltaZoom);
         const ratio = newZoom / v.zoom;
@@ -134,6 +140,7 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
     const dy = e.clientY - pan.startY;
     if (Math.hypot(dx, dy) < PAN_THRESHOLD_PX) return;
     e.preventDefault();
+    userAdjustedRef.current = true;
     setViewport((v) => ({
       ...v,
       panX: pan.panX + dx,
@@ -178,6 +185,7 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
       const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
       const newZoom = clampZoom(zoom * (dist / distance));
       const ratio = newZoom / zoom;
+      userAdjustedRef.current = true;
       setViewport({
         zoom: newZoom,
         panX: cx - (cx - panX) * ratio,
@@ -205,6 +213,7 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
     viewport,
     /** Setează direct vederea (ex. încadrare automată) */
     setView: setViewport,
+    userAdjustedRef,
     resetView,
     zoomIn,
     zoomOut,

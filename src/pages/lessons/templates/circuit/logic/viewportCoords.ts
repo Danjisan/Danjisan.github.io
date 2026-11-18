@@ -6,7 +6,7 @@ export interface WorkbenchViewport {
   panY: number;
 }
 
-export const VIEWPORT_ZOOM_MIN = 0.6;
+export const VIEWPORT_ZOOM_MIN = 0.4;
 export const VIEWPORT_ZOOM_MAX = 1.4;
 export const VIEWPORT_ZOOM_STEP = 0.1;
 

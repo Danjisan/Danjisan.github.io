@@ -42,7 +42,7 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 ## Texte și ghidare în mini-lecții
 
 - Conceptele: 1–2 fraze în `text`; detaliile merg în `aside` (caseta „Știai că?”, închisă implicit). Pe telefon textul ocupă cel mult o treime din ecran.
-- Masa se încadrează singură (`logic/fitView.ts`) când ceva iese din ecran — la deschidere, la schimbarea mărimii și la piese / fire noi.
+- Masa se încadrează singură (`logic/fitView.ts`) când ceva iese din vederea curentă — la deschidere, la schimbarea mărimii și după orice schimbare pe masă (fir/piesă nouă, mutare, rotire). La exerciții (`frameFor` din MiniLessonPlayer) se încadrează de la început și pentru firele soluției dintre piesele deja puse. După ce elevul umblă singur la zoom / mută masa, nu mai reîncadrăm până apasă „vedere normală”.
 
 - Textele din capitole pot conține marcaje: `{+}` `{-}` `{A}` `{B}` `{C}` `{W}` (bulinele bornelor, aceleași culori ca pe schemă) și `{battery-9v}`, `{led-red}`… (iconița piesei din catalog), puse la prima mențiune a unei piese. Le desenează `components/RichText.tsx`; un test verifică să nu existe marcaje necunoscute.
 - Indicațiile care pulsează („apasă aici”: variantele de la „prezice”, „Continuă”, piesa din inventar) apar doar primele 3 ori pe dispozitiv — `hooks/useCoachMark.ts`, clasa `.circuit-coach`.

@@ -324,6 +324,17 @@ function TaskView({
   const [helpOpen, setHelpOpen] = useState(false);
 
   const board = useMemo(() => boardToCircuit(step.board ?? { parts: [], wires: [] }), [step.board]);
+  // Masa se încadrează de la început pentru firele soluției dintre piesele deja puse
+  // (ex. firul lipsă care ocolește pe margine). Piesele noi din inventar nu au încă loc.
+  const frameFor = useMemo(() => {
+    if (!step.board) return undefined;
+    const ids = new Set(board.nodes.map((n) => n.id));
+    const sol = boardToCircuit(step.solution);
+    return {
+      nodes: sol.nodes.filter((n) => ids.has(n.id)),
+      edges: sol.edges.filter((e) => ids.has(e.from.nodeId) && ids.has(e.to.nodeId)),
+    };
+  }, [step.board, step.solution, board.nodes]);
   const isTry = step.kind === "try";
   const inventory: InventorySlot[] = useMemo(
     () => (isTry ? [] : (step as BuildStep).inventory.map((s) => ({ partId: s.part, count: s.count }))),
@@ -391,6 +402,7 @@ function TaskView({
         lockedNodeIds={board.lockedNodeIds}
         pinnedNodeIds={board.pinnedNodeIds}
         lockedEdgeIds={board.lockedEdgeIds}
+        frameFor={frameFor}
         onChange={handleChange}
         coachInventory={inventoryCoach.active && !placedFromInventory && inventory.length > 0}
       />

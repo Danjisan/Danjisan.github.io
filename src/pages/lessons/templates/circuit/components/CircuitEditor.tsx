@@ -6,7 +6,7 @@ import { useWorkbenchDrag } from "../hooks/useWorkbenchDrag";
 import { useWorkbenchViewport } from "../hooks/useWorkbenchViewport";
 import { canPlacePart, getPart, modelForPart, partOfNode, type InventorySlot } from "../logic/parts";
 import { emptyResult } from "../logic/sim/netlist";
-import { contentBounds, fitViewport } from "../logic/fitView";
+import { contentBounds, ensureVisible, unionBounds, type Bounds } from "../logic/fitView";
 import type { DcSimulationResult } from "../logic/sim/types";
 import { simulateCircuit } from "../logic/simulateCircuit";
 import type { WorkbenchViewport } from "../logic/viewportCoords";
@@ -75,6 +75,11 @@ interface CircuitEditorProps {
   coachInventory?: boolean;
   /** Simularea oprită (ex. la „prezice”, înainte de „Pornește”) */
   paused?: boolean;
+  /**
+   * Circuitul la care trebuie să ajungă elevul (la exerciții). Masa se încadrează de la început
+   * astfel încât să se vadă și firele care încă nu sunt puse.
+   */
+  frameFor?: { nodes: CircuitNode[]; edges: CircuitEdge[] };
   onChange?: (state: CircuitEditorState) => void;
   renderToolbar?: (api: CircuitEditorToolbarApi) => ReactNode;
   className?: string;
@@ -97,6 +102,7 @@ export default function CircuitEditor({
   coachInventory = false,
   scene,
   paused = false,
+  frameFor,
   onChange,
   renderToolbar,
   className = "",
@@ -210,7 +216,8 @@ export default function CircuitEditor({
   const {
     viewport,
     setView,
-    resetView,
+    userAdjustedRef,
+    resetView: resetViewRaw,
     zoomIn,
     zoomOut,
     handleWheel,
@@ -244,15 +251,52 @@ export default function CircuitEditor({
     return () => observer.disconnect();
   }, []);
 
-  // Încadrare automată: la deschidere, la schimbarea mărimii mesei și când se schimbă numărul de
-  // piese / fire — dacă ceva iese din masă (ex. un fir curbat pe lângă margine), micșorăm ca să se vadă tot.
+  // Încadrare automată: la deschidere, la schimbarea mărimii mesei și după orice schimbare pe masă
+  // (piesă/fir nou, mutare, rotire). Dacă ceva iese din vederea curentă, revenim la vederea normală
+  // sau micșorăm cât trebuie. Nu în timpul unei trageri, și deloc după ce elevul a umblat singur
+  // la zoom / a mutat masa (până apasă „vedere normală”).
+  const layoutKey = nodes
+    .map((n) => `${n.id}:${n.position.x.toFixed(3)},${n.position.y.toFixed(3)}:${JSON.stringify(n.state ?? null)}`)
+    .join("|");
+  const viewportNow = useRef(viewport);
+  viewportNow.current = viewport;
+  const busy = Boolean(draggingNodeId || paletteDragPartId);
+  const [fitNonce, setFitNonce] = useState(0);
+  const resetView = useCallback(() => {
+    resetViewRaw();
+    setFitNonce((n) => n + 1);
+  }, [resetViewRaw]);
+
+  /** Marginile reale ale pieselor, măsurate pe pagină (etichete, borne), în px-ii mesei nezoomate. */
+  const measuredBounds = useCallback((): Bounds | null => {
+    const el = viewportRef.current;
+    if (!el || el.clientWidth <= 1) return null;
+    const box = el.getBoundingClientRect();
+    const scale = box.width / el.clientWidth;
+    if (!(scale > 0)) return null;
+    let b: Bounds | null = null;
+    el.querySelectorAll(".circuit-node-2d").forEach((n) => {
+      const r = n.getBoundingClientRect();
+      if (r.width === 0) return;
+      b = unionBounds(b, {
+        x0: (r.left - box.left) / scale,
+        y0: (r.top - box.top) / scale,
+        x1: (r.right - box.left) / scale,
+        y1: (r.bottom - box.top) / scale,
+      });
+    });
+    return b;
+  }, []);
+
   useEffect(() => {
     const { w, h } = boardSize;
-    if (w <= 1 || h <= 1) return;
-    const fit = fitViewport(contentBounds(nodes, edges, w, h), w, h);
-    if (fit) setView(fit);
-    // Doar la schimbări de structură sau de mărime, nu la fiecare mutare de piesă.
-  }, [nodes.length, edges.length, boardSize, setView]);
+    if (busy || w <= 1 || h <= 1 || userAdjustedRef.current) return;
+    let bounds = unionBounds(contentBounds(nodes, edges, w, h), measuredBounds());
+    if (frameFor) bounds = unionBounds(bounds, contentBounds(frameFor.nodes, frameFor.edges, w, h));
+    const next = ensureVisible(bounds, viewportNow.current, w, h, 20);
+    if (next) setView(next);
+    // layoutKey + edges.length descriu tot ce contează pentru încadrare.
+  }, [layoutKey, edges.length, boardSize, busy, fitNonce, frameFor, measuredBounds, setView, userAdjustedRef]);
 
   const ghostPart = paletteDragPartId ? getPart(paletteDragPartId) ?? null : null;
   const placementPreview =
