@@ -19,7 +19,12 @@ export interface BoardPart {
   locked?: boolean | "pinned";
 }
 
+/** Fundal „din viața reală” desenat sub piese (vezi components/CircuitScene.tsx). */
+export type SceneId = "flashlight" | "room" | "bike";
+
 export interface BoardSetup {
+  /** Piesele stau pe un desen (lanternă, cameră…); LED-urile aprinse luminează */
+  scene?: SceneId;
   parts: BoardPart[];
   /** ["bat:+", "sw:a"] */
   wires: [string, string][];

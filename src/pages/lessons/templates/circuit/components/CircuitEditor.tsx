@@ -10,6 +10,7 @@ import type { DcSimulationResult } from "../logic/sim/types";
 import { simulateCircuit } from "../logic/simulateCircuit";
 import type { WorkbenchViewport } from "../logic/viewportCoords";
 import type { CircuitEdge, CircuitElectricMetadata, CircuitNode, WorkbenchHint } from "../types";
+import type { SceneId } from "../../../../../content/circuits/chapters/types";
 import CircuitFailureBanner from "./CircuitFailureBanner";
 import CircuitWorkbench from "./CircuitWorkbench";
 import ComponentPalette from "./ComponentPalette";
@@ -67,6 +68,8 @@ interface CircuitEditorProps {
   pinnedNodeIds?: Set<string>;
   lockedEdgeIds?: Set<string>;
   hints?: WorkbenchHint[];
+  /** Fundal de scenă sub piese */
+  scene?: SceneId;
   /** Piesele din inventar pulsează (ghidare: „de aici iei piesa”) */
   coachInventory?: boolean;
   /** Simularea oprită (ex. la „prezice”, înainte de „Pornește”) */
@@ -91,6 +94,7 @@ export default function CircuitEditor({
   lockedEdgeIds,
   hints = [],
   coachInventory = false,
+  scene,
   paused = false,
   onChange,
   renderToolbar,
@@ -341,6 +345,7 @@ export default function CircuitEditor({
           lockedNodeIds={lockedNodeIds}
           pinnedNodeIds={permissions.removeNode ? pinnedNodeIds : new Set(nodes.map((n) => n.id))}
           showWireHint={canWire}
+          scene={scene}
           selectedEdgeId={selectedEdgeId}
           onSelectEdge={
             canUnwire

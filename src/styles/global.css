@@ -6410,3 +6410,13 @@ body.circuit-is-dragging * {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Fundal de scenă (lanternă, cameră, bicicletă) sub fire și piese */
+.circuit-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}

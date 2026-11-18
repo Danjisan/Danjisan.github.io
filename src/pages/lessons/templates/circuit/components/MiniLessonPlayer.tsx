@@ -106,7 +106,7 @@ export default function MiniLessonPlayer({
             key={step.id}
             step={step}
             metadata={metadata}
-            completed={completed}
+            completed={solvedSteps.has(index)}
             onCompleted={markCompleted}
             footer={
               <button
@@ -217,7 +217,14 @@ function ConceptView({
         <RichText text={step.text} />
       </section>
       {board && (
-        <CircuitEditor metadata={metadata} initial={board} inventory={[]} editing={false} permissions={VIEW_ONLY} />
+        <CircuitEditor
+          metadata={metadata}
+          initial={board}
+          inventory={[]}
+          editing={false}
+          permissions={VIEW_ONLY}
+          scene={step.board?.scene}
+        />
       )}
       <footer className="circuit-lesson-bar">
         <span />
@@ -283,6 +290,7 @@ function PredictView({
         key={revealed ? "on" : "off"}
         metadata={metadata}
         initial={board}
+        scene={step.board?.scene}
         inventory={[]}
         editing={false}
         permissions={VIEW_ONLY}
@@ -370,6 +378,7 @@ function TaskView({
         key={attempt}
         metadata={metadata}
         initial={board}
+        scene={step.board?.scene}
         inventory={inventory}
         editing
         permissions={permissions}

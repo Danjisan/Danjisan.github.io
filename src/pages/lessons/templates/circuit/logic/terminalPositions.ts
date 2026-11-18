@@ -123,6 +123,14 @@ export function terminalEdgeStyle(term: TerminalPlacement): CSSProperties {
 /** Mărimea aproximativă a unei piese pe masă (px), pentru calcule fără DOM (teste, primul render). */
 export const APPROX_BODY = { halfW: 46, halfH: 38, terminalR: 13 };
 
+/** Jumătatea lățimii / înălțimii corpului (px, aproximativ), după tip și rotire. */
+export function approxHalfSize(node: CircuitNode): { halfW: number; halfH: number } {
+  if (node.type === "wire_junction") return { halfW: 22, halfH: 22 };
+  return isVertical(node)
+    ? { halfW: APPROX_BODY.halfH, halfH: APPROX_BODY.halfW }
+    : { halfW: APPROX_BODY.halfW, halfH: APPROX_BODY.halfH };
+}
+
 /** Poziția bornei în px, fără DOM: folosită până la prima măsurare și în teste. */
 export function terminalPixelPosition(
   node: CircuitNode,
@@ -132,9 +140,7 @@ export function terminalPixelPosition(
 ): { x: number; y: number } | null {
   const t = terminalPlacement(node, terminal);
   if (!t) return null;
-  const vertical = isVertical(node);
-  const halfW = vertical ? APPROX_BODY.halfH : APPROX_BODY.halfW;
-  const halfH = vertical ? APPROX_BODY.halfW : APPROX_BODY.halfH;
+  const { halfW, halfH } = approxHalfSize(node);
   const cx = node.position.x * boardWidth;
   const cy = node.position.y * boardHeight;
   const along = (t.at - 0.5) * 2;

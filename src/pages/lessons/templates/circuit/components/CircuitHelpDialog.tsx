@@ -107,6 +107,7 @@ export default function CircuitHelpDialog({ title, solution, metadata, onClose }
             highlightEdgeIds={highlight}
             nodeBadges={badges}
             onSwitchToggle={noop}
+            scene={solution.scene}
           />
         </div>
 

@@ -1,6 +1,8 @@
 import { type RefObject } from "react";
 import CircuitNode2D from "./CircuitNode2D";
 import WireLayer from "./WireLayer";
+import CircuitScene from "./CircuitScene";
+import type { SceneId } from "../../../../../content/circuits/chapters/types";
 import { modelForPart, partOfNode } from "../logic/parts";
 import { viewportTransformStyle, type WorkbenchViewport } from "../logic/viewportCoords";
 import type {
@@ -48,7 +50,9 @@ interface CircuitWorkbenchProps {
   lockedNodeIds?: Set<string>;
   /** Piese care nu se pot șterge (dar se pot roti) */
   pinnedNodeIds?: Set<string>;
-  /** Arată îndemnul „Atinge un terminal…” (doar dacă se pot lega fire) */
+  /** Fundal de scenă (lanternă, cameră, bicicletă) */
+  scene?: SceneId;
+  /** Arată îndemnul „Atinge o bornă…” (doar dacă se pot lega fire) */
   showWireHint?: boolean;
   onSelectEdge?: (edgeId: string) => void;
   onRemoveEdge?: (edgeId: string) => void;
@@ -94,6 +98,7 @@ export default function CircuitWorkbench({
   lockedNodeIds,
   pinnedNodeIds,
   showWireHint = true,
+  scene,
   onSelectEdge,
   onRemoveEdge,
   onSurfacePointerMove,
@@ -130,6 +135,8 @@ export default function CircuitWorkbench({
           onPointerDown={onSurfacePointerDown}
           onPointerUp={onSurfacePointerUp}
         >
+          {scene && <CircuitScene scene={scene} nodes={nodes} ledOnIds={ledOnIds} />}
+
           <WireLayer
             nodes={nodes}
             edges={edges}
@@ -220,7 +227,7 @@ export default function CircuitWorkbench({
 
           {editable && showWireHint && nodes.length > 0 && !hasCurrent && (
             <p className="circuit-workbench-wire-hint">
-              Atinge un terminal, apoi altul, ca să legi un fir. Pe un terminal pot fi mai multe fire. Atinge un fir ca să-l ștergi.
+              Atinge o bornă, apoi alta, ca să legi un fir. Pe o bornă pot fi mai multe fire. Atinge un fir ca să-l ștergi.
             </p>
           )}
         </div>

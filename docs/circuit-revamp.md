@@ -167,7 +167,7 @@ Electricitatea e la fizică în clasa a VIII-a; ținta e gimnaziu, curbă lină.
 | 2 ✅ | Schema capitol → mini-lecție → pași, condiții noi, test de rezolvabilitate; capitolul 1 (vezi `docs/circuit-step2.md`) | capitolul 1 jucabil |
 | 3 ✅ | Harta capitolului cu redeschiderea mini-lecțiilor; flux prezice → încearcă → construiește → repară | navigare ușoară între mini-lecții |
 | 4 ✅ | Progres + XP salvate (`colabme-server` `20261117_lesson_item_progress.sql` + client) + finalizare automată | progresul rămâne după refresh și pe alt dispozitiv |
-| 5 | Vizual 2D: ~~piese SVG~~ ✅, ~~curent pe fire (electroni)~~ ✅, luminozitate LED ∝ curent, fire curbe care ocolesc piesele | arată ca un joc |
+| 5 | Vizual 2D: ~~piese SVG~~ ✅, ~~curent pe fire (electroni)~~ ✅, ~~fire curbe~~ ✅, ~~scene „repară” (lanternă, cameră, bicicletă) cu lumină~~ ✅, luminozitate LED ∝ curent | arată ca un joc |
 | 6 | Atelier: piese deblocate, circuite salvate în cont, vizibile pentru profesori și admini | sandbox |
 | 7 | Capitolele 2–4 | conținut |
 | 8 | Experiment 3D / roboței | de decis după |

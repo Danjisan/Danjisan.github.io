@@ -45,6 +45,11 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - Indicațiile care pulsează („apasă aici”: variantele de la „prezice”, „Continuă”, piesa din inventar) apar doar primele 3 ori pe dispozitiv — `hooks/useCoachMark.ts`, clasa `.circuit-coach`.
 - Într-o mini-lecție deja terminată, bulinele pașilor de sus sunt butoane: elevul sare la orice pas.
 
+## Scene „din viața reală”
+
+- O masă poate avea `scene: "flashlight" | "room" | "bike"`: fundal desenat de `components/CircuitScene.tsx` (în px, din aceleași coordonate 0..1 ca piesele), iar LED-urile aprinse aruncă un con de lumină în direcția în care sunt întoarse.
+- Pozițiile pieselor din scene trebuie să se potrivească cu desenul și să treacă `wireLayout.test.ts` (fără fire prin piese, totul în interiorul mesei, pe laptop și pe telefon). Cel mai simplu: o căutare automată a pozițiilor cu `wireLayoutProblems` din `logic/wireLayoutCheck.ts`.
+
 ## Piese și inventar
 
 - Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și inventarul (`buildInventory`, `canPlacePart`).
