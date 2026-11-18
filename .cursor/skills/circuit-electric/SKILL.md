@@ -39,6 +39,12 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - Firele sunt curbe care ies din bornă spre exterior (`logic/wireGeometry.ts`). `wireLayout.test.ts` verifică pe toate mesele noastre (laptop + telefon) că niciun fir nu trece printr-o piesă sau peste o bornă străină: dacă pică, reașează piesele sau rotește-le.
 - Bornele: + roșu, − negru, A/B/C/W neutre — aceeași culoare și după ce sunt legate.
 
+## Texte și ghidare în mini-lecții
+
+- Textele din capitole pot conține marcaje: `{+}` `{-}` `{A}` `{B}` `{C}` `{W}` (bulinele bornelor, aceleași culori ca pe schemă) și `{battery-9v}`, `{led-red}`… (iconița piesei din catalog), puse la prima mențiune a unei piese. Le desenează `components/RichText.tsx`; un test verifică să nu existe marcaje necunoscute.
+- Indicațiile care pulsează („apasă aici”: variantele de la „prezice”, „Continuă”, piesa din inventar) apar doar primele 3 ori pe dispozitiv — `hooks/useCoachMark.ts`, clasa `.circuit-coach`.
+- Într-o mini-lecție deja terminată, bulinele pașilor de sus sunt butoane: elevul sare la orice pas.
+
 ## Piese și inventar
 
 - Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și inventarul (`buildInventory`, `canPlacePart`).

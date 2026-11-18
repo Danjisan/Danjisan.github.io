@@ -6,6 +6,8 @@ import type { CircuitNode, ComponentModel, ComponentType } from "../types";
 import ComponentIcon from "./ComponentIcon";
 
 interface ComponentPaletteProps {
+  /** Piese care pulsează („trage-mă pe masă”) — ghidare pentru primele exerciții */
+  coachPartIds?: Set<string>;
   inventory: InventorySlot[];
   models: Record<ComponentType, ComponentModel>;
   selected: string | null;
@@ -20,6 +22,7 @@ interface ComponentPaletteProps {
 
 function InventoryItem({
   part,
+  coach,
   model,
   selected,
   isFull,
@@ -31,6 +34,7 @@ function InventoryItem({
   onPalettePointerDown,
 }: {
   part: PartDef;
+  coach?: boolean;
   model: ComponentModel;
   selected: boolean;
   isFull: boolean;
@@ -52,6 +56,7 @@ function InventoryItem({
         "circuit-inventory-item",
         selected ? "active" : "",
         isFull ? "placed" : "",
+        coach && !isFull ? "circuit-coach" : "",
         compact ? "compact" : "",
         iconOnly ? "icon-only" : "",
       ]
@@ -101,6 +106,7 @@ function renderInventoryItem(
   return (
     <InventoryItem
       part={part}
+      coach={props.coachPartIds?.has(part.id)}
       model={modelForPart(part, props.models)}
       selected={props.selected === part.id}
       isFull={!props.canPlacePart(part.id)}
@@ -120,6 +126,7 @@ export default function ComponentPalette({
   selected,
   nodes,
   canPlacePart,
+  coachPartIds,
   compact = false,
   collapsed = false,
   onToggleCollapse,
@@ -145,6 +152,7 @@ export default function ComponentPalette({
     selected,
     nodes,
     canPlacePart,
+    coachPartIds,
     onTapSelect,
     onPalettePointerDown,
   };

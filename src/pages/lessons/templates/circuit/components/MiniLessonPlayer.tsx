@@ -15,6 +15,8 @@ import type { CircuitElectricMetadata } from "../types";
 import CircuitEditor, { type CircuitEditorState, type EditorPermissions } from "./CircuitEditor";
 import CircuitEditorFrame from "./CircuitEditorFrame";
 import CircuitHelpDialog from "./CircuitHelpDialog";
+import RichText, { plainRichText, RichInline } from "./RichText";
+import { useCoachMark } from "../hooks/useCoachMark";
 
 type Meta = Pick<CircuitElectricMetadata, "models" | "simulation">;
 
@@ -39,22 +41,37 @@ export default function MiniLessonPlayer({
   onNext,
 }: MiniLessonPlayerProps) {
   const [index, setIndex] = useState(0);
-  const [completed, setCompleted] = useState(false);
   // Starea de la deschidere: după `onFinish` părintele o marchează terminată, dar XP-ul l-am câștigat acum.
   const [doneBefore] = useState(alreadyDone);
+  /** Pașii rezolvați în sesiunea asta; la o mini-lecție deja făcută, toți se consideră rezolvați. */
+  const [solvedSteps, setSolvedSteps] = useState<Set<number>>(() => new Set());
   const [finished, setFinished] = useState(false);
   const step = lesson.steps[index];
   const last = index === lesson.steps.length - 1;
-  const markCompleted = useCallback(() => setCompleted(true), []);
+  const completed = doneBefore || solvedSteps.has(index);
+  const continueCoach = useCoachMark("continue");
+
+  const markCompleted = useCallback(
+    () => setSolvedSteps((prev) => (prev.has(index) ? prev : new Set(prev).add(index))),
+    [index],
+  );
+
+  /** Poți sări la un pas deja rezolvat sau la primul nerezolvat de după el. */
+  const canOpen = (i: number) => doneBefore || i === 0 || solvedSteps.has(i) || solvedSteps.has(i - 1);
+
+  const goTo = (i: number) => {
+    setFinished(false);
+    setIndex(i);
+  };
 
   const next = () => {
+    if (continueCoach.active) continueCoach.done();
     if (last) {
       onFinish();
       setFinished(true);
       return;
     }
     setIndex(index + 1);
-    setCompleted(false);
   };
 
   return (
@@ -66,11 +83,18 @@ export default function MiniLessonPlayer({
           </span>
           <ol className="circuit-lesson-dots" aria-label={`Pasul ${index + 1} din ${lesson.steps.length}`}>
             {lesson.steps.map((s, i) => (
-              <li
-                key={s.id}
-                className={i < index || finished ? "done" : i === index ? "current" : ""}
-                aria-hidden="true"
-              />
+              <li key={s.id}>
+                <button
+                  type="button"
+                  className={
+                    i === index && !finished ? "current" : doneBefore || solvedSteps.has(i) || finished ? "done" : ""
+                  }
+                  disabled={!canOpen(i) || (i === index && !finished)}
+                  aria-label={`Pasul ${i + 1}`}
+                  aria-current={i === index && !finished ? "step" : undefined}
+                  onClick={() => goTo(i)}
+                />
+              </li>
             ))}
           </ol>
         </header>
@@ -87,7 +111,7 @@ export default function MiniLessonPlayer({
             footer={
               <button
                 type="button"
-                className="circuit-lesson-next"
+                className={`circuit-lesson-next${completed && continueCoach.active ? " circuit-coach" : ""}`}
                 disabled={!completed}
                 onClick={next}
               >
@@ -120,7 +144,7 @@ function LessonEnd({
         {alreadyDone ? "Ai primit deja XP-ul pentru asta." : `+${XP_BY_DIFFICULTY[lesson.difficulty]} XP`}
       </p>
       <p className="circuit-lesson-end-summary">
-        <strong>Ce ai învățat:</strong> {lesson.summary}
+        <strong>Ce ai învățat:</strong> <RichInline text={lesson.summary} />
       </p>
       <div className="circuit-lesson-end-actions">
         <button type="button" className="circuit-help-back" onClick={onExit}>
@@ -177,16 +201,6 @@ function StepView({ step, metadata, completed, onCompleted, footer }: StepViewPr
   }
 }
 
-function Paragraphs({ text }: { text: string }) {
-  return (
-    <>
-      {text.split("\n\n").map((p, i) => (
-        <p key={i}>{p}</p>
-      ))}
-    </>
-  );
-}
-
 function ConceptView({
   step,
   metadata,
@@ -200,7 +214,7 @@ function ConceptView({
     <>
       <section className={`circuit-lesson-text ${board ? "" : "circuit-lesson-text--full"}`}>
         {step.title && <h3>{step.title}</h3>}
-        <Paragraphs text={step.text} />
+        <RichText text={step.text} />
       </section>
       {board && (
         <CircuitEditor metadata={metadata} initial={board} inventory={[]} editing={false} permissions={VIEW_ONLY} />
@@ -220,6 +234,7 @@ function PredictView({
   footer,
 }: Omit<StepViewProps, "step" | "completed"> & { step: PredictStep }) {
   const [chosen, setChosen] = useState<number | null>(null);
+  const optionsCoach = useCoachMark("predict-options");
   const revealed = chosen !== null;
   const board = useMemo(() => boardToCircuit(step.board, revealed ? { switchesOn: true } : {}), [step.board, revealed]);
   const correct = chosen !== null && step.options[chosen].correct === true;
@@ -228,7 +243,9 @@ function PredictView({
     <>
       <section className="circuit-lesson-text">
         <p className="circuit-lesson-kind">🤔 Ce crezi?</p>
-        <h3>{step.question}</h3>
+        <h3>
+          <RichInline text={step.question} />
+        </h3>
         <div className="circuit-lesson-options" role="group" aria-label="Variante">
           {step.options.map((o, i) => (
             <button
@@ -236,6 +253,7 @@ function PredictView({
               type="button"
               className={[
                 "circuit-lesson-option",
+                !revealed && optionsCoach.active ? "circuit-coach" : "",
                 revealed && o.correct ? "correct" : "",
                 revealed && i === chosen && !o.correct ? "wrong" : "",
               ]
@@ -245,17 +263,18 @@ function PredictView({
               aria-pressed={i === chosen}
               onClick={() => {
                 setChosen(i);
+                if (optionsCoach.active) optionsCoach.done();
                 onCompleted();
               }}
             >
-              {o.text}
+              <RichInline text={o.text} />
             </button>
           ))}
         </div>
         {revealed && (
           <p className={`circuit-lesson-feedback ${correct ? "ok" : "no"}`} role="status">
             {correct ? "Exact! " : "Nu chiar. "}
-            {step.explain_after}
+            <RichInline text={step.explain_after} />
           </p>
         )}
         {!revealed && <p className="circuit-lesson-note">Alege o variantă și vezi ce se întâmplă.</p>}
@@ -285,6 +304,8 @@ function TaskView({
   footer,
 }: Omit<StepViewProps, "step"> & { step: TryStep | BuildStep }) {
   const [attempt, setAttempt] = useState(0);
+  const inventoryCoach = useCoachMark("inventory");
+  const [placedFromInventory, setPlacedFromInventory] = useState(false);
   const [hintsShown, setHintsShown] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -307,9 +328,13 @@ function TaskView({
         sim,
         resimulate: (n) => simulateCircuit(n, edges, metadata),
       });
+      if (!placedFromInventory && nodes.length > board.nodes.length) {
+        setPlacedFromInventory(true);
+        if (inventoryCoach.active) inventoryCoach.done();
+      }
       if (won) onCompleted();
     },
-    [completed, step.win, metadata, onCompleted],
+    [completed, step.win, metadata, onCompleted, placedFromInventory, board.nodes.length, inventoryCoach],
   );
 
   const hints = isTry ? [] : (step as BuildStep).hints;
@@ -321,16 +346,22 @@ function TaskView({
     <>
       <section className="circuit-lesson-text">
         <p className="circuit-lesson-kind">{kindLabel}</p>
-        {story && <p className="circuit-lesson-story">{story}</p>}
-        <h3>{step.goal}</h3>
+        {story && (
+          <p className="circuit-lesson-story">
+            <RichInline text={story} />
+          </p>
+        )}
+        <h3>
+          <RichInline text={step.goal} />
+        </h3>
         {hints.slice(0, hintsShown).map((h, i) => (
           <p key={i} className="circuit-challenge-hint">
-            💡 {h}
+            💡 <RichInline text={h} />
           </p>
         ))}
         {completed && (
           <p className="circuit-lesson-feedback ok" role="status">
-            ✓ {step.explain_after}
+            ✓ <RichInline text={step.explain_after} />
           </p>
         )}
       </section>
@@ -346,6 +377,7 @@ function TaskView({
         pinnedNodeIds={board.pinnedNodeIds}
         lockedEdgeIds={board.lockedEdgeIds}
         onChange={handleChange}
+        coachInventory={inventoryCoach.active && !placedFromInventory && inventory.length > 0}
       />
 
       <footer className="circuit-lesson-bar">
@@ -371,7 +403,7 @@ function TaskView({
 
       {helpOpen && (
         <CircuitHelpDialog
-          title={step.goal}
+          title={plainRichText(step.goal)}
           solution={(step as BuildStep).solution}
           metadata={metadata}
           onClose={() => setHelpOpen(false)}

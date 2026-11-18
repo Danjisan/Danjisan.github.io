@@ -67,6 +67,8 @@ interface CircuitEditorProps {
   pinnedNodeIds?: Set<string>;
   lockedEdgeIds?: Set<string>;
   hints?: WorkbenchHint[];
+  /** Piesele din inventar pulsează (ghidare: „de aici iei piesa”) */
+  coachInventory?: boolean;
   /** Simularea oprită (ex. la „prezice”, înainte de „Pornește”) */
   paused?: boolean;
   onChange?: (state: CircuitEditorState) => void;
@@ -88,6 +90,7 @@ export default function CircuitEditor({
   pinnedNodeIds,
   lockedEdgeIds,
   hints = [],
+  coachInventory = false,
   paused = false,
   onChange,
   renderToolbar,
@@ -302,6 +305,7 @@ export default function CircuitEditor({
             selected={selectedPartId}
             nodes={nodes}
             canPlacePart={canPlace}
+            coachPartIds={coachInventory ? new Set(inventory.map((s) => s.partId)) : undefined}
             compact
             collapsed={inventoryCollapsed}
             onToggleCollapse={() => setInventoryCollapsed((c) => !c)}

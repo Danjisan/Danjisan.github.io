@@ -5,6 +5,7 @@ import { parseCircuitMetadata } from "../../parseMetadata";
 import { boardProblems, boardToCircuit } from "../board";
 import { simulateCircuit } from "../simulateCircuit";
 import { checkWin } from "../winConditions";
+import { unknownRichTokens } from "../../components/RichText";
 
 const { metadata } = parseCircuitMetadata({});
 const simMeta = { models: metadata.models, simulation: metadata.simulation };
@@ -100,3 +101,25 @@ for (const chapter of Object.values(CIRCUIT_CHAPTERS)) {
     }
   });
 }
+
+describe("marcajele din texte ({+}, {battery-9v}…) trimit spre ceva care există", () => {
+  const texts: string[] = [];
+  for (const chapter of Object.values(CIRCUIT_CHAPTERS)) {
+    texts.push(chapter.intro);
+    for (const lesson of chapter.lessons) {
+      texts.push(lesson.summary);
+      for (const step of lesson.steps) {
+        for (const value of Object.values(step)) {
+          if (typeof value === "string") texts.push(value);
+          if (Array.isArray(value)) for (const v of value) {
+            if (typeof v === "string") texts.push(v);
+            else if (v && typeof v === "object" && "text" in v) texts.push(String(v.text));
+          }
+        }
+      }
+    }
+  }
+  it("toate marcajele sunt cunoscute", () => {
+    expect(texts.flatMap((t) => unknownRichTokens(t))).toEqual([]);
+  });
+});

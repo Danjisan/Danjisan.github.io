@@ -49,20 +49,20 @@ export const CHAPTER_01: Chapter = {
       id: "c1-bateria",
       title: "Ce face bateria",
       difficulty: 1,
-      summary: "Electronii au nevoie de un drum complet, de la − la +, ca să curgă: un circuit închis.",
+      summary: "Electronii au nevoie de un drum complet, de la {-} la {+}, ca să curgă: un circuit închis.",
       steps: [
         {
           kind: "concept",
           id: "c1-bateria-concept",
           title: "Bateria împinge electronii",
           text:
-            "Bateria are două borne: + și −. Ea împinge electronii, niște particule foarte mici din fire: pleacă din borna −, trec prin fire și prin piese și ajung la borna +. Ca să curgă, au nevoie de un drum complet, fără întreruperi.\n\nLa școală vei auzi că „sensul curentului” e de la + la −. E o convenție stabilită înainte să se știe de electroni. Aici vezi chiar electronii, deci îi vei vedea mergând de la − la +.",
+            "{battery-9v} Bateria are două borne: {+} și {-}. Ea împinge electronii, niște particule foarte mici din fire: pleacă din borna {-}, trec prin fire și prin piese și ajung la borna {+}. Ca să curgă, au nevoie de un drum complet, fără întreruperi.\n\nLa școală vei auzi că „sensul curentului” e de la {+} la {-}. E o convenție stabilită înainte să se știe de electroni. Aici vezi chiar electronii, deci îi vei vedea mergând de la {-} la {+}.",
           board: noSwitchFull,
         },
         {
           kind: "predict",
           id: "c1-bateria-predict",
-          question: "Lipsește firul dintre LED și baterie. Se aprinde LED-ul?",
+          question: "Lipsește firul dintre {led-red} LED și baterie. Se aprinde LED-ul?",
           board: noSwitchMissingLast,
           options: [
             { text: "Da, bateria e legată la rezistor și la LED." },
@@ -74,7 +74,7 @@ export const CHAPTER_01: Chapter = {
         {
           kind: "try",
           id: "c1-bateria-try",
-          goal: "Leagă firul care lipsește: de la − al LED-ului la − al bateriei. Atinge un terminal, apoi pe celălalt.",
+          goal: "Leagă firul care lipsește: de la {-} al LED-ului la {-} al bateriei. Atinge o bornă, apoi pe cealaltă.",
           board: { ...noSwitchMissingLast, lockedWires: true },
           allow: ["add_wire"],
           win: [{ is: "led_on" }],
@@ -104,7 +104,7 @@ export const CHAPTER_01: Chapter = {
         {
           kind: "predict",
           id: "c1-deschis-predict",
-          question: "Acum lipsește firul dintre rezistor și LED, nu cel de lângă baterie. Ce face LED-ul?",
+          question: "Acum lipsește firul dintre {resistor-220} rezistor și LED, nu cel de lângă baterie. Ce face LED-ul?",
           board: { ...noSwitchFull, wires: withoutWire(NO_SWITCH_WIRES, 1) },
           options: [
             { text: "Rămâne aprins, pentru că e încă legat la baterie." },
@@ -144,7 +144,7 @@ export const CHAPTER_01: Chapter = {
           id: "c1-intrerupator-concept",
           title: "Un fir care se deschide",
           text:
-            "Întrerupătorul e ca un fir pe care îl poți deschide și închide. Deschis, rupe drumul: circuit deschis. Închis, îl reface: circuit închis. Așa aprinzi lumina fără să scoți fire.",
+            "{switch} Întrerupătorul e ca un fir pe care îl poți deschide și închide. Deschis, rupe drumul: circuit deschis. Închis, îl reface: circuit închis. Așa aprinzi lumina fără să scoți fire.\n\nAtenție la cuvinte: acasă spui „deschid lumina” când o aprinzi. În fizică e invers: întrerupătorul deschis înseamnă drum întrerupt, deci lumina e stinsă.",
         },
         {
           kind: "try",
@@ -159,7 +159,7 @@ export const CHAPTER_01: Chapter = {
         {
           kind: "build",
           id: "c1-intrerupator-build",
-          goal: "Pune întrerupătorul între + al bateriei și rezistor, apoi închide-l.",
+          goal: "Pune întrerupătorul între {+} al bateriei și rezistor, apoi închide-l.",
           board: {
             parts: [BAT, RES, LED],
             wires: [
@@ -172,7 +172,7 @@ export const CHAPTER_01: Chapter = {
           win: [{ is: "switch_controls" }, { is: "led_on" }],
           hints: [
             "Trage întrerupătorul din inventar pe masă.",
-            "Leagă + al bateriei la A de la întrerupător, apoi B de la întrerupător la rezistor.",
+            "Leagă {+} al bateriei la {A} de la întrerupător, apoi {B} de la întrerupător la rezistor.",
           ],
           explain_after: "Întrerupătorul e acum pe singurul drum al electronilor, deci îl comandă complet.",
           solution: seriesOn,
@@ -228,14 +228,18 @@ export const CHAPTER_01: Chapter = {
       id: "c1-led-sens",
       title: "LED-ul are sens",
       difficulty: 2,
-      summary: "LED-ul lasă curentul să treacă într-un singur sens: + spre + al bateriei, − spre −.",
+      summary: "LED-ul lasă curentul să treacă într-un singur sens: {+} spre {+} al bateriei, {-} spre {-}.",
       steps: [
         {
           kind: "concept",
           id: "c1-led-concept",
           title: "Piciorul lung e +",
           text:
-            "LED-ul e o diodă care luminează. O diodă lasă curentul să treacă doar într-un sens. Piciorul mai lung al LED-ului e + și trebuie să ajungă (prin restul circuitului) la + al bateriei; piciorul scurt e − și merge spre −. Pus invers, LED-ul nu se aprinde.",
+            "{led-red} LED-ul e o diodă care luminează. O diodă lasă curentul să treacă doar într-un sens. Piciorul mai lung al LED-ului e {+} și trebuie să ajungă (prin restul circuitului) la {+} al bateriei; piciorul scurt e {-} și merge spre {-}. Pus invers, LED-ul nu se aprinde.",
+          board: {
+            parts: [{ id: "led", part: "led-red", x: 0.5, y: 0.45, locked: true, state: { layout: "legs" } }],
+            wires: [],
+          },
         },
         {
           kind: "predict",
@@ -275,8 +279,8 @@ export const CHAPTER_01: Chapter = {
           inventory: [],
           win: [{ is: "led_on" }],
           hints: [
-            "Uită-te la semnele de pe terminalele LED-ului: + și −.",
-            "+ al LED-ului trebuie legat spre rezistor (deci spre + al bateriei), iar − al LED-ului la − al bateriei.",
+            "Uită-te la semnele de pe bornele LED-ului: {+} și {-}.",
+            "{+} al LED-ului trebuie legat spre rezistor (deci spre {+} al bateriei), iar {-} al LED-ului la {-} al bateriei. Apoi poți roti LED-ul cu ⟳ ca să arate ordonat.",
           ],
           explain_after:
             "Pe LED-urile adevărate vezi sensul după picioare (cel lung e +) și după marginea teșită a capsulei, care e pe partea −.",
@@ -316,7 +320,7 @@ export const CHAPTER_01: Chapter = {
           id: "c1-rezistor-concept",
           title: "Rezistorul limitează curentul",
           text:
-            "Rezistorul se opune trecerii curentului. Pus pe același drum cu LED-ul, face ca prin tot circuitul să treacă mai puțin curent. De aceea electronii merg mai încet peste tot, nu doar prin rezistor.\n\nCu un rezistor de 220 Ω și o baterie de 9 V, prin LED trec cam 29 mA: destul ca să lumineze, prea puțin ca să se ardă.",
+            "{resistor-220} Rezistorul se opune trecerii curentului. Pus pe același drum cu LED-ul, face ca prin tot circuitul să treacă mai puțin curent. De aceea electronii merg mai încet peste tot, nu doar prin rezistor.\n\nCu un rezistor de 220 Ω și o baterie de 9 V, prin LED trec cam 29 mA: destul ca să lumineze, prea puțin ca să se ardă.",
           board: seriesOn,
         },
         {
@@ -335,7 +339,7 @@ export const CHAPTER_01: Chapter = {
           win: [{ is: "led_on" }, { is: "no_failure" }],
           hints: [
             "Trage rezistorul pe masă, între întrerupător și LED.",
-            "Leagă B de la întrerupător la rezistor, apoi rezistorul la + de la LED. Abia apoi închide întrerupătorul.",
+            "Leagă {B} de la întrerupător la rezistor, apoi rezistorul la {+} de la LED. Abia apoi închide întrerupătorul.",
           ],
           explain_after: "LED-ul luminează și nu se încălzește: rezistorul ține curentul în limite sigure.",
           solution: seriesOn,
@@ -364,7 +368,7 @@ export const CHAPTER_01: Chapter = {
           win: [{ is: "switch_controls" }, { is: "led_on" }, { is: "no_failure" }],
           hints: [
             "Toate piesele stau pe un singur drum, una după alta.",
-            "Baterie + → întrerupător → rezistor → + LED, apoi − LED → baterie −.",
+            "Baterie {+} → întrerupător → rezistor → {+} LED, apoi {-} LED → baterie {-}.",
           ],
           help: "show_solution",
           explain_after: "Asta e schema oricărei lanterne: sursă, întrerupător, rezistor de protecție și consumator.",
@@ -388,7 +392,7 @@ export const CHAPTER_01: Chapter = {
           win: [{ is: "led_on" }, { is: "no_failure" }],
           hints: [
             "Urmărește drumul de la bornă la bornă. Lipsește ceva între întrerupător și rezistor?",
-            "Și uită-te la LED: e + spre + și − spre −?",
+            "Și uită-te la LED: e {+} spre {+} și {-} spre {-}?",
           ],
           explain_after: "Ai găsit un fir lipsă și un LED întors — cele mai dese două greșeli la primele circuite.",
           solution: seriesOn,
