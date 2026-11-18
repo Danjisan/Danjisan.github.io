@@ -41,14 +41,17 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 
 ## Texte și ghidare în mini-lecții
 
+- Conceptele: 1–2 fraze în `text`; detaliile merg în `aside` (caseta „Știai că?”, închisă implicit). Pe telefon textul ocupă cel mult o treime din ecran.
+- Masa se încadrează singură (`logic/fitView.ts`) când ceva iese din ecran — la deschidere, la schimbarea mărimii și la piese / fire noi.
+
 - Textele din capitole pot conține marcaje: `{+}` `{-}` `{A}` `{B}` `{C}` `{W}` (bulinele bornelor, aceleași culori ca pe schemă) și `{battery-9v}`, `{led-red}`… (iconița piesei din catalog), puse la prima mențiune a unei piese. Le desenează `components/RichText.tsx`; un test verifică să nu existe marcaje necunoscute.
 - Indicațiile care pulsează („apasă aici”: variantele de la „prezice”, „Continuă”, piesa din inventar) apar doar primele 3 ori pe dispozitiv — `hooks/useCoachMark.ts`, clasa `.circuit-coach`.
 - Într-o mini-lecție deja terminată, bulinele pașilor de sus sunt butoane: elevul sare la orice pas.
 
 ## Scene „din viața reală”
 
-- O masă poate avea `scene: "flashlight" | "room" | "bike"`: fundal desenat de `components/CircuitScene.tsx` (în px, din aceleași coordonate 0..1 ca piesele), iar LED-urile aprinse aruncă un con de lumină în direcția în care sunt întoarse.
-- Pozițiile pieselor din scene trebuie să se potrivească cu desenul și să treacă `wireLayout.test.ts` (fără fire prin piese, totul în interiorul mesei, pe laptop și pe telefon). Cel mai simplu: o căutare automată a pozițiilor cu `wireLayoutProblems` din `logic/wireLayoutCheck.ts`.
+- O masă poate avea `scene: "flashlight" | "nightlamp" | "bike"`: fundal desenat de `components/CircuitScene.tsx` (în px, din aceleași coordonate 0..1 ca piesele), iar LED-urile aprinse aruncă un con de lumină în direcția în care sunt întoarse.
+- Pozițiile pieselor din scene trebuie să se potrivească cu desenul și să treacă `wireLayout.test.ts`: fără fire prin piese, fără fire încrucișate, totul în interiorul mesei, pe laptop și pe telefon. Doar o masă „stricată” poate avea `allowCrossings: true` (ex. LED legat invers: repararea chiar inversează firele). Cel mai simplu: o căutare automată a pozițiilor cu `wireLayoutProblems` din `logic/wireLayoutCheck.ts`.
 
 ## Piese și inventar
 

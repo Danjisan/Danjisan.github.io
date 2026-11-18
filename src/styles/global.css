@@ -6420,3 +6420,87 @@ body.circuit-is-dragging * {
   pointer-events: none;
   z-index: 0;
 }
+
+/* „Știai că?” — detalii pentru cine e curios, închise implicit */
+.circuit-lesson-aside {
+  margin: 0.25rem 0 0.4rem;
+  border-radius: 8px;
+  background: rgba(167, 139, 250, 0.08);
+  font-size: 0.88rem;
+}
+
+.circuit-lesson-aside summary {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  list-style: none;
+}
+
+.circuit-lesson-aside summary::-webkit-details-marker {
+  display: none;
+}
+
+.circuit-lesson-aside summary::after {
+  content: " ▾";
+}
+
+.circuit-lesson-aside[open] summary::after {
+  content: " ▴";
+}
+
+.circuit-lesson-aside p {
+  margin: 0;
+  padding: 0 0.6rem 0.5rem;
+  color: var(--text-muted);
+}
+
+/* Pe telefon, textul pasului ocupă cel mult o treime din ecran; masa are restul */
+@media (max-width: 640px) {
+  .circuit-lesson-text {
+    max-height: 33vh;
+    font-size: 0.9rem;
+  }
+}
+
+/* Piesa din inventar care trebuie trasă pe masă: chenar și fundal care pulsează
+   (umbra singură era tăiată de marginea listei și abia se vedea). */
+@keyframes circuit-coach-inventory {
+  from {
+    border-color: var(--border);
+    background-color: transparent;
+  }
+  to {
+    border-color: var(--accent);
+    background-color: rgba(167, 139, 250, 0.22);
+  }
+}
+
+.circuit-inventory-item.circuit-coach {
+  animation: circuit-coach-inventory 1.1s ease-in-out infinite alternate;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.circuit-inventory-list,
+.circuit-inventory-strip {
+  padding-top: 0.35rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-inventory-item.circuit-coach {
+    animation: none;
+    border-color: var(--accent);
+    background-color: rgba(167, 139, 250, 0.22);
+  }
+}
+
+/* Butonul × al firului selectat: deasupra pieselor */
+.circuit-wire-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9;
+}

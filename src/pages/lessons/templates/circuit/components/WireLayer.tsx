@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { electronFlowStyle } from "../logic/electronFlow";
 import { pointOnWire, wireCurve, wireLinePath, wirePathD, type Direction } from "../logic/wireGeometry";
-import { sideDirection, terminalPixelPosition, terminalPlacement } from "../logic/terminalPositions";
+import { approxHalfSize, sideDirection, terminalPixelPosition, terminalPlacement } from "../logic/terminalPositions";
 import {
   clientToViewportLocal,
   measureTerminalNorms,
@@ -118,7 +118,26 @@ export default function WireLayer({
 
   if (!ready) return null;
 
+  /** Primul punct de pe fir (de la mijloc spre capete) care nu e acoperit de o piesă. */
+  const freePointOnWire = (curve: Parameters<typeof pointOnWire>[0]) => {
+    const covered = (pt: { x: number; y: number }) =>
+      nodes.some((n) => {
+        const { halfW, halfH } = approxHalfSize(n);
+        const cx = n.position.x * width;
+        const cy = n.position.y * height;
+        return Math.abs(pt.x - cx) < halfW + 14 && Math.abs(pt.y - cy) < halfH + 14;
+      });
+    for (const t of [0.5, 0.4, 0.6, 0.3, 0.7, 0.2, 0.8, 0.12, 0.88]) {
+      const pt = pointOnWire(curve, t);
+      if (!covered(pt)) return pt;
+    }
+    return pointOnWire(curve, 0.5);
+  };
+  // Punctul butonului × (se află în bucla firelor de mai jos)
+  const remove: { at: { x: number; y: number } | null } = { at: null };
+
   return (
+    <>
     <svg
       className="circuit-wire-layer"
       viewBox={`0 0 ${width} ${height}`}
@@ -134,7 +153,7 @@ export default function WireLayer({
         const flow = electronFlowStyle(wireCurrents?.get(edge.id) ?? 0, danger);
         const selected = editable && selectedEdgeId === edge.id;
         const highlighted = highlightEdgeIds?.has(edge.id) ?? false;
-        const mid = pointOnWire(curve, 0.5);
+        if (selected) remove.at = freePointOnWire(curve);
         return (
           <g key={edge.id}>
             <path
@@ -161,21 +180,6 @@ export default function WireLayer({
                 }}
               />
             )}
-            {selected && onRemoveEdge && (
-              <g
-                className="circuit-wire-remove"
-                transform={`translate(${mid.x} ${mid.y})`}
-                role="button"
-                aria-label="Șterge firul"
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  onRemoveEdge(edge.id);
-                }}
-              >
-                <circle r="12" />
-                <path d="M-4.5 -4.5 L4.5 4.5 M4.5 -4.5 L-4.5 4.5" />
-              </g>
-            )}
           </g>
         );
       })}
@@ -192,6 +196,24 @@ export default function WireLayer({
         />
       )}
     </svg>
+    {selectedEdgeId && remove.at && onRemoveEdge && (
+      <svg className="circuit-wire-overlay" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+        <g
+          className="circuit-wire-remove"
+          transform={`translate(${remove.at.x} ${remove.at.y})`}
+          role="button"
+          aria-label="Șterge firul"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onRemoveEdge(selectedEdgeId);
+          }}
+        >
+          <circle r="13" />
+          <path d="M-4.5 -4.5 L4.5 4.5 M4.5 -4.5 L-4.5 4.5" />
+        </g>
+      </svg>
+    )}
+    </>
   );
 }
 

@@ -4,7 +4,7 @@ import { nodeRotation } from "../logic/terminalPositions";
 import type { CircuitNode } from "../types";
 
 /**
- * Fundalul unei scene „din viața reală” (lanternă, cameră, bicicletă), desenat în spatele firelor.
+ * Fundalul unei scene „din viața reală” (lanternă, lampă de veghe, bicicletă), desenat în spatele firelor.
  * Formele se calculează în pixeli din mărimea mesei, din aceleași coordonate 0..1 ca piesele,
  * deci piesele stau pe desen la fel pe laptop și pe telefon.
  *
@@ -46,7 +46,7 @@ export default function CircuitScene({ scene, nodes, ledOnIds }: CircuitScenePro
       {w > 0 && h > 0 && (
         <>
           {scene === "flashlight" && <Flashlight w={w} h={h} />}
-          {scene === "room" && <Room w={w} h={h} />}
+          {scene === "nightlamp" && <NightLamp w={w} h={h} />}
           {scene === "bike" && <Bike w={w} h={h} />}
           {litLeds.map((n) => (
             <Beam key={n.id} node={n} w={w} h={h} />
@@ -113,19 +113,21 @@ function Flashlight({ w, h }: { w: number; h: number }) {
   );
 }
 
-/** Cameră: tavan cu lampă (sus, la mijloc), întrerupător pe perete (dreapta), tablou electric (stânga-jos). */
-function Room({ w, h }: { w: number; h: number }) {
-  const lampX = 0.5 * w;
+/** Lampă de veghe pe baterii, pe noptieră: abajur sus (LED-ul), tija la mijloc, baza cu baterie și întrerupător. */
+function NightLamp({ w, h }: { w: number; h: number }) {
   return (
     <g>
-      <rect x={0} y={0} width={w} height={h} fill="#211a33" />
-      <rect x={0} y={0} width={w} height={0.06 * h} fill="#2e2647" />
-      <rect x={0} y={0.92 * h} width={w} height={0.08 * h} fill="#3a2c1c" />
-      <line x1={lampX} y1={0.06 * h} x2={lampX} y2={0.12 * h} stroke="#94a3b8" strokeWidth="3" />
-      <rect x={0.06 * w} y={0.56 * h} width={0.3 * w} height={0.34 * h} rx={8} fill="#1b2433" stroke="#475569" strokeWidth="2" strokeDasharray="6 4" />
-      <text x={0.07 * w} y={0.89 * h} fill="#64748b" fontSize="12">tablou electric</text>
-      <rect x={0.72 * w} y={0.3 * h} width={0.2 * w} height={0.46 * h} rx={10} fill="#e2e8f0" opacity="0.12" stroke="#94a3b8" strokeWidth="2" />
-      <text x={0.73 * w} y={0.28 * h} fill="#64748b" fontSize="12">pe perete</text>
+      <rect x={0} y={0} width={w} height={h} fill="#1c1730" />
+      <rect x={0.06 * w} y={0.9 * h} width={0.88 * w} height={0.1 * h} rx={6} fill="#4a3622" />
+      <polygon
+        points={`${0.39 * w},${0.04 * h} ${0.67 * w},${0.04 * h} ${0.78 * w},${0.34 * h} ${0.28 * w},${0.34 * h}`}
+        fill="#fde68a"
+        fillOpacity="0.06"
+        stroke="#a8a29e"
+        strokeWidth="2"
+      />
+      <rect x={0.565 * w} y={0.34 * h} width={0.05 * w} height={0.26 * h} fill="#334155" />
+      <rect x={0.12 * w} y={0.56 * h} width={0.8 * w} height={0.34 * h} rx={16} fill="#2b3445" stroke="#64748b" strokeWidth="2" />
     </g>
   );
 }

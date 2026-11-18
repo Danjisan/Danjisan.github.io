@@ -6,6 +6,7 @@ import { useWorkbenchDrag } from "../hooks/useWorkbenchDrag";
 import { useWorkbenchViewport } from "../hooks/useWorkbenchViewport";
 import { canPlacePart, getPart, modelForPart, partOfNode, type InventorySlot } from "../logic/parts";
 import { emptyResult } from "../logic/sim/netlist";
+import { contentBounds, fitViewport } from "../logic/fitView";
 import type { DcSimulationResult } from "../logic/sim/types";
 import { simulateCircuit } from "../logic/simulateCircuit";
 import type { WorkbenchViewport } from "../logic/viewportCoords";
@@ -208,6 +209,7 @@ export default function CircuitEditor({
 
   const {
     viewport,
+    setView,
     resetView,
     zoomIn,
     zoomOut,
@@ -228,6 +230,29 @@ export default function CircuitEditor({
       onNodeTap: handleSelectNode,
       onNodeLongPress: handleNodeLongPress,
     });
+
+  // Mărimea mesei (se știe abia după layout; pe tot ecranul se poate schimba după prima afișare).
+  const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const update = () =>
+      setBoardSize((prev) => (prev.w === el.clientWidth && prev.h === el.clientHeight ? prev : { w: el.clientWidth, h: el.clientHeight }));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Încadrare automată: la deschidere, la schimbarea mărimii mesei și când se schimbă numărul de
+  // piese / fire — dacă ceva iese din masă (ex. un fir curbat pe lângă margine), micșorăm ca să se vadă tot.
+  useEffect(() => {
+    const { w, h } = boardSize;
+    if (w <= 1 || h <= 1) return;
+    const fit = fitViewport(contentBounds(nodes, edges, w, h), w, h);
+    if (fit) setView(fit);
+    // Doar la schimbări de structură sau de mărime, nu la fiecare mutare de piesă.
+  }, [nodes.length, edges.length, boardSize, setView]);
 
   const ghostPart = paletteDragPartId ? getPart(paletteDragPartId) ?? null : null;
   const placementPreview =

@@ -20,7 +20,7 @@ export interface BoardPart {
 }
 
 /** Fundal „din viața reală” desenat sub piese (vezi components/CircuitScene.tsx). */
-export type SceneId = "flashlight" | "room" | "bike";
+export type SceneId = "flashlight" | "nightlamp" | "bike";
 
 export interface BoardSetup {
   /** Piesele stau pe un desen (lanternă, cameră…); LED-urile aprinse luminează */
@@ -30,6 +30,11 @@ export interface BoardSetup {
   wires: [string, string][];
   /** Firele de la început nu se pot șterge */
   lockedWires?: boolean;
+  /**
+   * Doar pentru mese „stricate” (ex. LED legat invers): firele au voie să se încrucișeze, fiindcă
+   * repararea chiar înseamnă inversarea lor. Masa reparată (soluția) trebuie să rămână curată.
+   */
+  allowCrossings?: boolean;
 }
 
 /** Ce are voie elevul să facă la un pas `try`. */
@@ -51,7 +56,10 @@ export interface ConceptStep {
   kind: "concept";
   id: string;
   title?: string;
+  /** Scurt: 1–2 fraze. Restul merge în `aside`. */
   text: string;
+  /** Casetă „Știai că?”, închisă implicit — detalii pentru cine e curios */
+  aside?: string;
   /** Circuit „viu” de privit (se simulează, nu se poate modifica) */
   board?: BoardSetup;
 }

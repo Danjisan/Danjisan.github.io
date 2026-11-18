@@ -215,6 +215,12 @@ function ConceptView({
       <section className={`circuit-lesson-text ${board ? "" : "circuit-lesson-text--full"}`}>
         {step.title && <h3>{step.title}</h3>}
         <RichText text={step.text} />
+        {step.aside && (
+          <details className="circuit-lesson-aside">
+            <summary>💡 Știai că?</summary>
+            <RichText text={step.aside} />
+          </details>
+        )}
       </section>
       {board && (
         <CircuitEditor

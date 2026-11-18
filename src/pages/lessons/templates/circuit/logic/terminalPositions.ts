@@ -126,8 +126,10 @@ export const APPROX_BODY = { halfW: 46, halfH: 38, terminalR: 13 };
 /** Jumătatea lățimii / înălțimii corpului (px, aproximativ), după tip și rotire. */
 export function approxHalfSize(node: CircuitNode): { halfW: number; halfH: number } {
   if (node.type === "wire_junction") return { halfW: 22, halfH: 22 };
+  // Corpul nu se îngustează când piesa e verticală (are lățime minimă + etichetă), doar se înalță:
+  // măsurat în browser ~82×123 px pentru întrerupător, ~72×105 px pentru LED.
   return isVertical(node)
-    ? { halfW: APPROX_BODY.halfH, halfH: APPROX_BODY.halfW }
+    ? { halfW: 42, halfH: 60 }
     : { halfW: APPROX_BODY.halfW, halfH: APPROX_BODY.halfH };
 }
 

@@ -9,7 +9,7 @@ import {
   terminalPlacement,
 } from "./terminalPositions";
 import { pointOnWire, wireCurve, type Point } from "./wireGeometry";
-import type { CircuitNode } from "../types";
+import type { CircuitEdge, CircuitNode } from "../types";
 
 /**
  * Verifică o masă desenată de noi: niciun fir nu trece printr-o piesă sau peste borna altei piese.
@@ -85,6 +85,64 @@ export function wireLayoutProblems(board: BoardSetup, width: number, height: num
       }
     }
   }
+  if (board.allowCrossings) return [...new Set(out)];
+
+  // Firele nu se încrucișează între ele (o încrucișare arată ca o legătură). Două fire care pleacă
+  // din aceeași bornă se ating firesc acolo, deci ignorăm capetele comune.
+  const polylines = edges.flatMap((e) => {
+    const a = byId.get(e.from.nodeId);
+    const b = byId.get(e.to.nodeId);
+    if (!a || !b) return [];
+    const pa = terminalPixelPosition(a, e.from.terminal, width, height)!;
+    const pb = terminalPixelPosition(b, e.to.terminal, width, height)!;
+    const curve = wireCurve(
+      pa,
+      sideDirection(terminalPlacement(a, e.from.terminal)!.side),
+      pb,
+      sideDirection(terminalPlacement(b, e.to.terminal)!.side),
+    );
+    const pts: Point[] = [];
+    for (let i = 0; i <= 40; i++) pts.push(pointOnWire(curve, i / 40));
+    return [{ e, pts, ends: [`${e.from.nodeId}:${e.from.terminal}`, `${e.to.nodeId}:${e.to.terminal}`] }];
+  });
+  const cross = (p1: Point, p2: Point, p3: Point, p4: Point) => {
+    const d = (a: Point, b: Point, c: Point) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    const d1 = d(p3, p4, p1);
+    const d2 = d(p3, p4, p2);
+    const d3 = d(p1, p2, p3);
+    const d4 = d(p1, p2, p4);
+    return d1 * d2 < 0 && d3 * d4 < 0;
+  };
+  for (let i = 0; i < polylines.length; i++) {
+    for (let j = i + 1; j < polylines.length; j++) {
+      const A = polylines[i];
+      const B = polylines[j];
+      const shared = A.ends.filter((x) => B.ends.includes(x));
+      const nearShared = (pt: Point) =>
+        shared.some((key) => {
+          const [nodeId, t] = [key.slice(0, key.lastIndexOf(":")), key.slice(key.lastIndexOf(":") + 1)];
+          const n = byId.get(nodeId)!;
+          const tp = terminalPixelPosition(n, t as never, width, height)!;
+          return Math.hypot(pt.x - tp.x, pt.y - tp.y) < 40;
+        });
+      let hit = false;
+      for (let a = 0; a < A.pts.length - 1 && !hit; a++) {
+        if (nearShared(A.pts[a])) continue;
+        for (let b = 0; b < B.pts.length - 1; b++) {
+          if (nearShared(B.pts[b])) continue;
+          if (cross(A.pts[a], A.pts[a + 1], B.pts[b], B.pts[b + 1])) {
+            hit = true;
+            break;
+          }
+        }
+      }
+      if (hit) {
+        const name = (e: CircuitEdge) => `${e.from.nodeId}:${e.from.terminal}–${e.to.nodeId}:${e.to.terminal}`;
+        out.push(`${name(A.e)} se încrucișează cu ${name(B.e)}`);
+      }
+    }
+  }
+
   return [...new Set(out)];
 }
 

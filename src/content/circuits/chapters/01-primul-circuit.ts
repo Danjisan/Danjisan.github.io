@@ -41,17 +41,22 @@ const seriesOn: BoardSetup = { parts: [BAT, SW_ON, RES, LED], wires: SERIES_WIRE
 
 /* ── Scene din viața reală ──────────────────────────────────────────────
  * Fundalul e desenat de components/CircuitScene.tsx; pozițiile de aici se potrivesc cu desenul
- * și trec testul de fire (wireLayout.test.ts) pe laptop și pe telefon. LED-ul are picioarele
- * pe o parte (layout "legs") și e întors spre unde trebuie să lumineze.
+ * și trec testul de așezare (wireLayout.test.ts) pe laptop și pe telefon: fără fire prin piese,
+ * fără fire încrucișate, totul în interiorul mesei. Au fost găsite cu o căutare automată.
+ *
+ * LED-ul are picioarele pe o parte (layout "legs"), − sus și + jos, întors spre unde luminează.
+ * De aceea bateria stă deasupra, rezistorul dedesubt, iar întrerupătorul în spate.
+ *
+ * Piesele sunt „fixate”: nu se mută și nu se șterg, dar elevul le poate roti.
  */
 const legs = (rotation: number) => ({ layout: "legs", rotation });
 
-/** Lanterna lui Andrei: lipsește firul dintre rezistor și LED. Întrerupătorul (butonul de sus) e pornit. */
+/** Lanterna lui Andrei: lipsește firul dintre rezistor și LED. Butonul din capac e pornit. */
 const ANDREI_PARTS: BoardPart[] = [
-  { id: "bat", part: "battery-9v", x: 0.25, y: 0.44, locked: true, state: { rotation: 180 } },
-  { id: "sw", part: "switch", x: 0.52, y: 0.23, locked: true, state: { on: true } },
-  { id: "res", part: "resistor-220", x: 0.49, y: 0.7, locked: true, state: { rotation: 180 } },
-  { id: "led", part: "led-red", x: 0.8, y: 0.48, locked: true, state: legs(90) },
+  { id: "bat", part: "battery-9v", x: 0.47, y: 0.37, locked: "pinned", state: { rotation: 180 } },
+  { id: "sw", part: "switch", x: 0.12, y: 0.49, locked: "pinned", state: { on: true, rotation: 90 } },
+  { id: "res", part: "resistor-220", x: 0.46, y: 0.67, locked: "pinned", state: { rotation: 180 } },
+  { id: "led", part: "led-red", x: 0.78, y: 0.47, locked: "pinned", state: legs(90) },
 ];
 const andreiFull: BoardSetup = {
   scene: "flashlight",
@@ -64,12 +69,12 @@ const andreiFull: BoardSetup = {
   ],
 };
 
-/** Camera Anei: lampa în tavan, întrerupătorul pe perete, sursa în tablou; un fir ocolește întrerupătorul. */
+/** Lampa de veghe a Anei, pe baterii: un fir ocolește întrerupătorul, așa că lampa stă mereu aprinsă. */
 const ANA_PARTS: BoardPart[] = [
-  { id: "bat", part: "battery-9v", x: 0.18, y: 0.75, locked: true, state: { rotation: 90 } },
-  { id: "sw", part: "switch", x: 0.82, y: 0.52, locked: true, state: { on: false, rotation: 270 } },
-  { id: "res", part: "resistor-220", x: 0.44, y: 0.49, locked: true },
-  { id: "led", part: "led-red", x: 0.5, y: 0.24, locked: true, state: legs(180) },
+  { id: "bat", part: "battery-9v", x: 0.28, y: 0.7, locked: "pinned", state: { rotation: 90 } },
+  { id: "sw", part: "switch", x: 0.77, y: 0.72, locked: "pinned", state: { on: false, rotation: 270 } },
+  { id: "res", part: "resistor-220", x: 0.59, y: 0.46, locked: "pinned", state: { rotation: 90 } },
+  { id: "led", part: "led-red", x: 0.53, y: 0.18, locked: "pinned", state: legs(0) },
 ];
 const ANA_WIRES: [string, string][] = [
   ["bat:+", "sw:a"],
@@ -78,20 +83,20 @@ const ANA_WIRES: [string, string][] = [
   ["led:-", "bat:-"],
 ];
 
-/** Bicicleta lui Mihai: farul în fața ghidonului, LED-ul legat invers. */
+/** Bicicleta lui Mihai: farul în față, LED-ul legat invers. */
 const MIHAI_PARTS: BoardPart[] = [
-  { id: "bat", part: "battery-9v", x: 0.59, y: 0.65, locked: true, state: { rotation: 90 } },
-  { id: "sw", part: "switch", x: 0.57, y: 0.13, locked: true, state: { on: true } },
-  { id: "res", part: "resistor-220", x: 0.14, y: 0.41, locked: true, state: { rotation: 90 } },
-  { id: "led", part: "led-red", x: 0.88, y: 0.34, locked: true, state: legs(90) },
+  { id: "bat", part: "battery-9v", x: 0.42, y: 0.29, locked: "pinned", state: { rotation: 270 } },
+  { id: "sw", part: "switch", x: 0.17, y: 0.43, locked: "pinned", state: { on: true, rotation: 90 } },
+  { id: "res", part: "resistor-220", x: 0.4, y: 0.74, locked: "pinned", state: { rotation: 180 } },
+  { id: "led", part: "led-red", x: 0.87, y: 0.38, locked: "pinned", state: legs(90) },
 ];
 
 /** Lanterna lui Radu: lipsește firul întrerupător → rezistor, iar LED-ul e legat invers. */
 const RADU_PARTS: BoardPart[] = [
-  { id: "bat", part: "battery-9v", x: 0.2, y: 0.49, locked: true, state: { rotation: 180 } },
-  { id: "sw", part: "switch", x: 0.43, y: 0.27, locked: true, state: { on: true } },
-  { id: "res", part: "resistor-220", x: 0.44, y: 0.7, locked: true, state: { rotation: 180 } },
-  { id: "led", part: "led-red", x: 0.81, y: 0.48, locked: true, state: legs(90) },
+  { id: "bat", part: "battery-9v", x: 0.45, y: 0.3, locked: "pinned", state: { rotation: 180 } },
+  { id: "sw", part: "switch", x: 0.14, y: 0.45, locked: "pinned", state: { on: true, rotation: 90 } },
+  { id: "res", part: "resistor-220", x: 0.43, y: 0.65, locked: "pinned" },
+  { id: "led", part: "led-red", x: 0.82, y: 0.5, locked: "pinned", state: legs(90) },
 ];
 
 export const CHAPTER_01: Chapter = {
@@ -111,7 +116,9 @@ export const CHAPTER_01: Chapter = {
           id: "c1-bateria-concept",
           title: "Bateria împinge electronii",
           text:
-            "{battery-9v} Bateria are două borne: {+} și {-}. Ea împinge electronii, niște particule foarte mici din fire: pleacă din borna {-}, trec prin fire și prin piese și ajung la borna {+}. Ca să curgă, au nevoie de un drum complet, fără întreruperi.\n\nLa școală vei auzi că „sensul curentului” e de la {+} la {-}. E o convenție stabilită înainte să se știe de electroni. Aici vezi chiar electronii, deci îi vei vedea mergând de la {-} la {+}.",
+            "{battery-9v} Bateria împinge electronii prin fire: pleacă din borna {-} și se întorc în borna {+}. Curg doar dacă drumul e complet.",
+          aside:
+            "La școală vei auzi că „sensul curentului” e de la + la −. E o regulă stabilită înainte să se știe de electroni. Aici vezi chiar electronii, care merg invers: de la − la +.",
           board: noSwitchFull,
         },
         {
@@ -172,7 +179,7 @@ export const CHAPTER_01: Chapter = {
         {
           kind: "fix",
           id: "c1-deschis-fix",
-          story: "🔦 Lanterna lui Andrei nu se aprinde. Toate piesele sunt la locul lor și butonul e pornit, dar ceva nu e în regulă.",
+          story: "🔦 Lanterna lui Andrei nu se aprinde. Toate piesele sunt la locul lor și butonul din capac e pornit, dar ceva nu e în regulă.",
           goal: "Fă lanterna să se aprindă.",
           board: { ...andreiFull, wires: withoutWire(andreiFull.wires, 2), lockedWires: true },
           inventory: [],
@@ -192,14 +199,16 @@ export const CHAPTER_01: Chapter = {
       id: "c1-intrerupator",
       title: "Întrerupătorul",
       difficulty: 1,
-      summary: "Întrerupătorul deschide și închide drumul. Dacă un fir îl ocolește, nu mai comandă nimic.",
+      summary: "Întrerupătorul deschide și închide drumul. Dacă un fir îl ocolește, întrerupătorul nu mai are niciun efect.",
       steps: [
         {
           kind: "concept",
           id: "c1-intrerupator-concept",
           title: "Un fir care se deschide",
           text:
-            "{switch} Întrerupătorul e ca un fir pe care îl poți deschide și închide. Deschis, rupe drumul: circuit deschis. Închis, îl reface: circuit închis. Așa aprinzi lumina fără să scoți fire.\n\nAtenție la cuvinte: acasă spui „deschid lumina” când o aprinzi. În fizică e invers: întrerupătorul deschis înseamnă drum întrerupt, deci lumina e stinsă.",
+            "{switch} Întrerupătorul e un fir care se poate deschide. Deschis, rupe drumul și lumina se stinge. Închis, reface drumul și lumina se aprinde.",
+          aside:
+            "Atenție la cuvinte: acasă spui „deschid lumina” când o aprinzi. În fizică e invers: întrerupătorul deschis înseamnă drum întrerupt, deci lumina e stinsă.",
         },
         {
           kind: "try",
@@ -229,17 +238,17 @@ export const CHAPTER_01: Chapter = {
             "Trage întrerupătorul din inventar pe masă.",
             "Leagă {+} al bateriei la {A} de la întrerupător, apoi {B} de la întrerupător la rezistor.",
           ],
-          explain_after: "Întrerupătorul e acum pe singurul drum al electronilor, deci îl comandă complet.",
+          explain_after: "Acum întrerupătorul e pe drumul electronilor: când îl deschizi, curentul se oprește în tot circuitul și LED-ul se stinge.",
           solution: seriesOn,
         },
         {
           kind: "fix",
           id: "c1-intrerupator-fix",
           story:
-            "💡 Ana a montat un întrerupător pentru lumina din cameră. Doar că lumina stă mereu aprinsă, orice ar face cu întrerupătorul.",
+            "💡 Lampa de veghe a Anei, pe baterii, stă mereu aprinsă, orice ar face cu întrerupătorul. Bateriile se termină peste noapte!",
           goal: "Fă în așa fel încât întrerupătorul să aprindă și să stingă LED-ul.",
           board: {
-            scene: "room",
+            scene: "nightlamp",
             parts: ANA_PARTS,
             wires: [...ANA_WIRES, ["bat:+", "res:b"]],
           },
@@ -250,8 +259,8 @@ export const CHAPTER_01: Chapter = {
             "Un fir merge direct de la {+} al bateriei la rezistor, pe lângă întrerupător. Scoate-l.",
           ],
           explain_after:
-            "Firul acela făcea un drum ocolitor: curentul trecea pe lângă întrerupător. La instalațiile adevărate, așa ceva se repară doar de electrician, cu curentul oprit!",
-          solution: { scene: "room", parts: ANA_PARTS, wires: ANA_WIRES },
+            "Firul acela făcea un drum ocolitor: curentul trecea pe lângă întrerupător, deci întrerupătorul nu mai putea opri nimic.",
+          solution: { scene: "nightlamp", parts: ANA_PARTS, wires: ANA_WIRES },
         },
       ],
     },
@@ -267,7 +276,9 @@ export const CHAPTER_01: Chapter = {
           id: "c1-led-concept",
           title: "Piciorul lung e +",
           text:
-            "{led-red} LED-ul e o diodă care luminează. O diodă lasă curentul să treacă doar într-un sens. Piciorul mai lung al LED-ului e {+} și trebuie să ajungă (prin restul circuitului) la {+} al bateriei; piciorul scurt e {-} și merge spre {-}. Pus invers, LED-ul nu se aprinde.",
+            "{led-red} LED-ul lasă curentul să treacă într-un singur sens. Piciorul lung e {+} și merge spre + al bateriei. Pus invers, nu se aprinde.",
+          aside:
+            "LED vine de la „diodă luminoasă”. O diodă e ca o ușă care se deschide într-o singură direcție. Piciorul scurt al LED-ului e −, iar capsula are o margine teșită pe partea aceea.",
           board: {
             parts: [{ id: "led", part: "led-red", x: 0.5, y: 0.45, locked: true, state: { layout: "legs" } }],
             wires: [],
@@ -308,6 +319,7 @@ export const CHAPTER_01: Chapter = {
               ["res:a", "led:-"],
               ["led:+", "bat:-"],
             ],
+            allowCrossings: true,
           },
           inventory: [],
           win: [{ is: "led_on" }],
@@ -353,7 +365,9 @@ export const CHAPTER_01: Chapter = {
           id: "c1-rezistor-concept",
           title: "Rezistorul limitează curentul",
           text:
-            "{resistor-220} Rezistorul se opune trecerii curentului. Pus pe același drum cu LED-ul, face ca prin tot circuitul să treacă mai puțin curent. De aceea electronii merg mai încet peste tot, nu doar prin rezistor.\n\nCu un rezistor de 220 Ω și o baterie de 9 V, prin LED trec cam 29 mA: destul ca să lumineze, prea puțin ca să se ardă.",
+            "{resistor-220} Rezistorul frânează curentul. Pus pe același drum cu LED-ul, face ca prin tot circuitul să treacă mai puțin curent, așa că LED-ul nu se mai arde.",
+          aside:
+            "Cu un rezistor de 220 Ω și o baterie de 9 V, prin LED trec cam 29 mA (miliamperi): destul ca să lumineze, prea puțin ca să se ardă. Electronii merg mai încet în tot circuitul, nu doar prin rezistor.",
           board: seriesOn,
         },
         {
@@ -418,9 +432,10 @@ export const CHAPTER_01: Chapter = {
             parts: RADU_PARTS,
             wires: [
               ["bat:+", "sw:a"],
-              ["res:a", "led:-"],
+              ["res:b", "led:-"],
               ["led:+", "bat:-"],
             ],
+            allowCrossings: true,
           },
           inventory: [],
           win: [{ is: "led_on" }, { is: "no_failure" }],
@@ -429,7 +444,16 @@ export const CHAPTER_01: Chapter = {
             "Și uită-te la LED: e {+} spre {+} și {-} spre {-}?",
           ],
           explain_after: "Ai găsit un fir lipsă și un LED întors — cele mai dese două greșeli la primele circuite.",
-          solution: { scene: "flashlight", parts: RADU_PARTS, wires: SERIES_WIRES },
+          solution: {
+            scene: "flashlight",
+            parts: RADU_PARTS,
+            wires: [
+              ["bat:+", "sw:a"],
+              ["sw:b", "res:a"],
+              ["res:b", "led:+"],
+              ["led:-", "bat:-"],
+            ],
+          },
         },
       ],
     },

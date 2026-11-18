@@ -203,6 +203,8 @@ export function useWorkbenchViewport({ surfaceRef, panLocked = false }: UseWorkb
 
   return {
     viewport,
+    /** Setează direct vederea (ex. încadrare automată) */
+    setView: setViewport,
     resetView,
     zoomIn,
     zoomOut,

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CircuitSolution } from "../../../../../content/circuits/solutions";
 import { buildHelpSteps, solutionPartNames } from "../logic/solutionSteps";
 import { simulateCircuit } from "../logic/simulateCircuit";
+import { contentBounds, fitViewport } from "../logic/fitView";
 import type { CircuitElectricMetadata } from "../types";
 import CircuitWorkbench from "./CircuitWorkbench";
 
@@ -12,11 +13,6 @@ interface CircuitHelpDialogProps {
   onClose: () => void;
 }
 
-/** Pe ecrane înguste piesele (de mărime fixă) se înghesuie: micșorăm tot desenul. */
-function helpViewport() {
-  const narrow = typeof window !== "undefined" && window.innerWidth < 560;
-  return { zoom: narrow ? 0.8 : 1, panX: 0, panY: 0 };
-}
 const NO_HINTS: never[] = [];
 const noop = () => {};
 
@@ -28,11 +24,23 @@ export default function CircuitHelpDialog({ title, solution, metadata, onClose }
   const steps = useMemo(() => buildHelpSteps(solution, metadata.models), [solution, metadata.models]);
   const badges = useMemo(() => solutionPartNames(solution, metadata.models).badges, [solution, metadata.models]);
   const [index, setIndex] = useState(0);
-  const [viewport] = useState(helpViewport);
+  const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 });
   const step = steps[index];
   const surfaceRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Încadrăm schema completă (ultimul pas), ca să nu se taie nimic nici pe telefon.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const el = viewportRef.current;
+      const full = steps[steps.length - 1];
+      if (!el || !full) return;
+      const fit = fitViewport(contentBounds(full.nodes, full.edges, el.clientWidth, el.clientHeight), el.clientWidth, el.clientHeight);
+      if (fit) setViewport(fit);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [steps]);
 
   const sim = useMemo(
     () => simulateCircuit(step.nodes, step.edges, metadata),
