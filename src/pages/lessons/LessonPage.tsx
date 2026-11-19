@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../hooks/useAuth";
+import { lessonBackUrl } from "../../content/lessonTree";
 import BacteriaViewerTemplate from "./templates/BacteriaViewerTemplate";
 import CircuitElectricTemplate from "./templates/CircuitElectricTemplate";
 import PlantTamagotchiTemplate from "./templates/PlantTamagotchiTemplate";
@@ -103,7 +104,7 @@ export default function LessonPage() {
   return (
     <section className="page lesson-page">
       <div className="lesson-page-nav">
-        <button className="btn-back" onClick={() => navigate("/lectii")}>
+        <button className="btn-back" onClick={() => navigate(lessonBackUrl(lesson.slug, lesson.category))}>
           ← Lumea Lectiilor
         </button>
         <div className="lesson-page-completion">

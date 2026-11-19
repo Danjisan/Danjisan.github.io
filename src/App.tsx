@@ -62,6 +62,7 @@ export default function App() {
           <Route path="/lobby" element={<LobbyPage />} />
           <Route path="/joc/:sessionId" element={<GamePage />} />
           <Route path="/lectii" element={<LessonsWorldPage />} />
+          <Route path="/lectii/capitol/*" element={<LessonsWorldPage />} />
           <Route path="/lectii/:slug" element={<LessonPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
