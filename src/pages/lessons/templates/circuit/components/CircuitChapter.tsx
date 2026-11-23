@@ -17,7 +17,7 @@ type LessonStatus = "done" | "next" | "locked";
  */
 export default function CircuitChapter({ chapter, lesson, userId, onProgressChange }: CircuitChapterProps) {
   // Valorile electrice vin din lecție (dacă le are), altfel cele implicite.
-  const { metadata } = useMemo(() => parseCircuitMetadata(lesson.metadata), [lesson.metadata]);
+  const metadata = useMemo(() => parseCircuitMetadata(lesson.metadata), [lesson.metadata]);
   const { done, loading, markDone } = useChapterProgress(lesson.id, userId, onProgressChange);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 

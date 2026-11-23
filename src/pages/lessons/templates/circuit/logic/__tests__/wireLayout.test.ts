@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CIRCUIT_CHAPTERS } from "../../../../../../content/circuits/chapters";
 import type { BoardSetup } from "../../../../../../content/circuits/chapters/types";
-import { CIRCUIT_SOLUTIONS } from "../../../../../../content/circuits/solutions";
 import { LAYOUT_BOARD_SIZES, wireLayoutProblems } from "../wireLayoutCheck";
 
 /**
@@ -17,9 +16,6 @@ function allBoards(): { name: string; board: BoardSetup }[] {
         if ("solution" in step) list.push({ name: `${step.id} (soluție)`, board: step.solution });
       }
     }
-  }
-  for (const [id, solution] of Object.entries(CIRCUIT_SOLUTIONS)) {
-    list.push({ name: `provocarea ${id}`, board: solution });
   }
   return list;
 }

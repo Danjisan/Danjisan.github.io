@@ -3,21 +3,7 @@ import { PARTS } from "../../../../../../content/circuits/parts";
 import { resistorBandColors } from "../../components/ComponentIcon";
 import { runDcSimulation } from "../sim/dcSimulation";
 import { edge, node, testMetadata } from "../sim/__tests__/testModels";
-import { buildInventory, canPlacePart, electricalForNode, partOfNode } from "../parts";
-import type { CircuitChallenge } from "../../types";
-
-function challenge(extra: Partial<CircuitChallenge>): CircuitChallenge {
-  return {
-    id: "c",
-    order: 1,
-    title: "c",
-    description: "",
-    hint: "",
-    win_condition: { type: "component_state", target: "led", state: "on" },
-    required_types: [],
-    ...extra,
-  };
-}
+import { canPlacePart, electricalForNode, partOfNode } from "../parts";
 
 describe("catalogul de piese", () => {
   it("id-urile sunt unice", () => {
@@ -75,32 +61,6 @@ describe("catalogul de piese", () => {
 });
 
 describe("inventarul", () => {
-  it("din required_types: câte o piesă implicită pentru fiecare apariție", () => {
-    const inv = buildInventory(
-      challenge({ required_types: ["battery", "led", "wire_junction", "wire_junction"] }),
-      [],
-    );
-    expect(inv).toEqual([
-      { partId: "battery-9v", count: 1 },
-      { partId: "led-red", count: 1 },
-      { partId: "junction", count: 2 },
-    ]);
-  });
-
-  it("inventory explicit are prioritate și ignoră piese necunoscute", () => {
-    const inv = buildInventory(
-      challenge({
-        required_types: ["battery"],
-        inventory: [
-          { partId: "led-green", count: 2 },
-          { partId: "nu-exista", count: 1 },
-        ],
-      }),
-      [],
-    );
-    expect(inv).toEqual([{ partId: "led-green", count: 2 }]);
-  });
-
   it("limita se aplică pe piesă", () => {
     const inv = [{ partId: "led-red", count: 2 }];
     const one = [node("a", "led", { flipped: false, partId: "led-red" })];

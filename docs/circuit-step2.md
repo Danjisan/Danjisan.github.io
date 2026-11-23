@@ -152,12 +152,12 @@ Piese: baterie 9V, LED roșu, rezistor 220Ω, întrerupător. Totul cu electroni
 
 Total: 6 mini-lecții, ~100 XP, ~20–25 minute.
 
-Provocările actuale (motor, paralel, potențiometru) se mută în capitolele 3–4, refăcute cu aceeași curbă.
+Provocările vechi cu motor, paralel și potențiometru se refac în capitolele 3–4, cu aceeași curbă.
 
 ## Ce rămâne la fel / ce se schimbă
 
 - Masa de lucru, simularea, electronii, „Arată-mi cum” — refolosite.
-- Lecția live (`circuit-electric-de-baza`) merge ca acum până când rândul ei din `lessons` primește `metadata.chapter = "01-primul-circuit"`. Asta e o schimbare în Supabase (o face Dan / migrație în `colabme-server`), nu în repo.
+- Lecția veche `circuit-electric-de-baza` a fost scoasă pe 2026-11-23: repeta capitolul 1 (LED-ul, polaritatea). Rândul ei din `lessons` e nepublicat (`colabme-server/supabase/migrations/20261123_unpublish_circuit_electric_de_baza.sql`), nu șters, ca să rămână progresul elevilor. Clientul nu mai are codul provocărilor vechi.
 - Progresul + XP: local (ca acum) până la pasul 4; atunci trec în Supabase.
 
 ## Pași de implementare (fiecare se poate testa)
@@ -174,7 +174,7 @@ Provocările actuale (motor, paralel, potențiometru) se mută în capitolele 3�
 - Curba și toate felurile de pași: da; iterăm după ce le vedem jucate.
 - XP 10 / 20 / 30: da, deocamdată.
 - Textele: verificate de noi; urmează revizia unui profesor de fizică.
-- Supabase: Dan rulează migrația, Claude o scrie. Capitolul 1 e o **lecție nouă** (`primul-circuit`); „Circuit Electric de Bază” rămâne până mutăm motorul / paralelul / potențiometrul în capitolele 3–4.
+- Supabase: Dan rulează migrația, Claude o scrie. Capitolul 1 e o **lecție nouă** (`primul-circuit`); „Circuit Electric de Bază” a rămas publicată până pe 2026-11-23 (vezi mai sus).
 
 ## Unde e codul
 
@@ -183,8 +183,18 @@ Provocările actuale (motor, paralel, potențiometru) se mută în capitolele 3�
 | Schema | `src/content/circuits/chapters/types.ts` |
 | Capitolul 1 | `src/content/circuits/chapters/01-primul-circuit.ts` |
 | Masa din date, condiții de câștig | `circuit/logic/board.ts`, `circuit/logic/winConditions.ts` |
-| Editorul refolosibil (provocări vechi + mini-lecții) | `circuit/components/CircuitEditor.tsx` |
+| Editorul refolosibil | `circuit/components/CircuitEditor.tsx` |
 | Harta capitolului, player | `circuit/components/CircuitChapter.tsx`, `MiniLessonPlayer.tsx` |
 | Teste: fiecare pas se poate rezolva, nu e rezolvat de la început, respectă acțiunile permise | `circuit/logic/__tests__/chapters.test.ts` |
 
 Corecturi de conținut față de schiță: am adăugat explicația „sensul convențional al curentului” (+ → −) vs. electroni (− → +); rezistorul „limitează curentul din tot circuitul”, nu „încetinește electronii”; lanterna din lecția 2 are un fir lipsă (un fir pe aceeași piesă nu se poate face). LED-ul întors se repară mutând firele: butonul „rotește” schimbă doar desenul, nu polaritatea.
+
+## Provocările vechi (pentru capitolele 3–4)
+
+Lecția `circuit-electric-de-baza` avea 5 provocări: aprinde LED-ul, pornește motorul, LED și motor în paralel (cu două noduri de legătură), potențiometru în circuit (toate cele 3 borne legate), polaritate corectă. Primele două idei și polaritatea sunt acum în capitolul 1. Motorul, paralelul și potențiometrul sunt de refăcut.
+
+Ca punct de plecare, în commit-ul `28d2be8` (ultimul cu codul vechi):
+- `src/content/circuits/solutions.ts`: soluțiile lor (piese + fire), în formatul `BoardSetup` al capitolelor;
+- `src/pages/lessons/templates/circuit/logic/__tests__/fixtures/circuit-electric-de-baza.json`: textele și condițiile din DB.
+
+`git show 28d2be8:src/content/circuits/solutions.ts`

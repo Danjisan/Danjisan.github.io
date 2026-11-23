@@ -1,4 +1,4 @@
-import type { CircuitSolution } from "../../../../../content/circuits/solutions";
+import type { BoardSetup } from "../../../../../content/circuits/chapters/types";
 import type { CircuitEdge, CircuitNode, ComponentModel, ComponentType, TerminalId } from "../types";
 import { boardToCircuit } from "./board";
 import { getPart, modelForPart } from "./parts";
@@ -9,7 +9,7 @@ export interface SolutionCircuit {
 }
 
 /** Circuitul complet al soluției; `switchesOn` închide întrerupătoarele. */
-export function solutionToCircuit(solution: CircuitSolution, switchesOn = true): SolutionCircuit {
+export function solutionToCircuit(solution: BoardSetup, switchesOn = true): SolutionCircuit {
   const { nodes, edges } = boardToCircuit(solution, { switchesOn });
   return { nodes, edges };
 }
@@ -27,7 +27,7 @@ export interface HelpStep {
  * le numerotăm: „Nodul de legătură 1”, „Nodul de legătură 2”. Numărul apare și pe desen.
  */
 export function solutionPartNames(
-  solution: CircuitSolution,
+  solution: BoardSetup,
   models: Record<ComponentType, ComponentModel>,
 ): { names: Map<string, string>; badges: Map<string, string> } {
   const base = new Map<string, string>();
@@ -61,7 +61,7 @@ const TERMINAL_NAMES: Record<string, string> = { "+": "+", "-": "−", a: "A", b
  * Pașii din „Ajutor”: întâi piesele, apoi câte un fir, la final se închid întrerupătoarele.
  */
 export function buildHelpSteps(
-  solution: CircuitSolution,
+  solution: BoardSetup,
   models: Record<ComponentType, ComponentModel>,
 ): HelpStep[] {
   const open = solutionToCircuit(solution, false);

@@ -1,6 +1,5 @@
 import { DEFAULT_PART_BY_TYPE, PARTS, type PartDef } from "../../../../../content/circuits/parts";
 import type {
-  CircuitChallenge,
   CircuitNode,
   ComponentElectricalByType,
   ComponentModel,
@@ -51,32 +50,6 @@ export function modelForPart(
 export interface InventorySlot {
   partId: string;
   count: number;
-}
-
-/** Câte piese de un tip primește elevul când lecția nu spune altfel. */
-const FREE_PLAY_COUNT: Partial<Record<ComponentType, number>> = { wire_junction: 2 };
-
-/**
- * Inventarul pentru provocarea activă.
- * - Dacă provocarea are `inventory`, îl folosim exact.
- * - Altfel, din `required_types`: câte o piesă implicită pentru fiecare apariție a tipului.
- * - Fără provocare: piesele implicite ale tipurilor din lecție.
- */
-export function buildInventory(
-  challenge: CircuitChallenge | null,
-  components: ComponentType[],
-): InventorySlot[] {
-  if (challenge?.inventory && challenge.inventory.length > 0) {
-    return challenge.inventory.filter((s) => PARTS_BY_ID.has(s.partId) && s.count > 0);
-  }
-
-  const counts = new Map<ComponentType, number>();
-  if (challenge) {
-    for (const type of challenge.required_types) counts.set(type, (counts.get(type) ?? 0) + 1);
-  } else {
-    for (const type of components) counts.set(type, FREE_PLAY_COUNT[type] ?? 1);
-  }
-  return [...counts].map(([type, count]) => ({ partId: DEFAULT_PART_BY_TYPE[type], count }));
 }
 
 export function placedCountOfPart(nodes: CircuitNode[], partId: string): number {

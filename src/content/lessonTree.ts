@@ -70,7 +70,6 @@ export const SUBJECTS: Subject[] = [
         icon: "bolt",
         children: [
           { kind: "lesson", slug: "primul-circuit", icon: "bulb" },
-          { kind: "lesson", slug: "circuit-electric-de-baza", icon: "battery" },
         ],
       },
     ],

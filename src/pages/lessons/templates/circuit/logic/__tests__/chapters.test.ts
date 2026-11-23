@@ -7,7 +7,7 @@ import { simulateCircuit } from "../simulateCircuit";
 import { checkWin } from "../winConditions";
 import { unknownRichTokens } from "../../components/RichText";
 
-const { metadata } = parseCircuitMetadata({});
+const metadata = parseCircuitMetadata({});
 const simMeta = { models: metadata.models, simulation: metadata.simulation };
 
 function wins(step: Extract<LessonStep, { win: unknown }>, board: BoardSetup): boolean {

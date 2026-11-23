@@ -43,7 +43,7 @@ src/content/circuits/
   __tests__/levels.test.ts ← fiecare exercițiu are o soluție de referință; testul o trece prin simulator
 ```
 
-Rândul din `lessons` ține doar `metadata: { "chapter": "01-primul-circuit" }`. Metadata veche (`challenges` în JSONB) rămâne citită până mutăm lecția live.
+Rândul din `lessons` ține doar `metadata: { "chapter": "01-primul-circuit" }`. Provocările vechi din JSONB (`challenges`) nu mai sunt citite: lecția care le avea a fost scoasă pe 2026-11-23 (vezi `docs/circuit-step2.md`).
 
 **De ce:** TypeScript prinde greșelile, schimbările se văd în review, iar testul garantează că **orice exercițiu se poate rezolva**. Fișierele exportă doar date (fără funcții), deci pot fi mutate mai târziu în DB / editor / conținut făcut de useri.
 
@@ -96,9 +96,9 @@ interface ExerciseStep {
 
 ### 4c. Soluții de referință și „Arată-mi cum”
 
-- `src/content/circuits/solutions.ts`: soluția fiecărei provocări (piese + fire), doar date.
+- Fiecare pas `build` / `fix` din capitole are `solution` (piese + fire), doar date.
 - Butonul „Arată-mi cum” o desenează pas cu pas: piesele, apoi câte un fir (evidențiat), la final întrerupătorul — cu simularea pornită, deci se văd LED-ul și electronii.
-- Testul `logic/__tests__/solutions.test.ts` verifică pe o copie a provocărilor din DB (`fixtures/`) că fiecare soluție chiar rezolvă provocarea și folosește doar piese din inventar. La pasul 2, provocările se mută în repo și fixture-ul dispare.
+- `logic/__tests__/chapters.test.ts` verifică că fiecare soluție chiar rezolvă pasul. (Provocările vechi, cu `solutions.ts` și fixture-ul lor din DB, au fost scoase pe 2026-11-23.)
 
 ### 5. Condiții de câștig
 

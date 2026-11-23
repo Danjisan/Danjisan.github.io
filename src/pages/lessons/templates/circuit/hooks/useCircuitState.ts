@@ -39,11 +39,6 @@ export function useCircuitState(initial?: { nodes: CircuitNode[]; edges: Circuit
     setEdges((prev) => prev.filter((e) => e.from.nodeId !== id && e.to.nodeId !== id));
   }, []);
 
-  const clearBoard = useCallback(() => {
-    setNodes([]);
-    setEdges([]);
-  }, []);
-
   const edgeAtTerminal = useCallback(
     (ref: CircuitTerminalRef): CircuitEdge | undefined => {
       return edges.find((e) => sameTerminal(e.from, ref) || sameTerminal(e.to, ref));
@@ -114,7 +109,6 @@ export function useCircuitState(initial?: { nodes: CircuitNode[]; edges: Circuit
     placeNode,
     moveNode,
     removeNode,
-    clearBoard,
     addEdge,
     removeEdge,
     edgeAtTerminal,

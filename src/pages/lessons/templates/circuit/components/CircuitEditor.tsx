@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCircuitState } from "../hooks/useCircuitState";
 import { useSimulationBurn } from "../hooks/useSimulationBurn";
 import { useWireInteraction } from "../hooks/useWireInteraction";
@@ -9,8 +9,7 @@ import { emptyResult } from "../logic/sim/netlist";
 import { contentBounds, ensureVisible, unionBounds, type Bounds } from "../logic/fitView";
 import type { DcSimulationResult } from "../logic/sim/types";
 import { simulateCircuit } from "../logic/simulateCircuit";
-import type { WorkbenchViewport } from "../logic/viewportCoords";
-import type { CircuitEdge, CircuitElectricMetadata, CircuitNode, WorkbenchHint } from "../types";
+import type { CircuitEdge, CircuitElectricMetadata, CircuitNode } from "../types";
 import type { SceneId } from "../../../../../content/circuits/chapters/types";
 import CircuitFailureBanner from "./CircuitFailureBanner";
 import CircuitWorkbench from "./CircuitWorkbench";
@@ -46,16 +45,6 @@ export interface CircuitEditorState {
   sim: DcSimulationResult;
 }
 
-export interface CircuitEditorToolbarApi {
-  viewport: WorkbenchViewport;
-  zoomIn: () => void;
-  zoomOut: () => void;
-  resetView: () => void;
-  canReset: boolean;
-  /** Golește masa (doar în modul liber; la pași, părintele remontează editorul) */
-  clear: () => void;
-}
-
 interface CircuitEditorProps {
   metadata: Pick<CircuitElectricMetadata, "models" | "simulation">;
   /** Masa de la început. Pentru o masă nouă, părintele schimbă `key`. */
@@ -68,7 +57,6 @@ interface CircuitEditorProps {
   /** Fixate pe loc (nu se mută / șterg), dar se pot roti */
   pinnedNodeIds?: Set<string>;
   lockedEdgeIds?: Set<string>;
-  hints?: WorkbenchHint[];
   /** Fundal de scenă sub piese */
   scene?: SceneId;
   /** Piesele din inventar pulsează (ghidare: „de aici iei piesa”) */
@@ -81,7 +69,6 @@ interface CircuitEditorProps {
    */
   frameFor?: { nodes: CircuitNode[]; edges: CircuitEdge[] };
   onChange?: (state: CircuitEditorState) => void;
-  renderToolbar?: (api: CircuitEditorToolbarApi) => ReactNode;
   className?: string;
 }
 
@@ -98,13 +85,11 @@ export default function CircuitEditor({
   lockedNodeIds,
   pinnedNodeIds,
   lockedEdgeIds,
-  hints = [],
   coachInventory = false,
   scene,
   paused = false,
   frameFor,
   onChange,
-  renderToolbar,
   className = "",
 }: CircuitEditorProps) {
   const permissions = useMemo(() => ({ ...ALL_PERMISSIONS, ...permissionsProp }), [permissionsProp]);
@@ -124,7 +109,6 @@ export default function CircuitEditor({
     placeNode,
     moveNode,
     removeNode,
-    clearBoard,
     addEdge,
     removeEdge,
     toggleSwitch,
@@ -217,9 +201,6 @@ export default function CircuitEditor({
     viewport,
     setView,
     userAdjustedRef,
-    resetView: resetViewRaw,
-    zoomIn,
-    zoomOut,
     handleWheel,
     handleSurfacePointerDown: handleViewportPointerDown,
     handleSurfacePointerMove: handleViewportPointerMove,
@@ -261,11 +242,6 @@ export default function CircuitEditor({
   const viewportNow = useRef(viewport);
   viewportNow.current = viewport;
   const busy = Boolean(draggingNodeId || paletteDragPartId);
-  const [fitNonce, setFitNonce] = useState(0);
-  const resetView = useCallback(() => {
-    resetViewRaw();
-    setFitNonce((n) => n + 1);
-  }, [resetViewRaw]);
 
   /** Marginile reale ale pieselor, măsurate pe pagină (etichete, borne), în px-ii mesei nezoomate. */
   const measuredBounds = useCallback((): Bounds | null => {
@@ -296,21 +272,11 @@ export default function CircuitEditor({
     const next = ensureVisible(bounds, viewportNow.current, w, h, 20);
     if (next) setView(next);
     // layoutKey + edges.length descriu tot ce contează pentru încadrare.
-  }, [layoutKey, edges.length, boardSize, busy, fitNonce, frameFor, measuredBounds, setView, userAdjustedRef]);
+  }, [layoutKey, edges.length, boardSize, busy, frameFor, measuredBounds, setView, userAdjustedRef]);
 
   const ghostPart = paletteDragPartId ? getPart(paletteDragPartId) ?? null : null;
   const placementPreview =
     ghostPart && palettePreview ? { partId: ghostPart.id, type: ghostPart.type, position: palettePreview } : null;
-
-  const clear = useCallback(() => {
-    clearBoard();
-    cancelWire();
-    resetView();
-    setSelectedPartId(null);
-    setSelectedNodeId(null);
-    setSelectedEdgeId(null);
-    setInfoBubbleNodeId(null);
-  }, [clearBoard, cancelWire, resetView]);
 
   useEffect(() => {
     if (!editing) {
@@ -357,15 +323,6 @@ export default function CircuitEditor({
 
   return (
     <>
-      {renderToolbar?.({
-        viewport,
-        zoomIn,
-        zoomOut,
-        resetView,
-        canReset: nodes.length > 0 || edges.length > 0,
-        clear,
-      })}
-
       <CircuitFailureBanner message={failureMessage} onDismiss={() => setFailureMessage(null)} />
 
       <div
@@ -392,7 +349,6 @@ export default function CircuitEditor({
           viewportRef={viewportRef}
           viewport={viewport}
           onWheel={handleWheel}
-          hints={editing ? hints : []}
           editable={editing}
           nodes={nodes}
           edges={edges}

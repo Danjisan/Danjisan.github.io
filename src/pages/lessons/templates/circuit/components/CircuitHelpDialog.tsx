@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CircuitSolution } from "../../../../../content/circuits/solutions";
+import type { BoardSetup } from "../../../../../content/circuits/chapters/types";
 import { buildHelpSteps, solutionPartNames } from "../logic/solutionSteps";
 import { simulateCircuit } from "../logic/simulateCircuit";
 import { contentBounds, fitViewport } from "../logic/fitView";
@@ -8,12 +8,11 @@ import CircuitWorkbench from "./CircuitWorkbench";
 
 interface CircuitHelpDialogProps {
   title: string;
-  solution: CircuitSolution;
+  solution: BoardSetup;
   metadata: Pick<CircuitElectricMetadata, "models" | "simulation">;
   onClose: () => void;
 }
 
-const NO_HINTS: never[] = [];
 const noop = () => {};
 
 /**
@@ -94,7 +93,6 @@ export default function CircuitHelpDialog({ title, solution, metadata, onClose }
             surfaceRef={surfaceRef}
             viewportRef={viewportRef}
             viewport={viewport}
-            hints={NO_HINTS}
             nodes={step.nodes}
             edges={step.edges}
             models={metadata.models}

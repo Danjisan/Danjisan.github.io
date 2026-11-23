@@ -66,38 +66,6 @@ export interface ComponentModel {
   electrical: ComponentElectricalByType[ComponentType];
 }
 
-export interface WorkbenchHint {
-  id: string;
-  type: "text" | "label";
-  position: { x: number; y: number };
-  text: string;
-}
-
-export interface ComponentStateWin {
-  target: ComponentType;
-  state: string;
-}
-
-export interface WinCondition {
-  type: "component_state";
-  target: ComponentType;
-  state: string;
-  /** Condiții suplimentare (ex. LED aprins + motor pornit) */
-  also?: ComponentStateWin[];
-}
-
-export interface CircuitChallenge {
-  id: string;
-  order: number;
-  title: string;
-  description: string;
-  hint: string;
-  win_condition: WinCondition;
-  required_types: ComponentType[];
-  /** Piese exacte din catalog (src/content/circuits/parts.ts); dacă lipsește, se deduc din required_types */
-  inventory?: { partId: string; count: number }[];
-}
-
 export type SimulationFailureKind =
   | "led_burned"
   | "short_circuit"
@@ -118,10 +86,7 @@ export interface BranchElectricalReading {
 }
 
 export interface CircuitElectricMetadata {
-  components: ComponentType[];
-  workbench_hints: WorkbenchHint[];
   models: Record<ComponentType, ComponentModel>;
-  challenges: CircuitChallenge[];
   simulation: CircuitSimulationConfig;
 }
 
@@ -144,12 +109,6 @@ export interface TerminalDef {
   dx: number;
   dy: number;
   label?: string;
-}
-
-export interface ParsedCircuitLesson {
-  metadata: CircuitElectricMetadata;
-  /** true dacă metadata vine din schema v1 completă din DB */
-  schemaComplete: boolean;
 }
 
 /** Componentă plasată pe masa de lucru (coordonate normalizate 0–1) */

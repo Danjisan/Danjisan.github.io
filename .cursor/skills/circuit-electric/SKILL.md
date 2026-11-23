@@ -12,11 +12,11 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 
 | Fișier | Rol |
 |---|---|
-| `src/pages/lessons/templates/CircuitElectricTemplate.tsx` | orchestrator (template `circuit_electric` în DB) |
+| `src/pages/lessons/templates/CircuitElectricTemplate.tsx` | template `circuit_electric` în DB: alege capitolul din `metadata.chapter` |
 | `circuit/logic/sim/` | simulare DC: `netlist.ts` (union-find → noduri), `mnaSolve.ts`, `dcSimulation.ts` |
-| `circuit/logic/challengeWin.ts`, `validateCircuit.ts` | condiții de câștig |
+| `circuit/logic/winConditions.ts` | condiții de câștig ale pașilor |
 | `circuit/electricalDefaults.ts` | parametri impliciți + mesaje de eșec |
-| `circuit/parseMetadata.ts` | citește `lessons.metadata` (schema actuală, cu `challenges`) |
+| `circuit/parseMetadata.ts` | citește `lessons.metadata`: `models` și `simulation` (lipsă → valorile din cod) |
 | `circuit/logic/directedCircuit.ts` | legacy: doar verificarea „bucla e închisă” și pinii accesibili |
 
 ## Ce face simularea (stare actuală)
@@ -26,13 +26,12 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 - LED invers, LED ars după `burn_after_s` peste `max_current_a`, scurtcircuit peste `short_circuit_current_a`.
 - Motor: rezistență de bobinaj, „merge” peste `min_run_current_a`.
 - Potențiometru: două rezistențe a–wiper / wiper–b după `state.value` (0..1).
-- Condițiile `component_state` sunt îndeplinite dacă **cel puțin o piesă** de tipul cerut are starea cerută.
 
 ## Capitole și mini-lecții
 
-- `lessons.metadata.chapter` → capitol din `src/content/circuits/chapters/` (mini-lecții cu pași `concept` / `predict` / `try` / `build` / `fix`); fără el, template-ul arată provocările vechi din `metadata.challenges`.
+- `lessons.metadata.chapter` → capitol din `src/content/circuits/chapters/` (mini-lecții cu pași `concept` / `predict` / `try` / `build` / `fix`); fără el, template-ul arată doar un mesaj. Provocările vechi (`metadata.challenges`) au fost scoase pe 2026-11-23.
 - Orice pas nou are `solution`; `chapters.test.ts` verifică că se poate rezolva, că nu e rezolvat de la început și că respectă acțiunile permise.
-- Editorul e `components/CircuitEditor.tsx` (folosit de ambele moduri); permisiunile și piesele blocate vin din pas.
+- Editorul e `components/CircuitEditor.tsx` (folosit de mini-lecții și de „Arată-mi cum”); permisiunile și piesele blocate vin din pas.
 - Piesele se rotesc în pași de 90° (`state.rotation`); bornele își schimbă latura, dar rămân aceleași borne electric. Rotirea nu schimbă polaritatea — un LED întors se repară mutând firele. Nodurile vechi cu `flipped: true` = 180°.
 - Aranjamente alternative de borne, alese de exercițiu cu `state.layout` (ex. LED `legs`: ambele picioare jos, pentru scene realiste) — în `logic/terminalPositions.ts`.
 - Piesele din exerciții: `locked: true` (nu se mută / șterg / rotesc) sau `locked: "pinned"` (nu se mută / șterg, dar se rotesc).
@@ -55,7 +54,7 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 
 ## Piese și inventar
 
-- Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și inventarul (`buildInventory`, `canPlacePart`).
+- Catalogul: `src/content/circuits/parts.ts` (doar date). Nodul ține `state.partId`; `logic/parts.ts` dă piesa, parametrii (`electricalForNode`) și limita din inventar (`canPlacePart`).
 - Parametrii = valorile tipului din lecție + ce suprascrie piesa. Piesele implicite nu suprascriu nimic.
 - Desenele: `components/ComponentIcon.tsx` (SVG; LED colorat după piesă, benzi de rezistor după valoare).
 - Electronii pe fire: `logic/sim/wireCurrents.ts` (curent per fir) + `logic/electronFlow.ts` (viteză/sens).
@@ -63,7 +62,6 @@ Contextul tehnic detaliat (modele electrice, parametri, fișiere): `.cursor/rule
 
 ## Limitări cunoscute (rezolvate în pașii din `docs/circuit-revamp.md`)
 
-- Progresul provocărilor se ține doar local; finalizarea lecției e manuală.
 - Firele sunt linii drepte și pot trece peste piese.
 
 ## Reguli de lucru

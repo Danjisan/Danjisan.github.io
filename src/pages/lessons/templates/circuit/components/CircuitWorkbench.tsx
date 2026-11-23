@@ -13,7 +13,6 @@ import type {
   ComponentModel,
   ComponentType,
   TerminalId,
-  WorkbenchHint,
 } from "../types";
 
 interface CircuitWorkbenchProps {
@@ -21,7 +20,6 @@ interface CircuitWorkbenchProps {
   viewportRef: RefObject<HTMLDivElement | null>;
   viewport: WorkbenchViewport;
   onWheel?: (e: React.WheelEvent) => void;
-  hints: WorkbenchHint[];
   nodes: CircuitNode[];
   edges: CircuitEdge[];
   models: Record<ComponentType, ComponentModel>;
@@ -73,7 +71,6 @@ export default function CircuitWorkbench({
   viewportRef,
   viewport,
   onWheel,
-  hints,
   nodes,
   edges,
   models,
@@ -151,19 +148,6 @@ export default function CircuitWorkbench({
             pointer={editable ? wirePointer : null}
             viewportRef={viewportRef}
           />
-
-          {hints.map((hint) => (
-            <span
-              key={hint.id}
-              className={`circuit-workbench-hint circuit-workbench-hint--${hint.type} ${isEmpty ? "" : "faded"}`}
-              style={{
-                left: `${hint.position.x * 100}%`,
-                top: `${hint.position.y * 100}%`,
-              }}
-            >
-              {hint.text}
-            </span>
-          ))}
 
           {nodes.map((node) => (
             <CircuitNode2D
